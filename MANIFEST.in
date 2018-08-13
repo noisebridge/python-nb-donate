@@ -1,0 +1,3 @@
+include donate/static
+graft donate/templates
+global-exclude *.pyc
