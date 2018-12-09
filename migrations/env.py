@@ -4,11 +4,6 @@ from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
 import logging
 
-from flask import current_app
-
-from donate.database import db
-from donate import create_app
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -20,15 +15,21 @@ logger = logging.getLogger('alembic.env')
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
+from donate.models import (
+    User,
+    Currency,
+    Account,
+    Project,
+    Transaction,
+)
+from donate import db
 
-app = create_app()
+target_metadata = db.Model.metadata
 
+from flask import current_app
 config.set_main_option('sqlalchemy.url',
                        current_app.config.get('SQLALCHEMY_DATABASE_URI'))
 # target_metadata = current_app.extensions['migrate'].db.metadata
-target_metadata = db.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -86,9 +87,11 @@ def run_migrations_online():
     try:
         with context.begin_transaction():
             context.run_migrations()
+    except Exception as exception:
+        logger.error(exception)
+        raise exception
     finally:
         connection.close()
-
 
 if context.is_offline_mode():
     run_migrations_offline()

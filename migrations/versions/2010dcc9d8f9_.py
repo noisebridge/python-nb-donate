@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 57236586dac5
+Revision ID: 2010dcc9d8f9
 Revises: 
-Create Date: 2018-08-12 16:36:44.242895
+Create Date: 2018-12-08 03:56:50.362594
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '57236586dac5'
+revision = '2010dcc9d8f9'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -51,13 +51,13 @@ def upgrade():
     sa.Column('ccy', sa.Integer(), nullable=True),
     sa.Column('datetime', sa.DateTime(), nullable=False),
     sa.Column('payer_id', sa.Integer(), nullable=False),
-    sa.Column('recer_id', sa.Integer(), nullable=False),
+    sa.Column('recvr_id', sa.Integer(), nullable=False),
     sa.Column('requestor_id', sa.Integer(), nullable=False),
     sa.Column('approver_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['approver_id'], ['user.id'], ),
     sa.ForeignKeyConstraint(['ccy'], ['currency.id'], ),
     sa.ForeignKeyConstraint(['payer_id'], ['account.id'], ),
-    sa.ForeignKeyConstraint(['recer_id'], ['account.id'], ),
+    sa.ForeignKeyConstraint(['recvr_id'], ['account.id'], ),
     sa.ForeignKeyConstraint(['requestor_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

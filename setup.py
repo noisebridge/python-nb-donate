@@ -10,6 +10,8 @@ setup(
         'flask',
         'flask-migrate',
         'flask-sqlalchemy',
+        'pdoc',
+        'pytest',
         'python-dotenv',
         'werkzeug',
     ],

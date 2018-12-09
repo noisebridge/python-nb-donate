@@ -1,4 +1,6 @@
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
+from .extensions import db
 
-
-db = SQLAlchemy()
+Column = db.Column
+relationship = relationship
+Model = db.Model
