@@ -31,10 +31,10 @@ class User(db.Model):
     def __declare_last__(cls):
         ValidateString(User.username, False, True)
         ValidateString(User.slack, False, True)
-        ValidateEmail(User.email,
-                      False,
-                      True,
-                      "not a valid email address")
+        ValidateString(User.email,
+                       False,
+                       True,
+                       "not a valid email address")
 
 
 class Transaction(db.Model):
@@ -91,7 +91,7 @@ class Account(db.Model):
     id:     unique Id
     name:   name or nmenonic of account
     tx_ids: transactions associated with account.  Must link to pay/rec to
-            get debit or credit info
+    get debit or credit info
     ccy:    account denomination e.g. USD or BTC.
     '''
 
@@ -116,7 +116,7 @@ class Project(db.Model):
     name:       Project name
     account_id: Accunt linked to project (might need multiple for multiple ccys
     goal:       Amount required to read the goal of the project.
-                (prob need ccy)
+    (prob need ccy)
     '''
 
     id = db.Column(db.Integer, primary_key=True)

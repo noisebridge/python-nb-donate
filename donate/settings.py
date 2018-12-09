@@ -10,7 +10,7 @@ class Config:
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     CACHE_TYPE = 'simple'
-    SQLALCHEMY_TRACK_MODIFICAITONS = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_AUTH_USERNAME_KEY = 'email'
     JWT_AUTH_HEADERS_PREFIX = 'Token'
     CORS_ORIGIN_WHITELIST = []
