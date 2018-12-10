@@ -104,9 +104,9 @@ def test_new_account(model_objects):
 
     # usd = db.session.query(Currency).filter(Currency.code == "USD").one()
     usd = model_objects['usd']
-    acct = Account(ccy=usd.id, name="Credits")
+    acct = Account(ccy_id=usd.id, name="Credits")
 
-    assert acct.ccy == usd.id
+    assert acct.ccy_id == usd.id
     assert acct.name == "Credits"
 
 
@@ -118,7 +118,7 @@ def test_insert_account(model_objects):
     #     one()
 
     btc = model_objects['btc']
-    acct = Account(ccy=btc.id, name="Crypto")
+    acct = Account(ccy_id=btc.id, name="Crypto")
     db.session.add(acct)
     db.session.commit()
 
@@ -132,16 +132,16 @@ def test_insert_account(model_objects):
 def test_bad_formed_account():
 
     with pytest.raises(ValidateError):
-        acct = Account(name="test", ccy="test")
+        acct = Account(name="test", ccy_id="test")
 
     with pytest.raises(ValidateError):
-        acct = Account(name=124, ccy=1234)
+        acct = Account(name=124, ccy_id=1234)
 
     with pytest.raises(ValidateError):
-        acct = Account(name=None, ccy=1234)
+        acct = Account(name=None, ccy_id=1234)
 
     with pytest.raises(ValidateError):
-        acct = Account(name="test", ccy=None)
+        acct = Account(name="test", ccy_id=None)
 
 
 def test_new_project():
@@ -200,24 +200,24 @@ def test_new_transaction():
     rec_acct = 70
 
     tx = Transaction(approver_id=approver_id,
-                     ccy=ccy,
+                     ccy_id=ccy,
                      payer_id=payer_id,
                      recvr_id=recvr_id,
                      requestor_id=requestor_id,
                      amount=amount,
                      datetime=now,
-                     pay_from_acct=pay_acct,
-                     rec_to_acct=rec_acct)
+                     payer=pay_acct,
+                     recvr=rec_acct)
 
     assert tx.approver_id == approver_id
-    assert tx.ccy == ccy
+    assert tx.ccy_id == ccy
     assert tx.payer_id == payer_id
     assert tx.recvr_id == recvr_id
     assert tx.requestor_id == requestor_id
     assert tx.amount == amount
     assert tx.datetime == now
-    assert tx.pay_from_acct == pay_acct
-    assert tx.rec_to_acct == rec_acct
+    assert tx.payer == pay_acct
+    assert tx.recvr == rec_acct
 
 
 @pytest.mark.usefixtures('db')
@@ -235,15 +235,13 @@ def test_insert_transaction(model_objects):
     now = datetime.now()
     amount = 4000000
 
-    tx = Transaction(approver_id=approver.id,
-                     ccy=ccy.id,
-                     payer_id=payer.id,
-                     recvr_id=receiver.id,
-                     requestor_id=requestor.id,
+    tx = Transaction(ccy=ccy,
                      amount=amount,
+                     payer=pay_acct,
+                     recvr=rec_acct,
+                     requestor=requestor,
+                     approver=approver,
                      datetime=now,
-                     pay_from_acct=pay_acct.id,
-                     rec_to_acct=rec_acct.id
                      )
 
     db.session.add(tx)

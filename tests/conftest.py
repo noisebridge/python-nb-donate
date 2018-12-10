@@ -67,9 +67,9 @@ def model_objects():
                    email="apeep@gmail.com"),
         'usd': Currency(id=1, code="USD", name="US Dollar"),
         'btc': Currency(id=2, code="BTC", name="Bitcoin"),
-        'acct1': Account(id=1, ccy=1, name="USD Credits"),
-        'acct2': Account(id=2, ccy=1, name="USD Debits"),
-        'acct3': Account(id=3, ccy=2, name="BTC Wallet"),
+        'acct1': Account(id=1, ccy_id=1, name="USD Credits"),
+        'acct2': Account(id=2, ccy_id=1, name="USD Debits"),
+        'acct3': Account(id=3, ccy_id=2, name="BTC Wallet"),
     }
 
     return objects

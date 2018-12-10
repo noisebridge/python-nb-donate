@@ -43,7 +43,7 @@ class Transaction(db.Model):
 
     id:             unique ID of transaction
     amount:         the quantity of the transaction, e.g. <X> USD or <Y> BTC.
-    ccy:            the denomiation of the transaction, e.g. 100 <CCY>
+    ccy_id:         the denomiation of the transaction, e.g. 100 <CCY>
     datetime:       the time of the transaction in epochs
     payer_id:       The account which will be debited
     recvr_id:       the account which will be credited
@@ -55,8 +55,8 @@ class Transaction(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
-    ccy = db.Column(db.Integer, db.ForeignKey('currency.id'))
     datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
     payer_id = db.Column(db.Integer,
                          db.ForeignKey('account.id'),
                          nullable=False)
@@ -70,12 +70,15 @@ class Transaction(db.Model):
                             db.ForeignKey('user.id'),
                             nullable=False)
 
-    pay_from_acct = db.relationship('Account', foreign_keys=[payer_id])
-    rec_to_acct = db.relationship('Account', foreign_keys=[recvr_id])
+    ccy = db.relationship('Currency')
+    payer = db.relationship('Account', foreign_keys=[payer_id])
+    recvr = db.relationship('Account', foreign_keys=[recvr_id])
+    requestor = db.relationship("User", foreign_keys=[requestor_id])
+    approver = db.relationship("User", foreign_keys=[approver_id])
 
     @classmethod
     def __declare_last__(cls):
-        ValidateInteger(Transaction.ccy, False, True)
+        ValidateInteger(Transaction.ccy_id, False, True)
         ValidateNumeric(Transaction.amount, False, True)
         ValidateInteger(Transaction.payer_id, False, True)
         ValidateInteger(Transaction.recvr_id, False, True)
@@ -88,23 +91,23 @@ class Account(db.Model):
     only one currenct.  An account can increase or decrease based on the
     sum of the transactions.
 
-    id:     unique Id
-    name:   name or nmenonic of account
-    tx_ids: transactions associated with account.  Must link to pay/rec to
-    get debit or credit info
-    ccy:    account denomination e.g. USD or BTC.
+    id:         unique Id
+    name:       name or nmenonic of account
+    tx_ids:     transactions associated with account.  Must link to pay/rec to
+                get debit or credit info
+    ccy_id:     account denomination e.g. USD or BTC.
     '''
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     tx_ids = db.Column(db.Integer, db.ForeignKey('transaction.id'))
-    ccy = db.Column(db.Integer, db.ForeignKey('currency.id'))
+    ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
 
     @classmethod
     def __declare_last__(cls):
         ValidateString(Account.name, False, True)
         ValidateInteger(Account.tx_ids, False, True)
-        ValidateInteger(Account.ccy, False, True)
+        ValidateInteger(Account.ccy_id, False, True)
 
 
 class Project(db.Model):
