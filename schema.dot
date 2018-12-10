@@ -27,7 +27,7 @@
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
         ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
-        ><FONT FACE="Bitstream Vera Sans">☆ ccy</FONT
+        ><FONT FACE="Bitstream Vera Sans">☆ ccy_id</FONT
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
         ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
@@ -108,7 +108,7 @@
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
         ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
-        ><FONT FACE="Bitstream Vera Sans">☆ ccy</FONT
+        ><FONT FACE="Bitstream Vera Sans">☆ ccy_id</FONT
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
         ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
@@ -133,12 +133,27 @@
         ><FONT FACE="Bitstream Vera Sans">DATETIME</FONT
         ></TD></TR><TR><TD ALIGN="LEFT" BORDER="0"
         BGCOLOR="palegoldenrod"
-        ><FONT FACE="Bitstream Vera Sans">⚪ pay_from_acct</FONT></TD
+        ><FONT FACE="Bitstream Vera Sans">⚪ approver</FONT></TD
         ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">PROPERTY</FONT
         ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
         BGCOLOR="palegoldenrod"
-        ><FONT FACE="Bitstream Vera Sans">⚪ rec_to_acct</FONT></TD
+        ><FONT FACE="Bitstream Vera Sans">⚪ ccy</FONT></TD
+        ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">PROPERTY</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        BGCOLOR="palegoldenrod"
+        ><FONT FACE="Bitstream Vera Sans">⚪ payer</FONT></TD
+        ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">PROPERTY</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        BGCOLOR="palegoldenrod"
+        ><FONT FACE="Bitstream Vera Sans">⚪ recvr</FONT></TD
+        ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">PROPERTY</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        BGCOLOR="palegoldenrod"
+        ><FONT FACE="Bitstream Vera Sans">⚪ requestor</FONT></TD
         ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">PROPERTY</FONT
         ></TD></TR>
@@ -180,9 +195,9 @@
 		arrowtail = open
 	]
 	"Account" -> "Transaction" [label = "tx_ids"]
-	"Account" -> "Currency" [label = "ccy"]
+	"Account" -> "Currency" [label = "ccy_id"]
 	"Project" -> "Account" [label = "account_id"]
-	"Transaction" -> "Currency" [label = "ccy"]
+	"Transaction" -> "Currency" [label = "ccy_id"]
 	"Transaction" -> "Account" [label = "payer_id"]
 	"Transaction" -> "Account" [label = "recvr_id"]
 	"Transaction" -> "User" [label = "requestor_id"]

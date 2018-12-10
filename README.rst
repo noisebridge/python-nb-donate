@@ -12,3 +12,9 @@ Flask-SQLAlchemy
 Flask-Validator
 dot-env
 
+Specification
+_____________
+
+.. image:: pics/schema.png
+   :width: 60pt
+
