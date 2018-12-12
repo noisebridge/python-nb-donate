@@ -37,6 +37,15 @@ class User(db.Model):
                        "not a valid email address")
 
 
+# acct_tx_table = db.Table('association', db.Model.metadata,
+#                          db.Column('acct_id',
+#                                    db.Integer,
+#                                    db.ForeignKey('account.id')),
+#                          db.Column('tx_id',
+#                                    db.Integer,
+#                                    db.ForeignKey('transaction.id')))
+
+
 class Transaction(db.Model):
     ''' A transaction moves amounts between accounts.  When a transaction
     occurs, an account must be debited and an account must be credited.
@@ -70,6 +79,12 @@ class Transaction(db.Model):
                             db.ForeignKey('user.id'),
                             nullable=False)
 
+#     db.ForeignKeyConstraint(['payer_id'], ['account.id'],
+#                             use_alter=True, name='fk_acct_pay')
+
+#     db.ForeignKeyConstraint(['recvr_id'], ['account.id'],
+#                             use_alter=True, name='fk_acct_rec')
+
     ccy = db.relationship('Currency')
     payer = db.relationship('Account', foreign_keys=[payer_id])
     recvr = db.relationship('Account', foreign_keys=[recvr_id])
@@ -93,20 +108,16 @@ class Account(db.Model):
 
     id:         unique Id
     name:       name or nmenonic of account
-    tx_ids:     transactions associated with account.  Must link to pay/rec to
-                get debit or credit info
     ccy_id:     account denomination e.g. USD or BTC.
     '''
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
-    tx_ids = db.Column(db.Integer, db.ForeignKey('transaction.id'))
     ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
 
     @classmethod
     def __declare_last__(cls):
         ValidateString(Account.name, False, True)
-        ValidateInteger(Account.tx_ids, False, True)
         ValidateInteger(Account.ccy_id, False, True)
 
 
