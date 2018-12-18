@@ -19,3 +19,12 @@ def add_new_user(data):
                         slack=slack,
                         email=email))
     db.session.commit()
+
+
+'''
+    Add new user
+    Suspend user (logical delete not full delete)
+        - Puts paymens on hiatus
+        - saves type of subscription but cancels it
+        - can be unsuspended
+'''
