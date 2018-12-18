@@ -37,15 +37,6 @@ class User(db.Model):
                        "not a valid email address")
 
 
-# acct_tx_table = db.Table('association', db.Model.metadata,
-#                          db.Column('acct_id',
-#                                    db.Integer,
-#                                    db.ForeignKey('account.id')),
-#                          db.Column('tx_id',
-#                                    db.Integer,
-#                                    db.ForeignKey('transaction.id')))
-
-
 class Transaction(db.Model):
     ''' A transaction moves amounts between accounts.  When a transaction
     occurs, an account must be debited and an account must be credited.
@@ -156,3 +147,8 @@ class Currency(db.Model):
     def __declare_last__(cls):
         ValidateString(Currency.name, False, True)
         ValidateString(Currency.code, False, True)
+
+
+class Subscription(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    pass
