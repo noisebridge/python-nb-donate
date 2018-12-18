@@ -1,0 +1,58 @@
+.donations .nav.nav-tabs {
+  margin-bottom: 10px;
+}
+
+.donation-form {
+  font-family: 'Bitter', serif;
+
+  .form-group.amount {
+    label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      span.powered_by_stripe {
+        display: inline-block;
+        background-image: image-url('powered_by_stripe.png');
+        background-size: 119px 26px;
+        height: 26px;
+        width: 119px;
+      }
+    }
+  }
+
+  .form-group.cc-details {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+
+    input {
+      margin: 0px 5px;
+
+      &:first-child {
+        margin-left: 0px;
+      }
+
+      &:last-child {
+        margin-right: 0px;
+      }
+
+      width: 0%;
+      max-width: 50%;
+
+      &.cc-number {
+        flex-grow: 5;
+      }
+      &.cc-exp {
+        flex-grow: 2;
+      }
+      &.cc-cvc {
+        flex-grow: 1;
+      }
+    }
+  }
+
+  .input-group.custom-amount {
+    margin-top: 10px;
+  }
+}
