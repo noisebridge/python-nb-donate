@@ -73,3 +73,53 @@ def model_objects():
     }
 
     return objects
+
+
+def data_dict_builder(data):
+    if ("label" not in data
+            or "keys" not in data
+            or "obj_data" not in data):
+        raise ValueError("Malformed test data dictionary passed to \
+                         data_dict_builder")
+
+    label = data['label']
+    keys = data['keys']
+    obj_data = data['obj_data']
+
+    objects = {"{}{}".format(label, _obj): {
+        keys[_key]: obj_data[_obj][_key] for _key in range(len(leys))
+    }
+        for _obj in range(len(obj_data))}
+
+
+@pytest.fixture(scope='session')
+def user_data():
+
+    keys = ["username", "slack", "email"]
+
+    user_data = [
+        ("name1", "slack1", "email@domain.tld"),
+        (None, "slack", "email@domain.tld"),
+        ("name1", None, "email@domain.tld"),
+        ("name1", "slack1", None),
+        ("name1", "slack1", "email@domain.tld")
+    ]
+
+    return data_dict_builder({'label': 'user',
+                              'keys': keys,
+                              'obj_data': user_data})
+
+
+@pytest.fixture(scope="session")
+def account_data():
+
+    keys = ["code", "name"]
+    account_data = [
+        ("USD", "US Dollar"),
+        ("BTC", "Bitcoin"),
+        ("ETH", "Etherium"),
+        ("EUR", "Euro")]
+
+    return data_dict_builder({"label": "acct",
+                              "keys": keys,
+                              "obj_data": account_data})
