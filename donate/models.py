@@ -1,11 +1,21 @@
 from donate.extensions import db
 from datetime import datetime
+from babel import numbers
 from flask_validator import (
     ValidateInteger,
     ValidateString,
     ValidateEmail,
     ValidateNumeric,
 )
+
+
+class TimestampMixin():
+    created_at = db.Column(db.DateTime,
+                           default=datetime.now(),
+                           nullable=False)
+    updated_at = db.Column(db.DateTime,
+                           default=datetime.now(),
+                           nullable=False)
 
 
 class User(db.Model):
@@ -19,13 +29,19 @@ class User(db.Model):
     email:      email address of user
     '''
 
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    slack = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(80), unique=True, nullable=False)
-
-    def __repr__(self):
-        return('<User {}>'.format(self.username))
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    username = db.Column(db.String(80),
+                         unique=True,
+                         nullable=False)
+    slack = db.Column(db.String(80),
+                      unique=True,
+                      nullable=False)
+    email = db.Column(db.String(80),
+                      unique=True,
+                      nullable=False)
+    name_first = db.Column(db.String(80))
+    name_last = db.Column(db.String(8))
 
     @classmethod
     def __declare_last__(cls):
@@ -37,7 +53,28 @@ class User(db.Model):
                        "not a valid email address")
 
 
-class Transaction(db.Model):
+class StripeDonation(db.Model, TimestampMixin):
+    __tablename__ = 'donations'
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    anonymous = db.Column(db.Boolean,
+                          nullable=False,
+                          default=False)
+    card = db.Column(db.String,
+                     nullable=False)
+    stripe_id = db.Column(db.String,
+                          nullable=False,
+                          default=False)
+    token = db.Column(db.String(80),
+                      nullable=False,
+                      default=False)
+    user = db.Column(db.Integer,
+                     db.ForeignKey('user.id'))
+    txs = db.Column(db.Integer,
+                    db.ForeignKey('transaction.id'))
+
+
+class Transaction(db.Model, TimestampMixin):
     ''' A transaction moves amounts between accounts.  When a transaction
     occurs, an account must be debited and an account must be credited.
 
@@ -53,10 +90,15 @@ class Transaction(db.Model):
     rec_to_acct:    Account linked to recvr_id
     '''
 
-    id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.Float, nullable=False)
-    datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    amount = db.Column(db.Float,
+                       nullable=False)
+    ccy_id = db.Column(db.Integer,
+                       db.ForeignKey('currency.id'))
+    datetime = db.Column(db.DateTime,
+                         nullable=False,
+                         default=datetime.utcnow)
     payer_id = db.Column(db.Integer,
                          db.ForeignKey('account.id'),
                          nullable=False)
@@ -70,17 +112,15 @@ class Transaction(db.Model):
                             db.ForeignKey('user.id'),
                             nullable=False)
 
-#     db.ForeignKeyConstraint(['payer_id'], ['account.id'],
-#                             use_alter=True, name='fk_acct_pay')
-
-#     db.ForeignKeyConstraint(['recvr_id'], ['account.id'],
-#                             use_alter=True, name='fk_acct_rec')
-
     ccy = db.relationship('Currency')
-    payer = db.relationship('Account', foreign_keys=[payer_id])
-    recvr = db.relationship('Account', foreign_keys=[recvr_id])
-    requestor = db.relationship("User", foreign_keys=[requestor_id])
-    approver = db.relationship("User", foreign_keys=[approver_id])
+    payer = db.relationship('Account',
+                            foreign_keys=[payer_id])
+    recvr = db.relationship('Account',
+                            foreign_keys=[recvr_id])
+    requestor = db.relationship("User",
+                                foreign_keys=[requestor_id])
+    approver = db.relationship("User",
+                               foreign_keys=[approver_id])
 
     @classmethod
     def __declare_last__(cls):
@@ -92,7 +132,7 @@ class Transaction(db.Model):
         ValidateInteger(Transaction.approver_id, False, True)
 
 
-class Account(db.Model):
+class Account(db.Model, TimestampMixin):
     ''' Accounts aggregate transactions.  They are associated with one and
     only one currenct.  An account can increase or decrease based on the
     sum of the transactions.
@@ -102,9 +142,13 @@ class Account(db.Model):
     ccy_id:     account denomination e.g. USD or BTC.
     '''
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), unique=True, nullable=False)
-    ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    name = db.Column(db.String(120),
+                     unique=True,
+                     nullable=False)
+    ccy_id = db.Column(db.Integer,
+                       db.ForeignKey('currency.id'))
 
     @classmethod
     def __declare_last__(cls):
@@ -112,7 +156,7 @@ class Account(db.Model):
         ValidateInteger(Account.ccy_id, False, True)
 
 
-class Project(db.Model):
+class Project(db.Model, TimestampMixin):
     ''' A project has a specific goal, e.g. amount to be reached. It is
     linked to an account which provides information about how much has been
     donated towards the goal.
@@ -124,12 +168,17 @@ class Project(db.Model):
     (prob need ccy)
     '''
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), unique=True, nullable=False)
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    name = db.Column(db.String(120),
+                     unique=True,
+                     nullable=False)
     account_id = db.Column(db.Integer,
                            db.ForeignKey('account.id'),
                            nullable=False)
-    goal = db.Column(db.Float, nullable=False, default=0)
+    goal = db.Column(db.Float,
+                     nullable=False,
+                     default=0)
 
     @classmethod
     def __declare_last__(cls):
@@ -138,10 +187,15 @@ class Project(db.Model):
         ValidateNumeric(Project.goal, False, True)
 
 
-class Currency(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), unique=True, nullable=False)
-    code = db.Column(db.String(3), unique=True, nullable=False)
+class Currency(db.Model, TimestampMixin):
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    name = db.Column(db.String(120),
+                     unique=True,
+                     nullable=False)
+    code = db.Column(db.String(3),
+                     unique=True,
+                     nullable=False)
 
     @classmethod
     def __declare_last__(cls):
@@ -149,6 +203,42 @@ class Currency(db.Model):
         ValidateString(Currency.code, False, True)
 
 
-class Subscription(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    pass
+class StripeSubscription(db.Model, TimestampMixin):
+    ''' Subscriptions will literally subscribe to updates via API request
+    to generate appropriate transactions.'''
+
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    stripe_plan_id = db.Column(db.Integer,
+                               db.ForeignKey('stripeplan.id'))
+    user = db.Column(db.Integer,
+                     db.ForeignKey('user.id'))
+    txs = db.Column(db.Integer,
+                    db.ForeignKey('transaction.id'))
+
+
+class StripePlan(db.Model):
+    __tablename__ = 'stripeplan'
+
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    ccy_id = db.Column(db.Integer,
+                       db.ForeignKey('currency.id'))
+    name = db.Column(db.String)
+    amount = db.Column(db.Float,
+                       nullable=False,
+                       default=1)
+    interval = db.Column(db.String)
+    desc = db.Column(db.String,
+                     nullable=False)
+    acct_id = db.Column(db.Integer,
+                        db.ForeignKey('account.id'))
+
+    acct = db.relationship('Account')
+
+    @classmethod
+    def __declare_last__(cls):
+        ValidateNumeric(StripePlan.amount, False, True)
+        ValidateString(StripePlan.name, False, True)
+        ValidateInteger(StripePlan.ccy_id, False, True)
+        ValidateString(StripePlan.interval, False, True)

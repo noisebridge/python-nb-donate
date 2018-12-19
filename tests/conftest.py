@@ -1,4 +1,5 @@
 import pytest
+from random import randint
 from donate.app import create_app
 from donate.database import db as _db
 from donate.settings import TestConfig
@@ -8,6 +9,9 @@ from donate.models import (
     Project,
     Transaction,
     Currency,
+    StripeDonation,
+    StripeSubscription,
+    StripePlan,
 )
 
 
@@ -86,17 +90,22 @@ def data_dict_builder(data):
     keys = data['keys']
     obj_data = data['obj_data']
 
+    # {'label<n>': {key: value}}
+    # n is the nth entry in the passed dictionary, e.g. user1
     objects = {"{}{}".format(label, _obj): {
-        keys[_key]: obj_data[_obj][_key] for _key in range(len(leys))
+        keys[_key]: obj_data[_obj][_key]
+        for _key in range(len(keys))
     }
         for _obj in range(len(obj_data))}
+
+    return objects
 
 
 @pytest.fixture(scope='session')
 def user_data():
 
+    label = 'user'
     keys = ["username", "slack", "email"]
-
     user_data = [
         ("name1", "slack1", "email@domain.tld"),
         (None, "slack", "email@domain.tld"),
@@ -105,14 +114,16 @@ def user_data():
         ("name1", "slack1", "email@domain.tld")
     ]
 
-    return data_dict_builder({'label': 'user',
+    return data_dict_builder({'label': label,
                               'keys': keys,
                               'obj_data': user_data})
 
 
 @pytest.fixture(scope="session")
-def account_data():
+def currency_data():
+    # should generate non-alphanumeric ccy codes to test that creation fails
 
+    label = "ccy"
     keys = ["code", "name"]
     account_data = [
         ("USD", "US Dollar"),
@@ -120,6 +131,52 @@ def account_data():
         ("ETH", "Etherium"),
         ("EUR", "Euro")]
 
-    return data_dict_builder({"label": "acct",
+    return data_dict_builder({"label": label,
                               "keys": keys,
                               "obj_data": account_data})
+
+
+@pytest.fixture(scope='session')
+def account_data(currency_data):
+
+    ccy_codes = [ccy['code'] for _, ccy in currency_data().items()]
+    num_ccys = len(ccy_codes)
+
+    label = "acct"
+    keys = ['name', 'ccy']
+    account_data = [
+        ('general', ccy_codes[randint(0, num_ccys - 1)]),
+        ('noisetor', ccy_codes[randint(0, num_ccys - 1)]),
+        ('noisetor', ccy_codes[randint(0, num_ccys - 1)]),
+        ('sawstop', ccy_codes[randint(0, num_ccys - 1)])]
+
+    return data_dict_builder({"label": label,
+                              "keys": keys,
+                              "obj_data": account_data})
+
+
+@pytest.fixture(scope='session')
+def stripe_plan_data(account_data):
+
+    acct_data = account_data()
+    num_accts = len(acct_data)
+    accts, ccys = list(zip(*[[acct['name'], acct['ccy']]
+                             for acct in acct_data.items()]))
+
+    label = "stripe_plan"
+    keys = ["ccy", "name", "amount", "interval", "desc", "acct"]
+    # This needs to be built based on the number of accounts
+    # separate the selectino of account from pool created above with
+    # plan creation.  These are just for basic tests.
+
+    obj_data = [
+        (ccy_codes[0], "#$10/month", 10, "month", "10 bucks a month!", accts[0])  # NOQA
+        (ccy_codes[0], "#$20/month", 20, "month", "10 bucks a month!", accts[0])  # NOQA
+        (ccy_codes[1], "#$10/month", 10, "month", "10 bucks a month!", accts[1])  # NOQA
+        (ccy_codes[2], "#$5000/month", 500, "month", "500 bucks a month!", accts[2])  # NOQA
+        (ccy_codes[0], "#$10/month", 10, "month", "10 bucks a month!", accts[0])  # NOQA
+    ]
+
+    return data_dict_builder({"label": label,
+                              "keys": keys,
+                              "obj_data": obj_data})
