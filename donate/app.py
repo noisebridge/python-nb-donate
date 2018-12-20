@@ -12,6 +12,8 @@ from donate.models import (
 
 
 def create_app(config_object=ProdConfig):
+    ''' Create the Flas application.  By default this will load the
+    production config. '''
 
     app = Flask(__name__.split('.')[0])
     app.url_map.strict_slashes = False
@@ -29,6 +31,7 @@ def register_extensions(app):
 
 
 def register_shellcontext(app):
+    ''' Pre-loads variables into the shell.'''
     def shell_context():
         return{
             'db': db,

@@ -3,6 +3,7 @@ from ..extensions import db
 
 
 def add_new_user(data):
+    ''' Performs basic checking on inserting a user. '''
     email = data['email']
     slack = data['slack']
     username = data['username']

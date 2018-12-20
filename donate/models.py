@@ -10,6 +10,7 @@ from flask_validator import (
 
 
 class TimestampMixin():
+    ''' Most objects (but not all) need a creation and updated timestamp '''
     created_at = db.Column(db.DateTime,
                            default=datetime.now(),
                            nullable=False)
@@ -54,6 +55,13 @@ class User(db.Model):
 
 
 class StripeDonation(db.Model, TimestampMixin):
+    ''' A stripe donation is made by a user and generates a transaction between
+    the outside world and Noisebridge.  there is no direct account linked to a
+    donation, it encapsulates the payment method and person. All financial data
+    is handled via created transactions or the associated user data.
+
+    '''
+
     __tablename__ = 'donations'
     id = db.Column(db.Integer,
                    primary_key=True)
@@ -188,6 +196,7 @@ class Project(db.Model, TimestampMixin):
 
 
 class Currency(db.Model, TimestampMixin):
+    ''' Currency (numeriere) of the amount. '''
     id = db.Column(db.Integer,
                    primary_key=True)
     name = db.Column(db.String(120),
@@ -204,8 +213,11 @@ class Currency(db.Model, TimestampMixin):
 
 
 class StripeSubscription(db.Model, TimestampMixin):
-    ''' Subscriptions will literally subscribe to updates via API request
-    to generate appropriate transactions.'''
+    ''' A stripe Subscription contains a Stripe Plan to which a user subscribes
+    and generates transactions against.'''
+
+    # Note: Subscriptions will literally subscribe to updates via API request
+    #       to generate appropriate transactions.'''
 
     id = db.Column(db.Integer,
                    primary_key=True)
@@ -218,6 +230,8 @@ class StripeSubscription(db.Model, TimestampMixin):
 
 
 class StripePlan(db.Model):
+    ''' A stripe plan sets the details for a repeated charge, e.g. $100 / m'''
+
     __tablename__ = 'stripeplan'
 
     id = db.Column(db.Integer,
