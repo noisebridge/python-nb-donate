@@ -1,7 +1,12 @@
 import pytest
+import uuid
 from random import randint
 from donate.app import create_app
-from donate.database import db as _db
+from donate.database import (
+    db as _db,
+    make_dependencies,
+    count_dependencies,
+)
 from donate.settings import TestConfig
 from donate.models import (
     User,
@@ -139,16 +144,13 @@ def currency_data():
 @pytest.fixture(scope='session')
 def account_data(currency_data):
 
-    ccy_codes = [ccy['code'] for _, ccy in currency_data().items()]
-    num_ccys = len(ccy_codes)
-
     label = "acct"
     keys = ['name', 'ccy']
     account_data = [
-        ('general', ccy_codes[randint(0, num_ccys - 1)]),
-        ('noisetor', ccy_codes[randint(0, num_ccys - 1)]),
-        ('noisetor', ccy_codes[randint(0, num_ccys - 1)]),
-        ('sawstop', ccy_codes[randint(0, num_ccys - 1)])]
+        ('general', "USD"),
+        ('noisetor', "BTC"),
+        ('noisetor', "ETH"),
+        ('sawstop', "USD")]
 
     return data_dict_builder({"label": label,
                               "keys": keys,
@@ -158,11 +160,6 @@ def account_data(currency_data):
 @pytest.fixture(scope='session')
 def stripe_plan_data(account_data):
 
-    acct_data = account_data()
-    num_accts = len(acct_data)
-    accts, ccys = list(zip(*[[acct['name'], acct['ccy']]
-                             for acct in acct_data.items()]))
-
     label = "stripe_plan"
     keys = ["ccy", "name", "amount", "interval", "desc", "acct"]
     # This needs to be built based on the number of accounts
@@ -170,11 +167,44 @@ def stripe_plan_data(account_data):
     # plan creation.  These are just for basic tests.
 
     obj_data = [
-        (ccy_codes[0], "#$10/month", 10, "month", "10 bucks a month!", accts[0])  # NOQA
-        (ccy_codes[0], "#$20/month", 20, "month", "10 bucks a month!", accts[0])  # NOQA
-        (ccy_codes[1], "#$10/month", 10, "month", "10 bucks a month!", accts[1])  # NOQA
-        (ccy_codes[2], "#$5000/month", 500, "month", "500 bucks a month!", accts[2])  # NOQA
-        (ccy_codes[0], "#$10/month", 10, "month", "10 bucks a month!", accts[0])  # NOQA
+        ("USD", "#$10/month", 10, "month", "10 bucks a month!", "general")  # NOQA
+        ("ETH", "#$20/month", 20, "month", "10 bucks a month!", "noisetor")  # NOQA
+        ("BTC", "#$10/month", 10, "month", "10 bucks a month!", "snacks")  # NOQA
+        ("USD", "#$5000/month", 500, "month", "500 bucks a month!", "general")  # NOQA
+        ("USD", "#$10/month", 10, "month", "10 bucks a month!", "sawstop")  # NOQA
+    ]
+
+    return data_dict_builder({"label": label,
+                              "keys": keys,
+                              "obj_data": obj_data})
+
+
+@pytest.fixture(scope='session')
+def stripe_subscription_data():
+
+    label = 'stripe_sub'
+    keys = ['plan_id', 'user']
+    obj_data = [
+        ("$10 / month", "Frank"),
+        ("$20 / week", "Rachel"),
+        ("$5 / whenever", "Asad")
+         ]
+
+    return data_dict_builder({"label": label,
+                              "keys": keys,
+                              "obj_data": obj_data})
+
+
+@pytest.fixture(scope='session')
+def stripe_donations_data():
+
+    label = "stripe_donation"
+    keys = 'anonymous, card, stripe_id, token, user, txs'.split(',')
+
+    obj_data = [
+        (True, "1234-5678-9101", 1, uuid.uuid1().hex, "Billy", [2, 3]),
+        (False, "0987-6543-2112", 2, uuid.uuid1().hex, "Rachel", [5, 10]),
+        (False, "8888-9999-1111-2222", 6, uuid.uuid1().hex, "Sven", [1000, 1001]), # NOQA
     ]
 
     return data_dict_builder({"label": label,
