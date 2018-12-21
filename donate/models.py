@@ -222,9 +222,11 @@ class StripeSubscription(db.Model, TimestampMixin):
     id = db.Column(db.Integer,
                    primary_key=True)
     stripe_plan_id = db.Column(db.Integer,
-                               db.ForeignKey('stripeplan.id'))
+                               db.ForeignKey('stripeplan.id'),
+                               nullable=False)
     user = db.Column(db.Integer,
-                     db.ForeignKey('user.id'))
+                     db.ForeignKey('user.id'),
+                     nullable=False)
     txs = db.Column(db.Integer,
                     db.ForeignKey('transaction.id'))
 
@@ -242,11 +244,13 @@ class StripePlan(db.Model):
     amount = db.Column(db.Float,
                        nullable=False,
                        default=1)
-    interval = db.Column(db.String)
+    interval = db.Column(db.String,
+                         nullable=False)
     desc = db.Column(db.String,
                      nullable=False)
     acct_id = db.Column(db.Integer,
-                        db.ForeignKey('account.id'))
+                        db.ForeignKey('account.id'),
+                        nullable=False)
 
     acct = db.relationship('Account')
 

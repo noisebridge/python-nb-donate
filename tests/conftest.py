@@ -167,11 +167,11 @@ def stripe_plan_data(account_data):
     # plan creation.  These are just for basic tests.
 
     obj_data = [
-        ("USD", "#$10/month", 10, "month", "10 bucks a month!", "general")  # NOQA
-        ("ETH", "#$20/month", 20, "month", "10 bucks a month!", "noisetor")  # NOQA
-        ("BTC", "#$10/month", 10, "month", "10 bucks a month!", "snacks")  # NOQA
-        ("USD", "#$5000/month", 500, "month", "500 bucks a month!", "general")  # NOQA
-        ("USD", "#$10/month", 10, "month", "10 bucks a month!", "sawstop")  # NOQA
+        ("USD", "#$10/month", 10, "month", "10 bucks a month!", "general"),  # NOQA
+        ("ETH", "#$20/month", 20, "month", "10 bucks a month!", "noisetor"),  # NOQA
+        ("BTC", "#$10/month", 10, "month", "10 bucks a month!", "snacks"),  # NOQA
+        ("USD", "#$5000/month", 500, "month", "500 bucks a month!", "general"),  # NOQA
+        ("USD", "#$10/month", 10, "month", "10 bucks a month!", "sawstop"),  # NOQA
     ]
 
     return data_dict_builder({"label": label,
@@ -196,15 +196,15 @@ def stripe_subscription_data():
 
 
 @pytest.fixture(scope='session')
-def stripe_donations_data():
+def stripe_donation_data():
 
     label = "stripe_donation"
-    keys = 'anonymous, card, stripe_id, token, user, txs'.split(',')
+    keys = ['anonymous', 'card', 'stripe_id', 'token', 'user', 'txs']
 
     obj_data = [
-        (True, "1234-5678-9101", 1, uuid.uuid1().hex, "Billy", [2, 3]),
-        (False, "0987-6543-2112", 2, uuid.uuid1().hex, "Rachel", [5, 10]),
-        (False, "8888-9999-1111-2222", 6, uuid.uuid1().hex, "Sven", [1000, 1001]), # NOQA
+        (True, "1234-5678-9101", 1, uuid.uuid1().hex, "Billy", 2),
+        (False, "0987-6543-2112", 2, uuid.uuid1().hex, "Rachel", 5),
+        (False, "8888-9999-1111-2222", 6, uuid.uuid1().hex, "Sven", 1000), # NOQA
     ]
 
     return data_dict_builder({"label": label,
