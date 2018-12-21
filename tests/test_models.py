@@ -8,6 +8,8 @@ from donate.models import (
     User,
     Project,
     Transaction,
+    StripeDonation,
+    StripePlan
 )
 from flask_validator import ValidateError
 import pytest
@@ -223,14 +225,14 @@ def test_new_transaction():
 @pytest.mark.usefixtures('db')
 def test_insert_transaction(model_objects):
 
-    approver = model_objects['u1']
-    payer = model_objects['u2']
-    receiver = model_objects['u3']
-    requestor = model_objects['u4']
+    approver = 100
+    payer = 201
+    receiver = 400
+    requestor = 693
 
-    ccy = model_objects['usd']
-    rec_acct = model_objects['acct1']
-    pay_acct = model_objects['acct2']
+    ccy = 1
+    rec_acct = 7
+    pay_acct = 9
 
     now = datetime.now()
     amount = 4000000
@@ -250,3 +252,34 @@ def test_insert_transaction(model_objects):
     retrieved_tx = db.session.query(Transaction).one()
 
     assert retrieved_tx == tx
+
+
+@pytest.mark.usefixtures('stripe_donation_data')
+def test_new_stripe_donation(stripe_donation_data):
+
+    test_case = list(stripe_donation_data.keys()).pop()
+    donation_data = stripe_donation_data[test_case]
+    donation = StripeDonation(**donation_data)
+
+    for k, v in donation_data.items():
+        assert getattr(donation, k) == v
+
+
+@pytest.mark.usefixtures('stripe_donation_data')
+def test_insert_stripe_donation(stripe_donation_data):
+
+    test_case = list(stripe_donation_data.keys()).pop()
+    donation_data = stripe_donation_data[test_case]
+    donation = StripeDonation(**donation_data)
+
+    db.session.add(donation)
+    db.session.commit()
+
+    retrieved_donation = db.session.query(StripeDonation).one()
+
+    assert retrieved_donation == donation
+
+
+@pytest.mark.usefixtures()
+def test_new_stripe_plan():
+    pass

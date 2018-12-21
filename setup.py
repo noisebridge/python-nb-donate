@@ -13,6 +13,7 @@ setup(
         'pdoc',
         'pytest',
         'python-dotenv',
+        'sadisplay',
         'werkzeug',
     ],
 )

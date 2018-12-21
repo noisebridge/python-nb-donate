@@ -62,7 +62,9 @@ class StripeDonation(db.Model, TimestampMixin):
 
     '''
 
-    __tablename__ = 'donations'
+    __tablename__ = 'stripe_donation'
+
+    print(db.metadata.tables.keys())
     id = db.Column(db.Integer,
                    primary_key=True)
     anonymous = db.Column(db.Boolean,
@@ -219,6 +221,7 @@ class StripeSubscription(db.Model, TimestampMixin):
     # Note: Subscriptions will literally subscribe to updates via API request
     #       to generate appropriate transactions.'''
 
+    __tablename__ = "stripe_subscription"
     id = db.Column(db.Integer,
                    primary_key=True)
     stripe_plan_id = db.Column(db.Integer,

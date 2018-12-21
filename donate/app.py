@@ -8,6 +8,8 @@ from donate.models import (
     Project,
     Currency,
     Transaction,
+    StripeDonation,
+    StripePlan,
 )
 
 
