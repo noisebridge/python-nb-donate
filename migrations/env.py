@@ -21,6 +21,9 @@ from donate.models import (
     Account,
     Project,
     Transaction,
+    StripeDonation,
+    StripePlan,
+    StripeSubscription,
 )
 from donate import db
 

@@ -161,17 +161,17 @@ def account_data(currency_data):
 def stripe_plan_data(account_data):
 
     label = "stripe_plan"
-    keys = ["ccy", "name", "amount", "interval", "desc", "acct"]
+    keys = ["ccy_id", "name", "amount", "interval", "desc", "acct_id"]
     # This needs to be built based on the number of accounts
     # separate the selectino of account from pool created above with
     # plan creation.  These are just for basic tests.
 
     obj_data = [
-        ("USD", "#$10/month", 10, "month", "10 bucks a month!", "general"),  # NOQA
-        ("ETH", "#$20/month", 20, "month", "10 bucks a month!", "noisetor"),  # NOQA
-        ("BTC", "#$10/month", 10, "month", "10 bucks a month!", "snacks"),  # NOQA
-        ("USD", "#$5000/month", 500, "month", "500 bucks a month!", "general"),  # NOQA
-        ("USD", "#$10/month", 10, "month", "10 bucks a month!", "sawstop"),  # NOQA
+        (1, "#$10/month", 10, "month", "10 bucks a month!", "general"),  # NOQA
+        (3, "#$20/month", 20, "month", "10 bucks a month!", "noisetor"),  # NOQA
+        (2, "#$10/month", 10, "month", "10 bucks a month!", "snacks"),  # NOQA
+        (1, "#$5000/month", 500, "month", "500 bucks a month!", "general"),  # NOQA
+        (1, "#$10/month", 10, "month", "10 bucks a month!", "sawstop"),  # NOQA
     ]
 
     return data_dict_builder({"label": label,

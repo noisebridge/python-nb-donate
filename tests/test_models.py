@@ -229,20 +229,19 @@ def test_insert_transaction(model_objects):
     payer = 201
     receiver = 400
     requestor = 693
-
-    ccy = 1
+    ccy_id = 1
     rec_acct = 7
     pay_acct = 9
 
     now = datetime.now()
     amount = 4000000
 
-    tx = Transaction(ccy=ccy,
+    tx = Transaction(ccy_id=ccy_id,
                      amount=amount,
-                     payer=pay_acct,
-                     recvr=rec_acct,
-                     requestor=requestor,
-                     approver=approver,
+                     payer_id=pay_acct,
+                     recvr_id=rec_acct,
+                     requestor_id=requestor,
+                     approver_id=approver,
                      datetime=now,
                      )
 
@@ -265,7 +264,7 @@ def test_new_stripe_donation(stripe_donation_data):
         assert getattr(donation, k) == v
 
 
-@pytest.mark.usefixtures('stripe_donation_data')
+@pytest.mark.usefixtures('stripe_donation_data', 'db')
 def test_insert_stripe_donation(stripe_donation_data):
 
     test_case = list(stripe_donation_data.keys()).pop()
@@ -280,6 +279,45 @@ def test_insert_stripe_donation(stripe_donation_data):
     assert retrieved_donation == donation
 
 
-@pytest.mark.usefixtures()
 def test_new_stripe_plan():
-    pass
+
+    id = 9000
+    ccy_id = 4
+    name = "$10 / month"
+    amount = 8000
+    interval = "month"
+    desc = "a subscription for 8000 / month!"
+    acct_id = 4
+    acct = 10
+
+    plan = StripePlan(id=id,
+                      ccy_id=ccy_id,
+                      name=name,
+                      amount=amount,
+                      interval=interval,
+                      desc=desc,
+                      acct_id=acct_id,
+                      acct=acct)
+
+    assert id == plan.id
+    assert ccy_id == plan.ccy_id
+    assert name == plan.name
+    assert amount == plan.amount
+    assert interval == plan.interval
+    assert desc == plan.desc
+    assert acct_id == plan.acct_id
+    assert acct == plan.acct
+
+
+@pytest.mark.usefixtures('db')
+def test_insert_stripe_plan(stripe_plan_data):
+    test_case = list(stripe_plan_data.keys()).pop()
+    plan_data = stripe_plan_data[test_case]
+    plan = StripePlan(**plan_data)
+
+    db.session.add(plan)
+    db.session.commit()
+
+    retrieved_plan = db.session.query(StripePlan).one()
+
+    assert retrieved_plan == plan
