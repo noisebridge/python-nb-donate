@@ -5,11 +5,6 @@ from .extensions import db
 from collections import defaultdict
 
 
-''' Just a stub right now '''
-Column = db.Column
-Model = db.Model
-
-
 def count_levels(name, deps):
     if deps[name] == set():
         return 0
