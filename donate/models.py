@@ -190,6 +190,8 @@ class Project(db.Model, TimestampMixin):
                      nullable=False,
                      default=0)
 
+    accounts = db.relationship('Account')
+
     @classmethod
     def __declare_last__(cls):
         ValidateString(Project.name, False, True)
