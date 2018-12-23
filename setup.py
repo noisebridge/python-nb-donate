@@ -10,6 +10,8 @@ setup(
         'flask',
         'flask-migrate',
         'flask-sqlalchemy',
+        'flask-validator',
+        'babel',
         'pdoc',
         'pytest',
         'python-dotenv',
