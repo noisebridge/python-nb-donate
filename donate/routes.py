@@ -1,21 +1,40 @@
 from flask import (
-    render_tempalte,
+    render_template,
     flash,
     redirect,
     request,
     url_for,
+    Blueprint,
 )
-from donate.app import app
 from donate.database import db
+from donate.models import (
+    Project,
+    Account,
+)
+
+home_page = Blueprint('home', __name__, template_folder="templates")
+projects_page = Blueprint('projects', __name__, template_folder="templates")
+project_page = Blueprint('project', __name__, template_folder="templates")
+new_project_page = Blueprint(
+    'new_project',
+    __name__,
+    template_folder="templates")
+new_account_page = Blueprint(
+    'new_account',
+    __name__,
+    template_folder="templates")
 
 
-@app.route('/')
-@app.route('/index')
+@home_page.route('/')
+@home_page.route('/index')
 def index():
-    pass
+    data = {'title': "New Donate.  Like Old Donate.  Only New."}
+    return render_template('base.html',
+                           title="New Donate",
+                           data=data)
 
 
-@app.route('/projects')
+@projects_page.route('/projects')
 def projects():
     projects = db.session.query(Project)
     return (render_template('projects.html',
@@ -23,7 +42,7 @@ def projects():
                             projects=projects))
 
 
-@app.route('/projects/<project_name>')
+@project_page.route('/projects/<project_name>')
 def get_project(project_name):
     project = db.session.query(Project).filter_by(name == project_name)
     if len(project) == 0:
@@ -36,14 +55,15 @@ def get_project(project_name):
         raise ValueError("shit we're fucked in projects m8y!")
 
 
-@app.route('/new/project/<project_name>')
+@new_project_page.route('/new/project/<project_name>')
 def new_project(project_name, methods=['GET', 'POST']):
     name = project_name
     if request.method == "POST":
-        pass
+        goal = request.form['goal']
+        ccy = request.form['ccy']
     pass
 
 
-@app.route('/new/account')
+@new_account_page.route('/new/account')
 def new_account():
     pass

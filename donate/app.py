@@ -11,6 +11,7 @@ from donate.models import (
     StripeDonation,
     StripePlan,
 )
+from donate import routes
 
 
 def create_app(config_object=ProdConfig):
@@ -23,6 +24,7 @@ def create_app(config_object=ProdConfig):
 
     register_extensions(app)
     register_shellcontext(app)
+    register_blueprints(app)
 
     return(app)
 
@@ -30,6 +32,13 @@ def create_app(config_object=ProdConfig):
 def register_extensions(app):
     db.init_app(app)
     migrate.init_app(app, db)
+
+
+def register_blueprints(app):
+    app.register_blueprint(routes.home_page)
+    app.register_blueprint(routes.project_page)
+    app.register_blueprint(routes.projects_page)
+    app.register_blueprint(routes.new_project_page)
 
 
 def register_shellcontext(app):

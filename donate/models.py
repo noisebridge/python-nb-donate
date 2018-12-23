@@ -64,7 +64,6 @@ class StripeDonation(db.Model, TimestampMixin):
 
     __tablename__ = 'stripe_donation'
 
-    print(db.metadata.tables.keys())
     id = db.Column(db.Integer,
                    primary_key=True)
     anonymous = db.Column(db.Boolean,

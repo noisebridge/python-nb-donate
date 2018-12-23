@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block title %}Donate{% endblock title %}</title>
+    {% block head_favicon %}
+      <link rel="icon" type="image/png" href="{{ STATIC_URL }}images/favicon.ico">
+    {% endblock head_favicon %}
+    {% block head_meta %}
+      {% block head_meta_charset %}
+        <meta http-equic="Content-Type" content="text/html; charset=utf-8" />
+      {% endblock head_meta_charset %}
+      {% block head_meta_contentlanguage %}
+        <meta http-equiv="Content-Language" value="en-US" />
+      {% endblock head_meta_contentlanguage %}
+      {% block head_meta_viewport %}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      {% endblock head_meta_viewport %}
+    {% endblock head_meta %}
+    {% block head_css %}
+      {% block head_css_site %}
+        <link href="{{ STATIC_URL }}css/donate.css"
+              rel="stylesheet" media="screen">
+      {% endblock head_css_site %}
+      {% block head_css_section %}{% endblock head_css_section %}
+      {% block head_css_page %}{% endblock head_css_page %}
+    {% endblock head_css %}
+  </head>
+  <body>
+  </body>
+</html>
