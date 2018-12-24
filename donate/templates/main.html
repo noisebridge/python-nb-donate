@@ -6,7 +6,7 @@
         <div class="row donation-header">
           <div class="col-md-8 col-md-offset-3 donation-title">
             <a href="https://donate.noisebridge.net/">
-              <img class="center noisebridge_logo" src="../static/images/noisebridge_logo.jpg" alt="Noisebridge logo" />
+              <img class="center noisebridge-logo" src="../static/images/noisebridge_logo.jpg" alt="Noisebridge logo" />
             </a>
             <h1>Donate Now! Keep Noisebridge Hackerspace Alive in San Francisco!!</h1>
           </div>
@@ -68,8 +68,8 @@
                         </a>
                       </label>
                      
-                      <select name="charge[amount]" id="charge_amount" class="form-control">
-                        <option value="10">$10</option>
+                      <select name="charge[amount]" id="charge-amount" class="form-control" autocomplete="off">
+                        <option selected="selected" value="10">$10</option>
                         <option value="20">$20</option>
                         <option value="40">$40</option>
                         <option value="80">$80</option>
@@ -134,7 +134,7 @@
           </div>
     
           <!-- Summary of recent donations and projects -->
-          <div class="col-md-4 clo-md-offset-2 summary">
+          <div class="col-md-4 summary">
             <div class="table-container">
               <h3>Recent donations</h3>
               <ol>

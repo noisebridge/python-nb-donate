@@ -7,6 +7,10 @@ body {
   margin: 0;
 }
 
+img {
+  max-width: 100%;
+}
+
 .container {
   margin: 10px;
 }
@@ -19,13 +23,14 @@ body {
 .donation-title {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 .donation-title h1 { 
   font-weight: bold;
 }
 
-.noisebridge_logo {
-  width: 120px;
+.noisebridge-logo {
+  width: 230px;
 }
 
 /* Donation form */
@@ -86,13 +91,23 @@ body {
   text-align: center;
 }
 
+/* Thanks */
+
+.thanks-title {
+  text-align: center;
+}
+.thanks-title h1 {  
+  font-weight: bold;
+}
 .thanks {
+  font-size: 1.3em;
   text-align: center;
 }
 
 /* Footer */
 
 .footer {
+  margin-top: 20px;
   text-align: center;
 }
 .footer p.meta {
@@ -111,8 +126,19 @@ body {
   .donation-title h1 { 
     text-align: left;
   }
-  .donation-title .noisebridge_logo {
+  .donation-title .noisebridge-logo {
     width: 80px;
+  }
+
+  .thanks {
+    font-size: 1.3em;
+    text-align: left;
+  }
+  .thanks img {
+    display: none;
+  }
+  .thanks-title h1 {
+    text-align: left;
   }
 
   .footer {
@@ -129,7 +155,7 @@ body {
   .donation-title {
     flex-direction: column;
   }
-  .donation-header .noisebridge_logo {
+  .donation-header .noisebridge-logo {
     width: 100px;
   }
 }

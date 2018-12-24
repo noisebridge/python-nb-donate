@@ -21,7 +21,6 @@ jQuery(function ($) {
       exp_month: $form.find(".cc-exp"),
       exp_year: $form.find(".cc-exp")
     }, function (status, response) {
-    console.log(status,response)
       if (response.error) {
         displayError($form, response.error);
         $form.find("button").prop("disabled", false);
