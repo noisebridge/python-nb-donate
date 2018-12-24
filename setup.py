@@ -12,6 +12,7 @@ setup(
         'flask-sqlalchemy',
         'flask-validator',
         'babel',
+        'gitpython',
         'pdoc',
         'pytest',
         'python-dotenv',
