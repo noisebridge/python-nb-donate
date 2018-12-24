@@ -1,0 +1,9 @@
+.donation-form .bitcoin {
+  text-align: center;
+}
+.donation-form .bitcoin iframe {
+  width: 165px !important;
+  height: 48px !important;
+}
+
+/*# sourceMappingURL=bitcoin.css.map */
