@@ -18,14 +18,21 @@
     {% endblock head_meta %}
     {% block head_css %}
       {% block head_css_site %}
-        <link href="static/css/donate.css"
-              rel="stylesheet" media="screen">
+        <link href="static/css/donate.css" rel="stylesheet" media="screen">
+        <link href="static/css/application.css" rel="stylesheet" media="screen">
+        <link href="static/css/bitcoin.css" rel="stylesheet" media="screen">
+        <link href="static/css/donate.css" rel="stylesheet" media="screen">
+        <link href="static/css/donation_form.css" rel="stylesheet" media="screen">
+        <link href="static/css/thanks.css" rel="stylesheet" media="screen">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
       {% endblock head_css_site %}
       {% block head_css_section %}{% endblock head_css_section %}
       {% block head_css_page %}{% endblock head_css_page %}
     {% endblock head_css %}
   </head>
   <body>
+
+    <div id="content">{% block content %}{% endblock %}</div>
 
     {% block footer %}
       <footer>

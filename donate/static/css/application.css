@@ -12,63 +12,47 @@
  *
  *= require_self
  */
-
-//= require bootstrap
-//= require_tree .
-
 @font-face {
-    font-family: 'Bitter';
-    src: font-url('Bitter-Regular.ttf') format('truetype');
+  font-family: "Bitter";
+  src: font-url("Bitter-Regular.ttf") format("truetype");
 }
-
 body {
-  font-family: 'Bitter', serif !important;
+  font-family: "Bitter", serif !important;
 }
 
-// main container body
 .container {
   margin: 30px 0px;
-
-  h3 {
-    font-family: 'Bitter', serif;
-  }
 }
-
+.container h3 {
+  font-family: "Bitter", serif;
+}
 
 .donation-header {
-  font-family: 'Bitter', serif;
+  font-family: "Bitter", serif;
   display: flex;
   flex-direction: row;
-
   align-items: center;
   justify-content: space-around;
-
-  h3 {
-    font-weight: bold;
-  }
-
-  .noisebridge_logo {
-    width: 120px;
-  }
+}
+.donation-header h3 {
+  font-weight: bold;
+}
+.donation-header .noisebridge_logo {
+  width: 120px;
 }
 
-.donation-progress {
-  h3 {
-    text-align: center;
-  }
-
+.donation-progress h3 {
+  text-align: center;
 }
 
 .footer {
   text-align: center;
-
-  p.meta {
-    color: #6F6F6F;
-  }
+}
+.footer p.meta {
+  color: #6F6F6F;
 }
 
 /* Responsive design tweaks */
-
 /* Narrow */
 @media only screen and (max-width: 480px) {
   .container {
@@ -78,10 +62,9 @@ body {
   .donation-header {
     flex-direction: column;
     text-align: center;
-
-    .noisebridge_logo {
-      width: 80px;
-    }
+  }
+  .donation-header .noisebridge_logo {
+    width: 80px;
   }
 }
 /* Medium */
@@ -93,15 +76,13 @@ body {
   .donation-header {
     flex-direction: column;
     text-align: center;
-
-    .noisebridge_logo {
-      width: 100px;
-    }
   }
-
+  .donation-header .noisebridge_logo {
+    width: 100px;
+  }
 }
-
 .row:not(:first-child) {
   margin-top: 25px;
 }
 
+/*# sourceMappingURL=application.css.map */

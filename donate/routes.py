@@ -47,7 +47,7 @@ FAKE_PROJECTS = [
 @home_page.route('/index')
 def index():
     data = {'title': "New Donate.  Like Old Donate.  Only New."}
-    return render_template('base.html',
+    return render_template('main.html',
                            title="New Donate",
                            data=data,
                            git_sha=git.Repo(search_parent_directories=True).head.object.hexsha,
