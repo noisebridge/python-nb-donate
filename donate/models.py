@@ -12,10 +12,10 @@ from flask_validator import (
 class TimestampMixin():
     ''' Most objects (but not all) need a creation and updated timestamp '''
     created_at = db.Column(db.DateTime,
-                           default=datetime.now(),
+                           default=datetime.now,
                            nullable=False)
     updated_at = db.Column(db.DateTime,
-                           default=datetime.now(),
+                           default=datetime.now,
                            nullable=False)
 
 
@@ -158,6 +158,8 @@ class Account(db.Model, TimestampMixin):
                      nullable=False)
     ccy_id = db.Column(db.Integer,
                        db.ForeignKey('currency.id'))
+
+    ccy = db.relationship('Currency')
 
     @classmethod
     def __declare_last__(cls):

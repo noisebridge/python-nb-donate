@@ -46,3 +46,13 @@ Projects have a stated goal.  A project will have at least one account to track 
 .. image:: pics/schema.png
    :width: 60pt
 
+Database Creation / Migration
+_____________________________
+
+We use Flask-Migrate to create and run the database.  The workflow is
+1) [Once] flask db init to create the migrations folder
+2) [Once] edit migrations/env.py to add the model data
+3) flask db migrate - creates a migration in the migrations/versions folder which represents the commands to go from teh existing DB state to the new state.  These migration scripts may need to be edited.
+4) flask db upgrade - run the migration script.
+
+If having an a issue with a migration, it's important to remore __pycache__ from the migration folder tree to make sure cached versions which may be repeating the same issues.
