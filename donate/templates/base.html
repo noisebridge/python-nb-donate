@@ -3,7 +3,7 @@
   <head>
     <title>{% block title %}Donate{% endblock title %}</title>
     {% block head_favicon %}
-      <link rel="icon" type="image/png" href="{{ STATIC_URL }}images/favicon.ico">
+      <link rel="icon" type="image/png" href="/static/images/favicon.ico">
     {% endblock head_favicon %}
     {% block head_meta %}
       {% block head_meta_charset %}
@@ -18,7 +18,7 @@
     {% endblock head_meta %}
     {% block head_css %}
       {% block head_css_site %}
-        <link href="{{ STATIC_URL }}css/donate.css"
+        <link href="static/css/donate.css"
               rel="stylesheet" media="screen">
       {% endblock head_css_site %}
       {% block head_css_section %}{% endblock head_css_section %}
@@ -26,5 +26,21 @@
     {% endblock head_css %}
   </head>
   <body>
+
+    {% block footer %}
+      <footer>
+        <div class="container footer">
+          <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+              <p>
+                <a href="https://donate.noisebridge.net/">donate.noisebridge.net</a> is released under the terms of the <a href="https://gnu.org/licenses/agpl.html">AGPL V3</a>
+              </p>
+              <p class="meta">running: <a href="{{ repo_path }}{{ git_sha }}">{{ git_sha }}</a></p>
+            </div>
+          </div>
+        </div>
+      </footer>
+    {% endblock footer %}
+
   </body>
 </html>
