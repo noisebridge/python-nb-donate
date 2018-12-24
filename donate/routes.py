@@ -90,8 +90,6 @@ def new_project(project_name):
     name = project_name
     if request.method == "POST":
         goal = request.form['goal']
-        if goal == 0:
-            goal = None
         project.goal = goal
         # TODO: send the new project to the database
         return (render_template('new_project_created.html',
