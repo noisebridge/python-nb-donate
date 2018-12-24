@@ -25,8 +25,9 @@ new_account_page = Blueprint(
     'new_account',
     __name__,
     template_folder="templates")
-git_sha = git.Repo(search_parent_directories=True).head.object.hexsha,
-repo_path = "https://github.com/marcidy/nb_donate/commits/",
+git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
+repo_path = "https://github.com/marcidy/nb_donate/commits/"
+
 
 '''
 Project/Donation classes and FAKE_ data can be 
@@ -74,21 +75,21 @@ end fake data
 @home_page.route('/index')
 def index():
     return render_template('main.html',
-                           title="Donate to Noisebridge",
-                           git_sha=git.Repo(search_parent_directories=True).head.object.hexsha,
-                           repo_path="https://github.com/marcidy/nb_donate/commits/",
-                           projects=FAKE_PROJECTS,
-                           recent_donations=FAKE_RECENT_DONATIONS
-                           )
+                           data={
+                               'git_sha': git_sha,
+                               'repo_path': repo_path,
+                               'recent_donations': FAKE_RECENT_DONATIONS,
+                               'projects': FAKE_PROJECTS
+                           })
 
 
 @thanks_page.route('/thanks')
 def thanks():
     return render_template('thanks.html',
-                           title="Thanks from Noisebridge!",
-                           git_sha=git.Repo(search_parent_directories=True).head.object.hexsha,
-                           repo_path="https://github.com/marcidy/nb_donate/commits/",
-                           )
+                           data={
+                               'git_sha': git_sha,
+                               'repo_path': repo_path
+                           })
 
 
 @projects_page.route('/projects')

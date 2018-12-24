@@ -138,7 +138,7 @@
             <div class="table-container">
               <h3>Recent donations</h3>
               <ol>
-                {% for d in recent_donations %}
+                {% for d in data.recent_donations %}
                   <li>{{ "%s - $%d %s" % (d.name, d.amount, (" towards %s " % d.project) if d.project else "") }}</li>
                 {% endfor %}
               </ol>
@@ -147,7 +147,7 @@
             <div class="table-container">
               <h3>Current projects</h3>
               <ol>
-                {% for d in projects %}
+                {% for d in data.projects %}
                   <li>{{ "%s - $%d of $%d" % (d.name, d.amount, d.goal) }}</li>
                 {% endfor %}
               </ol>

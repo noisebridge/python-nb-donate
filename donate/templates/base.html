@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>{% block title %}Donate{% endblock title %}</title>
+    <title>{% block title %}Donate to Noisebridge{% endblock title %}</title>
     {% block head_favicon %}
       <link rel="icon" type="image/png" href="/static/images/favicon.ico">
     {% endblock head_favicon %}
@@ -40,7 +40,7 @@
               <a href="https://donate.noisebridge.net/">donate.noisebridge.net</a> 
               is released under the terms of the <a href="https://gnu.org/licenses/agpl.html">AGPL V3</a>
             </p>
-            <p class="meta">running: <a href="{{ repo_path }}{{ git_sha }}">{{ git_sha }}</a></p>
+            <p class="meta">running: <a href="{{ data.repo_path }}{{ data.git_sha }}">{{ data.git_sha }}</a></p>
           </div>
         </div>
       </div>
