@@ -25,14 +25,18 @@ new_account_page = Blueprint(
     __name__,
     template_folder="templates")
 
-
-
-# this Project class and FAKE_PROJECTS can be deleted once we get the database working
+# this Project class and fake_projects can be deleted once we get the database working
 class Project:
     def __init__(self, name, amount, goal):
         self.name = name
         self.amount = amount
         self.goal = goal
+
+class Donation:
+    def __init__(self, name, amount, project=None):
+        self.name = name
+        self.amount = amount
+        self.project = project
 
 FAKE_PROJECTS = [
     Project("laser", 2000, 5000),
@@ -41,7 +45,12 @@ FAKE_PROJECTS = [
     Project("Fire Drill 2018", 200, None),
     Project("Axidraw", 222, 200)
 ]
-
+FAKE_RECENT_DONATIONS = [
+    Donation("Brad Pitt", 4, None),
+    Donation("Matthew Arcidy", 3, "Club Mate"),
+    Donation("Angelina Jolie", 4, "Whatever"),
+    Donation("Bill Gates", 5, "Club Mate")
+]
 
 @home_page.route('/')
 @home_page.route('/index')
@@ -51,7 +60,9 @@ def index():
                            title="New Donate",
                            data=data,
                            git_sha=git.Repo(search_parent_directories=True).head.object.hexsha,
-                           repo_path="https://github.com/marcidy/nb_donate/commits/"
+                           repo_path="https://github.com/marcidy/nb_donate/commits/",
+                           projects=FAKE_PROJECTS,
+                           recent_donations=FAKE_RECENT_DONATIONS
                            )
 
 

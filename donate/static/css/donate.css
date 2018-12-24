@@ -1,5 +1,137 @@
-@import url('https://fonts.googleapis.com/css?family=Bitter');
+@import url('https://fonts.googleapis.com/css?family=Bitter:400,700');
 
-* {
-  font-family: 'Bitter', serif;
+body {
+  font-family: "Bitter", serif !important;
+}
+
+.container {
+  margin: 30px 0px;
+}
+
+/* Header */
+
+.donation-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+.donation-header h1 { 
+  text-align: center;
+  font-weight: bold;
+}
+.donation-header h3 {
+  font-weight: bold;
+}
+.noisebridge_logo {
+  width: 120px;
+}
+
+/* Donation form */
+
+.donations .nav.nav-tabs {
+  margin-bottom: 10px;
+}
+
+.donation-form {
+  font-family: "Bitter", serif;
+}
+.donation-form .form-group.amount label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.donation-form .form-group.amount label span.powered_by_stripe {
+  display: inline-block;
+  background-image: image-url("powered_by_stripe.png");
+  background-size: 119px 26px;
+  height: 26px;
+  width: 119px;
+}
+.donation-form .form-group.cc-details {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+}
+.donation-form .form-group.cc-details input {
+  margin: 0px 5px;
+  width: 0%;
+  max-width: 50%;
+}
+.donation-form .form-group.cc-details input:first-child {
+  margin-left: 0px;
+}
+.donation-form .form-group.cc-details input:last-child {
+  margin-right: 0px;
+}
+.donation-form .form-group.cc-details input.cc-number {
+  flex-grow: 5;
+}
+.donation-form .form-group.cc-details input.cc-exp {
+  flex-grow: 2;
+}
+.donation-form .form-group.cc-details input.cc-cvc {
+  flex-grow: 1;
+}
+.donation-form .input-group.custom-amount {
+  margin-top: 10px;
+}
+.donation-form .bitcoin {
+  text-align: center;
+}
+.donation-form .bitcoin iframe {
+  width: 165px !important;
+  height: 48px !important;
+}
+
+.donation-progress h3 {
+  text-align: center;
+}
+
+.thanks {
+  text-align: center;
+}
+
+/* Footer */
+
+.footer {
+  text-align: center;
+}
+.footer p.meta {
+  color: #6F6F6F;
+}
+
+/* Narrow */
+@media only screen and (max-width: 480px) {
+  .container {
+    max-width: 400px;
+  }
+
+  .donation-header {
+    flex-direction: column;
+  }
+  .donation-header h1 { 
+    text-align: left;
+  }
+  .donation-header .noisebridge_logo {
+    width: 80px;
+  }
+}
+
+/* Medium */
+@media only screen and (min-width: 481px) and (max-width: 960px) {
+  .container {
+    max-width: 800px;
+  }
+
+  .donation-header {
+    flex-direction: column;
+  }
+  .donation-header .noisebridge_logo {
+    width: 100px;
+  }
+}
+
+.row:not(:first-child) {
+  margin-top: 25px;
 }
