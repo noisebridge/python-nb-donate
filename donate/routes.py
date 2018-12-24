@@ -61,15 +61,24 @@ def projects():
                             projects=FAKE_PROJECTS))
 
 
+# Delete this once the database is set up
+def find_project(project_name):
+    for project in FAKE_PROJECTS:
+        if project.name.lower().replace(" ","_") == project_name.lower():
+            return [project]
+    return []
+
+
 @project_page.route('/projects/<project_name>')
 def get_project(project_name):
-    project = db.session.query(Project).filter_by(name == project_name)
+    # project = db.session.query(Project).filter_by(name == project_name)
+    project = find_project(project_name)
     if len(project) == 0:
         redirect(url_for('new_project', project_name=project_name))
     if len(project) == 1:
         return (render_template('project.html',
                                 title=project_name,
-                                project=project))
+                                project=project[0]))
     if len(project) > 1:
         raise ValueError("shit we're fucked in projects m8y!")
 
