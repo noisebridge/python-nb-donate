@@ -1,28 +1,29 @@
 @import url('https://fonts.googleapis.com/css?family=Bitter:400,700');
 
+/* Global/body */
+
 body {
   font-family: "Bitter", serif !important;
+  margin: 0;
 }
 
 .container {
-  margin: 30px 0px;
+  margin: 10px;
 }
 
 /* Header */
 
-.donation-header {
+.donation-title > * {
+  margin: 20px;
+}
+.donation-title {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: space-around;
 }
-.donation-header h1 { 
-  text-align: center;
+.donation-title h1 { 
   font-weight: bold;
 }
-.donation-header h3 {
-  font-weight: bold;
-}
+
 .noisebridge_logo {
   width: 120px;
 }
@@ -33,9 +34,6 @@ body {
   margin-bottom: 10px;
 }
 
-.donation-form {
-  font-family: "Bitter", serif;
-}
 .donation-form .form-group.amount label {
   display: flex;
   justify-content: space-between;
@@ -43,7 +41,7 @@ body {
 }
 .donation-form .form-group.amount label span.powered_by_stripe {
   display: inline-block;
-  background-image: image-url("powered_by_stripe.png");
+  background-image: url("../images/powered_by_stripe.png");
   background-size: 119px 26px;
   height: 26px;
   width: 119px;
@@ -73,15 +71,15 @@ body {
 .donation-form .form-group.cc-details input.cc-cvc {
   flex-grow: 1;
 }
+
+.donation-form #donation-form-custom-amount {
+  display: none;
+}
 .donation-form .input-group.custom-amount {
   margin-top: 10px;
 }
 .donation-form .bitcoin {
   text-align: center;
-}
-.donation-form .bitcoin iframe {
-  width: 165px !important;
-  height: 48px !important;
 }
 
 .donation-progress h3 {
@@ -107,24 +105,28 @@ body {
     max-width: 400px;
   }
 
-  .donation-header {
+  .donation-title {
     flex-direction: column;
   }
-  .donation-header h1 { 
+  .donation-title h1 { 
     text-align: left;
   }
-  .donation-header .noisebridge_logo {
+  .donation-title .noisebridge_logo {
     width: 80px;
+  }
+
+  .footer {
+    text-align: left;
   }
 }
 
 /* Medium */
-@media only screen and (min-width: 481px) and (max-width: 960px) {
+@media only screen and (min-width: 481px) and (max-width: 800px) {
   .container {
-    max-width: 800px;
+    max-width: 600px;
   }
 
-  .donation-header {
+  .donation-title {
     flex-direction: column;
   }
   .donation-header .noisebridge_logo {
