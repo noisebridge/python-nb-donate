@@ -1,3 +1,4 @@
+import git
 from flask import (
     render_template,
     flash,
@@ -25,6 +26,7 @@ new_account_page = Blueprint(
     template_folder="templates")
 
 
+
 # this Project class and FAKE_PROJECTS can be deleted once we get the database working
 class Project:
     def __init__(self, name, amount, goal):
@@ -47,7 +49,10 @@ def index():
     data = {'title': "New Donate.  Like Old Donate.  Only New."}
     return render_template('base.html',
                            title="New Donate",
-                           data=data)
+                           data=data,
+                           git_sha=git.Repo(search_parent_directories=True).head.object.hexsha,
+                           repo_path="https://github.com/marcidy/nb_donate/commits/"
+                           )
 
 
 @projects_page.route('/projects')
