@@ -3,6 +3,25 @@ Donate
 
 A rewrite of Noisebridge's donation site in python using Flask.
 
+Quick Start
+-----------
+
+Reference: http://flask.pocoo.org/
+
+optional: do it in a virtualenv
+
+```pip install virtualenv
+virtualenv venv
+source venv/bin/activate```
+
+install requirements
+
+```pip install -r requirements.txt```
+
+run the app
+
+```FLASK_APP=autoapp.py flask run```
+
 Requirements
 ____________
 
