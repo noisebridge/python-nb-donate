@@ -21,7 +21,7 @@
           <h3>Make a donation</h3>
           <div class="alerts"></div>
      
-          <div role="tabanel" class="donations">
+          <div role="tabpanel" class="donations">
             <ul class="nav nav-tabs" role="tablist">
               <li role="presentation" class="active"><a href="#credit-card" aria-controls="credit-card" role="tab" data-toggle="tab">Credit Card</a></li>
               <li role="presentation"><a href="#bitcoin" aria-controls="bitcoin" role="tab" data-toggle="tab">Bitcoin</a></li>
@@ -29,79 +29,79 @@
           
             <div class="tab-content">
               <div role="tabpanel" class="tab-pane active" id="credit-card">
-                <form class="donation-form" action="/donations/charges" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="&#x2713;" /><input type="hidden" name="authenticity_token" value="CLEEjMbh7v+witbVpmWXmvuoJSONbouk98RovQWNwtNal/vRARndzw+Kl3WCyhZV26PWZNap2KWTgI5Zxf4yOA==" />
+                <form class="donation-form" action="/donations/charges" accept-charset="UTF-8" method="post">
+                  <input name="utf8" type="hidden" value="&#x2713;" />
+                  <input type="hidden" name="authenticity_token" value="CLEEjMbh7v+witbVpmWXmvuoJSONbouk98RovQWNwtNal/vRARndzw+Kl3WCyhZV26PWZNap2KWTgI5Zxf4yOA==" />
 
-            <!-- Donation amount -->
-            <div class="form-group amount">
-              <label for="charge[amount]">
-                Donation
-                <a href="https://stripe.com">
-                  <span class="powered_by_stripe"></span>
-                </a>
-              </label>
-
-              <select name="charge[amount]" id="charge_amount" class="form-control"><option value="10">$10</option>
-              <option value="20">$20</option>
-              <option value="40">$40</option>
-              <option value="80">$80</option>
-              <option value="160">$160</option>
-              <option value="other">Other</option></select>
-            </div>
+                  <!-- Donation amount -->
+                  <div class="form-group amount">
+                    <label for="charge[amount]">
+                      Donation
+                      <a href="https://stripe.com">
+                        <span class="powered_by_stripe"></span>
+                      </a>
+                    </label>
+                   
+                    <select name="charge[amount]" id="charge_amount" class="form-control">
+                      <option value="10">$10</option>
+                      <option value="20">$20</option>
+                      <option value="40">$40</option>
+                      <option value="80">$80</option>
+                      <option value="160">$160</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <!-- Credit card details -->
+                  <div class="form-group cc-details">
+                    <input type="text" class="form-control cc-number" size="20" data-stripe="number" inputmode="numeric" placeholder="Card number" />
+                    <input type="text" class="form-control cc-exp" data-stripe="exp" inputmode="numeric" placeholder="MM / YYYY">
+                    <input type="text" class="form-control cc-cvc" size="20" data-stripe="cvc" inputmode="numeric" placeholder="CVC" />
+                  </div>
+                  
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" name="charge[recurring]"> Recurring donation on a monthly basis
+                    </label>
+                  </div>
+                  
+                  <!-- Donor information -->
+                  <div class="form-group">
+                    <label for="donor[email]">Email</label>
+                    <input type="email" class="form-control" name="donor[email]" placeholder="edward.snowden@eff.org" %>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="donor[name]">Name</label>
+                    <input type="text" class="form-control" name="donor[name]" placeholder="Edward Snowden" %>
+                  </div>
+                  
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" name="donor[anonymous]"> I wish to be anonymous
+                    </label>
+                  </div>
+                  
+                  <div class="form-group">
+                    <button name="button" type="submit" class="btn btn-primary">Donate</button>
+                  </div>
           
-            <!-- Credit card details -->
-            <div class="form-group cc-details">
-              <input type="text" class="form-control cc-number" size="20" data-stripe="number" inputmode="numeric" placeholder="Card number" />
-              <input type="text" class="form-control cc-exp" data-stripe="exp" inputmode="numeric" placeholder="MM / YYYY">
-              <input type="text" class="form-control cc-cvc" size="20" data-stripe="cvc" inputmode="numeric" placeholder="CVC" />
-            </div>
-          
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" name="charge[recurring]"> Recurring donation on a monthly basis
-              </label>
-            </div>
-          
-            <!-- Donor information -->
-            <div class="form-group">
-              <label for="donor[email]">
-                Email
-              </label>
-              <input type="email" class="form-control" name="donor[email]" placeholder="edward.snowden@eff.org" %>
-            </div>
-          
-            <div class="form-group">
-              <label for="donor[name]">
-                Name
-              </label>
-              <input type="text" class="form-control" name="donor[name]" placeholder="Edward Snowden" %>
-            </div>
-          
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" name="donor[anonymous]"> I wish to be anonymous
-              </label>
-            </div>
-          
-            <div class="form-group">
-              <button name="button" type="submit" class="btn btn-primary">Donate</button>
-            </div>
-          
-          </form>
-          <script id="donation-form-custom-amount" type="text/html">
-            <div class="input-group custom-amount">
-              <span class="input-group-addon">$</span>
-              <input type="text" name="charge[amount]" class="form-control" inputmode="number" aria-label="Amount (to the nearest dollar)">
-              <span class="input-group-addon">.00</span>
-            </div>
-          </script>
-          
-          </div>
-          <div role="tabpanel" class="tab-pane" id="bitcoin">
-            <div class="bitcoin">
-              <p>Bitcoin Address: <a href="bitcoin:1NrbWrxkdPuyPfFtc1W4AKNtkQMyXwAAJV">1NrbWrxkdPuyPfFtc1W4AKNtkQMyXwAAJV</a></p>
-              <img src="/assets/bitcoin_address-78eb31026dd433ebb862d97e6f43065c8016019c126901160b29dae0d8b7aed1.png" alt="Bitcoin address" />
-            </div>
-          </div>
+                </form>
+                
+                <script id="donation-form-custom-amount" type="text/html">
+                  <div class="input-group custom-amount">
+                    <span class="input-group-addon">$</span>
+                    <input type="text" name="charge[amount]" class="form-control" inputmode="number" aria-label="Amount (to the nearest dollar)">
+                    <span class="input-group-addon">.00</span>
+                  </div>
+                </script>
+              </div>  
+              <div role="tabpanel" class="tab-pane" id="bitcoin">
+                <div class="bitcoin">
+                  <p>Bitcoin Address: <a href="bitcoin:1NrbWrxkdPuyPfFtc1W4AKNtkQMyXwAAJV">1NrbWrxkdPuyPfFtc1W4AKNtkQMyXwAAJV</a></p>
+                  <img src="../static/images/bitcoin_address.png" alt="Bitcoin address" />
+                </div>
+              </div>
         </div>
       </div>
     </div>
