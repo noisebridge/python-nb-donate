@@ -120,7 +120,7 @@
         <h3>Current projects</h3>
         <ol>
           {% for d in projects %}
-            <li>{{ "%s - $%d" % (d.name, d.amount) }}</li>
+            <li>{{ "%s - $%d of $%d" % (d.name, d.amount, d.goal) }}</li>
           {% endfor %}
         </ol>
       </div>

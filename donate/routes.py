@@ -43,7 +43,7 @@ FAKE_PROJECTS = [
     Project("laser", 2000, 5000),
     Project("Forever Home", 2000, 4000000),
     Project("printer", 150, 200),
-    Project("Fire Drill 2018", 200, None),
+    Project("Fire Drill 2018", 200, 20000),
     Project("Axidraw", 222, 200)
 ]
 FAKE_RECENT_DONATIONS = [
