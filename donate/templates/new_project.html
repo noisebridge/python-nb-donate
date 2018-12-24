@@ -1,0 +1,11 @@
+<div class="header">
+  <img src="/static/images/noisebridge_logo.jpg" alt="Noisebridge">
+  <h1>Noisebridge: a hackerspace needs your help!</h1>
+</div>
+
+<h2>New project {{project.name}}</h2>
+
+<form action="/new/project/{{project.name}}" method="POST">
+  <p>Goal (put 0 if you have no goal)<input type="number" step="1" name="goal" /></p>
+  <p><input type="submit" value="submit" /></p>
+</form>

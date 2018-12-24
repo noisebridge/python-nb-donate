@@ -25,14 +25,19 @@ new_account_page = Blueprint(
     __name__,
     template_folder="templates")
 
-
-
-# this Project class and FAKE_PROJECTS can be deleted once we get the database working
+# this Project class and fake_projects can be deleted once we get the database working
 class Project:
     def __init__(self, name, amount, goal):
         self.name = name
         self.amount = amount
         self.goal = goal
+        self.ccy = "USD"
+
+class Donation:
+    def __init__(self, name, amount, project=None):
+        self.name = name
+        self.amount = amount
+        self.project = project
 
 FAKE_PROJECTS = [
     Project("laser", 2000, 5000),
@@ -41,7 +46,12 @@ FAKE_PROJECTS = [
     Project("Fire Drill 2018", 200, None),
     Project("Axidraw", 222, 200)
 ]
-
+FAKE_RECENT_DONATIONS = [
+    Donation("Brad Pitt", 4, None),
+    Donation("Matthew Arcidy", 3, "Club Mate"),
+    Donation("Angelina Jolie", 4, "Whatever"),
+    Donation("Bill Gates", 5, "Club Mate")
+]
 
 @home_page.route('/')
 @home_page.route('/index')
@@ -51,7 +61,9 @@ def index():
                            title="New Donate",
                            data=data,
                            git_sha=git.Repo(search_parent_directories=True).head.object.hexsha,
-                           repo_path="https://github.com/marcidy/nb_donate/commits/"
+                           repo_path="https://github.com/marcidy/nb_donate/commits/",
+                           projects=FAKE_PROJECTS,
+                           recent_donations=FAKE_RECENT_DONATIONS
                            )
 
 
@@ -79,7 +91,7 @@ def get_project(project_name):
     # project = db.session.query(Project).filter_by(name == project_name)
     project = find_project(project_name)
     if len(project) == 0:
-        redirect(url_for('new_project', project_name=project_name))
+        return new_project(project_name)
     if len(project) == 1:
         return (render_template('project.html',
                                 title=project_name,
@@ -88,13 +100,21 @@ def get_project(project_name):
         raise ValueError("shit we're fucked in projects m8y!")
 
 
-@new_project_page.route('/new/project/<project_name>')
-def new_project(project_name, methods=['GET', 'POST']):
+@new_project_page.route('/new/project/<project_name>', methods=['GET', 'POST'])
+def new_project(project_name):
+    project = Project(project_name, 0, None)
     name = project_name
     if request.method == "POST":
         goal = request.form['goal']
-        ccy = request.form['ccy']
-    pass
+        project.goal = goal
+        # TODO: send the new project to the database
+        return (render_template('new_project_created.html',
+                                title=project_name,
+                                project=project))
+    else:
+        return (render_template('new_project.html',
+                                title=project_name,
+                                project=project))
 
 
 @new_account_page.route('/new/account')
