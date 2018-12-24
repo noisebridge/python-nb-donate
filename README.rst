@@ -1,4 +1,4 @@
-Donate
+Donate [![Build Status](https://travis-ci.org/marcidy/nb_donate.svg?branch=master)](https://travis-ci.org/marcidy/nb_donate)
 ======
 
 A rewrite of Noisebridge's donation site in python using Flask.
