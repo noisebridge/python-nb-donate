@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block content %}
+    
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2 donation-header">
+        <a href="https://donate.noisebridge.net/">
+          <img class="center noisebridge_logo" src="../static/noisebridge_logo.jpg" alt="Noisebridge logo" />
+</a>    <h3>Donate Now! Keep Noisebridge Hackerspace Alive in San Francisco!!</h3>
+    <p>Our lease, at 2169 Mission Street, is up in August and the landlord has told us that it won't be renewed. That throws us into a crunch to find and fund a new space, and move all of our blinky stuff and well-loved tools before August. We're raising money to fill a war-chest to allow us to afford our new space and cover expenses.</p>
+    <p>Since we last moved, rents for our type of space have almost tripled.  We're looking at several options for an accessible, industrial space close to public transit, but it's clear that whichever we choose, we're going to have to deal with a significant rent increase. </p>
+    <p>Any donations to Noisebridge are tax deductible as we are a 501(c)(3). Please consider signing up for a monthly donation, reoccuring revenue is the best way to keep us afloat. </p>
+    <p>PS. If you have a lead on a cheap industrial space near transit, please let us know ( secretary@noisebridge.net ). Also, if you, or an organization you are a part of would like to discuss a larger donation or loan that could help us buy a building and ensure a permanent home for Noisebridge, please get in contact!</p>
+  </div>
+  <div class="col-md-10 col-md-offset-1">
+    <div class="col-md-4 col-md-offset-2 donation-form">
+      <h3>Make a donation</h3>
+
+<div class="alerts">
+</div>
+
+<script type="text/html" id="notice-template">
+  <div class="alert alert-{{type}}" role="alert">
+    {{ content }}
+  </div>
+</script>
+
+
+<div role="tabanel" class="donations">
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#credit-card" aria-controls="credit-card" role="tab" data-toggle="tab">Credit Card</a></li>
+    <li role="presentation"><a href="#bitcoin" aria-controls="bitcoin" role="tab" data-toggle="tab">Bitcoin</a></li>
+  </ul>
+
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="credit-card">
+      <form class="donation-form" action="/donations/charges" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="&#x2713;" /><input type="hidden" name="authenticity_token" value="CLEEjMbh7v+witbVpmWXmvuoJSONbouk98RovQWNwtNal/vRARndzw+Kl3WCyhZV26PWZNap2KWTgI5Zxf4yOA==" />
+  <!-- Donation amount -->
+  <div class="form-group amount">
+    <label for="charge[amount]">
+      Donation
+
+      <a href="https://stripe.com">
+        <span class="powered_by_stripe"></span>
+</a>    </label>
+    <select name="charge[amount]" id="charge_amount" class="form-control"><option value="10">$10</option>
+<option value="20">$20</option>
+<option value="40">$40</option>
+<option value="80">$80</option>
+<option value="160">$160</option>
+<option value="other">Other</option></select>
+  </div>
+
+  <!-- Credit card details -->
+  <div class="form-group cc-details">
+    <input type="text" class="form-control cc-number" size="20" data-stripe="number" inputmode="numeric" placeholder="Card number" />
+    <input type="text" class="form-control cc-exp" data-stripe="exp" inputmode="numeric" placeholder="MM / YYYY">
+    <input type="text" class="form-control cc-cvc" size="20" data-stripe="cvc" inputmode="numeric" placeholder="CVC" />
+  </div>
+
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" name="charge[recurring]"> Recurring donation on a monthly basis
+      </label>
+    </div>
+
+  <!-- Donor information -->
+  <div class="form-group">
+    <label for="donor[email]">
+      Email
+    </label>
+    <input type="email" class="form-control" name="donor[email]" placeholder="edward.snowden@eff.org" %>
+  </div>
+
+  <div class="form-group">
+    <label for="donor[name]">
+      Name
+    </label>
+    <input type="text" class="form-control" name="donor[name]" placeholder="Edward Snowden" %>
+  </div>
+
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="donor[anonymous]"> I wish to be anonymous
+    </label>
+  </div>
+
+
+  <div class="form-group">
+    <button name="button" type="submit" class="btn btn-primary">Donate</button>
+  </div>
+
+</form>
+<script id="donation-form-custom-amount" type="text/html">
+  <div class="input-group custom-amount">
+    <span class="input-group-addon">$</span>
+    <input type="text" name="charge[amount]" class="form-control" inputmode="number" aria-label="Amount (to the nearest dollar)">
+    <span class="input-group-addon">.00</span>
+  </div>
+</script>
+
+    </div>
+    <div role="tabpanel" class="tab-pane" id="bitcoin">
+      <div class="bitcoin">
+  <p>Bitcoin Address: <a href="bitcoin:1NrbWrxkdPuyPfFtc1W4AKNtkQMyXwAAJV">1NrbWrxkdPuyPfFtc1W4AKNtkQMyXwAAJV</a></p>
+  <img src="/assets/bitcoin_address-78eb31026dd433ebb862d97e6f43065c8016019c126901160b29dae0d8b7aed1.png" alt="Bitcoin address" />
+</div>
+
+    </div>
+  </div>
+</div>
+
+    </div>
+
+    <div class="col-md-4 clo-md-offset-2 summary">
+      <div class="table-container">
+        <h3>Recent donations</h3>
+<ol>
+        <li>💩 - $4</li>
+        <li>Matthew Arcidy - $10 towards Club Mate</li>
+        <li>💩 - $1</li>
+        <li>Noël Flantier - $3 towards Snacks</li>
+        <li>💩 - $5</li>
+</ol>
+
+      </div>
+
+      <div class="table-container">
+        <h3>Current projects</h3>
+<ol>
+      <li>Dcddv - $60</li>
+      <li>Beer - $9</li>
+      <li>2018 Fire Drill - $60</li>
+      <li>Paint - $80</li>
+      <li>Golden Monkey - $3</li>
+      <li>Axidraw - $222</li>
+      <li>Thomas J Shutt Memorial Foundation - $1,966</li>
+      <li>Printer - $240</li>
+      <li>Prusa I3 - $20</li>
+      <li>Facebook - $10</li>
+      <li>Smd Rework - $40</li>
+      <li>Sawstop - $310</li>
+      <li>Lockers - $20</li>
+      <li>Laserbridge - $205</li>
+      <li>Keys - $20</li>
+      <li>Stickers - $55</li>
+      <li>2018 Fire Drill - $520</li>
+      <li>Dranks - $21</li>
+      <li>Tours - $1,000</li>
+      <li>Gnar - $65</li>
+      <li>Pretzel Failure - $40</li>
+      <li>Guidelaser - $100</li>
+      <li>Gamebridge - $10</li>
+      <li>Curtains - $110</li>
+      <li>Forever Home 8 Elp5f7 G59 - $7</li>
+      <li>Laser - $3,966</li>
+      <li>Nbsp - $853</li>
+      <li>Forever Home T8d K Tgrb2p - $25</li>
+      <li>Snacks - $606</li>
+      <li>Stupid - $577</li>
+      <li>Sewing - $355</li>
+      <li>Club Mate - $998</li>
+      <li>Vr - $50</li>
+      <li>Bug Zapper - $10</li>
+      <li>20cm3dprinter - $366</li>
+      <li>Forever Home 4c1de0k Ivi - $10</li>
+      <li>Electronics Art Supplies - $10</li>
+      <li>Givingtuesday2018 - $110</li>
+      <li>Dranks - $6</li>
+      <li>Spec - $40</li>
+      <li>Ember - $40</li>
+</ol>
+
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
