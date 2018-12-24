@@ -10,17 +10,15 @@ Reference: http://flask.pocoo.org/
 
 optional: do it in a virtualenv
 
-```pip install virtualenv
-virtualenv venv
-source venv/bin/activate```
+``pip install virtualenv; virtualenv venv; source venv/bin/activate``
 
 install requirements
 
-```pip install -r requirements.txt```
+``pip install -r requirements.txt``
 
 run the app
 
-```FLASK_APP=autoapp.py flask run```
+``FLASK_APP=autoapp.py flask run``
 
 Requirements
 ____________
