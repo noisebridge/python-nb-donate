@@ -18,7 +18,7 @@ def create_app(config_object=ProdConfig):
     ''' Create the Flas application.  By default this will load the
     production config. '''
 
-    app = Flask(__name__.split('.')[0])
+    app = Flask(__name__.split('.')[0], static_url_path='/static')
     app.url_map.strict_slashes = False
     app.config.from_object(config_object)
 

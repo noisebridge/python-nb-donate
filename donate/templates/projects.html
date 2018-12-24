@@ -1,0 +1,17 @@
+<div class="header">
+  <img src="/static/images/noisebridge_logo.jpg" alt="Noisebridge">
+  <h1>Noisebridge: a hackerspace needs your help!</h1>
+</div>
+
+<table>
+  <tr>
+    <th>Project</th>
+    <th>Amount</th>
+  </tr>
+{% for project in projects %}
+<tr>
+  <td><a href="/projects/{{project.name}}">{{project.name}}</a></td>
+  <td>{{project.amount}}</td>
+</tr>
+{% endfor %}
+</table>
