@@ -36,7 +36,7 @@ jQuery(function ($) {
 
   // Allow for custom amounts when "Other" selected in donation amount dropdown
   $("form.donation-form select").on("change", function (e) {
-    if ($(e.target).val() == "other") {
+    if ($(e.target).val() === "other") {
       $("form.donation-form .form-group.amount")
         .append($("#donation-form-custom-amount").html())
     }
