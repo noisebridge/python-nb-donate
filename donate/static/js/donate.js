@@ -21,6 +21,7 @@ jQuery(function ($) {
       exp_month: $form.find(".cc-exp"),
       exp_year: $form.find(".cc-exp")
     }, function (status, response) {
+    console.log(status,response)
       if (response.error) {
         displayError($form, response.error);
         $form.find("button").prop("disabled", false);
@@ -36,11 +37,17 @@ jQuery(function ($) {
 
   // Allow for custom amounts when "Other" selected in donation amount dropdown
   $("form.donation-form select").on("change", function (e) {
-    if ($(e.target).val() === "other") {
+    if ($(this).val() === "other") {
       $("form.donation-form #donation-form-custom-amount").show();
     }
     else {
       $("form.donation-form #donation-form-custom-amount").hide();
     }
+  });
+
+  // Enable/disable name input when anonymous option is ticked
+  $("#donation-form-anonymous").on("change", function (e) {
+    $("#donation-form-name").prop("disabled", $(this).prop("checked"));
+    $("#donation-form-name").prop("required", $(this).prop("checked"));
   });
 });

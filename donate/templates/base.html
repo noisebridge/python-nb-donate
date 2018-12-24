@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>{% block title %}Donate{% endblock title %}</title>
     {% block head_favicon %}
@@ -7,18 +7,19 @@
     {% endblock head_favicon %}
     {% block head_meta %}
       {% block head_meta_charset %}
-        <meta http-equic="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
       {% endblock head_meta_charset %}
-      {% block head_meta_contentlanguage %}
-        <meta http-equiv="Content-Language" value="en-US" />
-      {% endblock head_meta_contentlanguage %}
       {% block head_meta_viewport %}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
       {% endblock head_meta_viewport %}
     {% endblock head_meta %}
     {% block head_css %}
+      {% block head_css_lib %}
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" 
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"
+        >
+      {% endblock head_css_lib %}
       {% block head_css_site %}
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <link href="static/css/donate.css" rel="stylesheet" media="screen">
       {% endblock head_css_site %}
       {% block head_css_section %}{% endblock head_css_section %}
@@ -27,24 +28,31 @@
   </head>
   <body>
 
-    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="content">
+    {% block content %}{% endblock %}
 
     {% block footer %}
+      <!-- Footer -->
       <div class="container footer">
         <div class="row">
           <div class="col-md-8 col-md-offset-3">
             <p>
-              <a href="https://donate.noisebridge.net/">donate.noisebridge.net</a> is released under the terms of the <a href="https://gnu.org/licenses/agpl.html">AGPL V3</a>
+              <a href="https://donate.noisebridge.net/">donate.noisebridge.net</a> 
+              is released under the terms of the <a href="https://gnu.org/licenses/agpl.html">AGPL V3</a>
             </p>
             <p class="meta">running: <a href="{{ repo_path }}{{ git_sha }}">{{ git_sha }}</a></p>
           </div>
         </div>
       </div>
     {% endblock footer %}
+    </div> <!-- end content -->
 
+    <!-- External scripts -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="https://js.stripe.com/v2/"></script>
+
+    <!-- Internal scripts -->
     <script src="../static/js/donate.js"></script>
 
   </body>
