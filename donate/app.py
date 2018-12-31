@@ -15,7 +15,7 @@ from donate import routes
 
 
 def create_app(config_object=ProdConfig):
-    ''' Create the Flas application.  By default this will load the
+    ''' Create the Flask application. By default this will load the
     production config. '''
 
     app = Flask(__name__.split('.')[0], static_url_path='/static')
@@ -39,6 +39,7 @@ def register_blueprints(app):
     app.register_blueprint(routes.project_page)
     app.register_blueprint(routes.projects_page)
     app.register_blueprint(routes.new_project_page)
+    app.register_blueprint(routes.thanks_page)
 
 
 def register_shellcontext(app):
