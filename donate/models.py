@@ -42,7 +42,10 @@ class User(db.Model):
                       unique=True,
                       nullable=False)
     name_first = db.Column(db.String(80))
-    name_last = db.Column(db.String(8))
+    name_last = db.Column(db.String(80))
+
+    donations = db.relationship('StripeDonation')
+    subscriptions = db.relationship('StripeSubscription')
 
     @classmethod
     def __declare_last__(cls):
@@ -52,6 +55,82 @@ class User(db.Model):
                        False,
                        True,
                        "not a valid email address")
+
+
+class Currency(db.Model, TimestampMixin):
+    ''' Currency (numeriere) of the amount. '''
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    name = db.Column(db.String(120),
+                     unique=True,
+                     nullable=False)
+    code = db.Column(db.String(3),
+                     unique=True,
+                     nullable=False)
+
+    @classmethod
+    def __declare_last__(cls):
+        ValidateString(Currency.name, False, True)
+        ValidateString(Currency.code, False, True)
+
+
+class Account(db.Model, TimestampMixin):
+    ''' Accounts aggregate transactions.  They are associated with one and
+    only one currenct.  An account can increase or decrease based on the
+    sum of the transactions.
+
+    id:         unique Id
+    name:       name or nmenonic of account
+    ccy_id:     account denomination e.g. USD or BTC.
+    '''
+
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    name = db.Column(db.String(120),
+                     unique=True,
+                     nullable=False)
+    ccy_id = db.Column(db.Integer,
+                       db.ForeignKey('currency.id'))
+
+    ccy = db.relationship('Currency')
+
+    @classmethod
+    def __declare_last__(cls):
+        ValidateString(Account.name, False, True)
+        ValidateInteger(Account.ccy_id, False, True)
+
+
+class Project(db.Model, TimestampMixin):
+    ''' A project has a specific goal, e.g. amount to be reached. It is
+    linked to an account which provides information about how much has been
+    donated towards the goal.
+
+    id:         Unique ID
+    name:       Project name
+    account_id: Accunt linked to project (might need multiple for multiple ccys
+    goal:       Amount required to read the goal of the project.
+    (prob need ccy)
+    '''
+
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    name = db.Column(db.String(120),
+                     unique=True,
+                     nullable=False)
+    account_id = db.Column(db.Integer,
+                           db.ForeignKey('account.id'),
+                           nullable=False)
+    goal = db.Column(db.Float,
+                     nullable=False,
+                     default=0)
+
+    accounts = db.relationship('Account')
+
+    @classmethod
+    def __declare_last__(cls):
+        ValidateString(Project.name, False, True)
+        ValidateInteger(Project.account_id, False, True)
+        ValidateNumeric(Project.goal, False, True)
 
 
 class StripeDonation(db.Model, TimestampMixin):
@@ -141,82 +220,6 @@ class Transaction(db.Model, TimestampMixin):
         ValidateInteger(Transaction.approver_id, False, True)
 
 
-class Account(db.Model, TimestampMixin):
-    ''' Accounts aggregate transactions.  They are associated with one and
-    only one currenct.  An account can increase or decrease based on the
-    sum of the transactions.
-
-    id:         unique Id
-    name:       name or nmenonic of account
-    ccy_id:     account denomination e.g. USD or BTC.
-    '''
-
-    id = db.Column(db.Integer,
-                   primary_key=True)
-    name = db.Column(db.String(120),
-                     unique=True,
-                     nullable=False)
-    ccy_id = db.Column(db.Integer,
-                       db.ForeignKey('currency.id'))
-
-    ccy = db.relationship('Currency')
-
-    @classmethod
-    def __declare_last__(cls):
-        ValidateString(Account.name, False, True)
-        ValidateInteger(Account.ccy_id, False, True)
-
-
-class Project(db.Model, TimestampMixin):
-    ''' A project has a specific goal, e.g. amount to be reached. It is
-    linked to an account which provides information about how much has been
-    donated towards the goal.
-
-    id:         Unique ID
-    name:       Project name
-    account_id: Accunt linked to project (might need multiple for multiple ccys
-    goal:       Amount required to read the goal of the project.
-    (prob need ccy)
-    '''
-
-    id = db.Column(db.Integer,
-                   primary_key=True)
-    name = db.Column(db.String(120),
-                     unique=True,
-                     nullable=False)
-    account_id = db.Column(db.Integer,
-                           db.ForeignKey('account.id'),
-                           nullable=False)
-    goal = db.Column(db.Float,
-                     nullable=False,
-                     default=0)
-
-    accounts = db.relationship('Account')
-
-    @classmethod
-    def __declare_last__(cls):
-        ValidateString(Project.name, False, True)
-        ValidateInteger(Project.account_id, False, True)
-        ValidateNumeric(Project.goal, False, True)
-
-
-class Currency(db.Model, TimestampMixin):
-    ''' Currency (numeriere) of the amount. '''
-    id = db.Column(db.Integer,
-                   primary_key=True)
-    name = db.Column(db.String(120),
-                     unique=True,
-                     nullable=False)
-    code = db.Column(db.String(3),
-                     unique=True,
-                     nullable=False)
-
-    @classmethod
-    def __declare_last__(cls):
-        ValidateString(Currency.name, False, True)
-        ValidateString(Currency.code, False, True)
-
-
 class StripeSubscription(db.Model, TimestampMixin):
     ''' A stripe Subscription contains a Stripe Plan to which a user subscribes
     and generates transactions against.'''
@@ -259,6 +262,7 @@ class StripePlan(db.Model):
                         nullable=False)
 
     acct = db.relationship('Account')
+    subscriptions = db.relationship('StripeSubscription')
 
     @classmethod
     def __declare_last__(cls):
