@@ -102,6 +102,7 @@ class Project(db.Model, TimestampMixin):
 
     id:         Unique ID
     name:       Project name
+    desc:       Project description
     account_id: Accunt linked to project (might need multiple for multiple ccys
     goal:       Amount required to read the goal of the project.
     (prob need ccy)
@@ -112,6 +113,7 @@ class Project(db.Model, TimestampMixin):
     name = db.Column(db.String(120),
                      unique=True,
                      nullable=False)
+    desc = db.Column(db.String(160))
     account_id = db.Column(db.Integer,
                            db.ForeignKey('account.id'),
                            nullable=False)

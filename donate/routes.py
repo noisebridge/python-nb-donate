@@ -103,27 +103,17 @@ def thanks():
 
 @projects_page.route('/projects')
 def projects():
-    # projects = db.session.query(Project)
-    # return (render_template('projects.html',
-    #                         title='Projects',
-    #                         projects=projects))
-    return (render_template('projects.html',
-                            title='Projects',
-                            projects=FAKE_PROJECTS))
+    projects = sorted(db.sesion.query(Project).all(),
+                      key=lambda proj: proj.name)
 
-
-# Delete this once the database is set up
-def find_project(project_name):
-    for project in FAKE_PROJECTS:
-        if project.name.lower().replace(" ", "_") == project_name.lower():
-            return [project]
-    return []
+    return render_template('projects.html',
+                           title='Projects',
+                           projects=sorted_projects)
 
 
 @project_page.route('/projects/<project_name>')
 def get_project(project_name):
-    # project = db.session.query(Project).filter_by(name == project_name)
-    project = find_project(project_name)
+    project = db.session.query(Project).filter_by(name == project_name)
     if len(project) == 0:
         return new_project(project_name)
     if len(project) == 1:
@@ -136,11 +126,23 @@ def get_project(project_name):
 
 @new_project_page.route('/new/project/<project_name>', methods=['GET', 'POST'])
 def new_project(project_name):
-    project = Project(project_name, 0, None)
-    name = project_name
     if request.method == "POST":
         goal = request.form['goal']
-        project.goal = goal
+        ccy_code = request.form['ccy']
+        desc = request.form['desc']
+
+        acct = Account(name="{}_{}_acct".format(project_name, ccy_code),
+                       ccy=db.session.query('Currency').
+                       filter(code=ccy_code).one())
+
+        project = Project(name=project_name,
+                          desc=desc,
+                          goal=goal,
+                          accounts=[acct])
+
+        db.session.add(project)
+        db.session.commit()
+
         # TODO: send the new project to the database
         return (render_template('new_project_created.html',
                                 title=project_name,
