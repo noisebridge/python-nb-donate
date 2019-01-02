@@ -30,9 +30,11 @@ repo_path = "https://github.com/marcidy/nb_donate/commits/"
 
 
 '''
-Project/Donation classes and FAKE_ data can be 
+Project/Donation classes and FAKE_ data can be
 deleted once we get the database working
 '''
+
+
 class Project:
     def __init__(self, name, amount, goal):
         self.name = name
@@ -40,11 +42,13 @@ class Project:
         self.goal = goal
         self.ccy = "USD"
 
+
 class Donation:
     def __init__(self, name, amount, project=None):
         self.name = name
         self.amount = amount
         self.project = project
+
 
 FAKE_PROJECTS = [
     Project("laser", 2000, 5000),
@@ -74,12 +78,17 @@ end fake data
 @home_page.route('/')
 @home_page.route('/index')
 def index():
+    projects = sorted(db.sesion.query(Project).all(),
+                      key=lambda proj: proj.name)
+
+    donations = db.session.query(Donation).limit(10)
+
     return render_template('main.html',
                            data={
                                'git_sha': git_sha,
                                'repo_path': repo_path,
-                               'recent_donations': FAKE_RECENT_DONATIONS,
-                               'projects': FAKE_PROJECTS
+                               'recent_donations': donations,
+                               'projects': sorted_projects
                            })
 
 
@@ -106,7 +115,7 @@ def projects():
 # Delete this once the database is set up
 def find_project(project_name):
     for project in FAKE_PROJECTS:
-        if project.name.lower().replace(" ","_") == project_name.lower():
+        if project.name.lower().replace(" ", "_") == project_name.lower():
             return [project]
     return []
 

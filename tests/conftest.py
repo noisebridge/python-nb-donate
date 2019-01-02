@@ -60,19 +60,15 @@ def model_objects():
     objects = {
         'u1': User(id=1,
                    username="Matt",
-                   slack="rando",
                    email="test@gmail.com"),
         'u2': User(id=2,
                    username="Melissa",
-                   slack="tperson",
                    email="tp@gmail.com"),
         'u3': User(id=3,
                    username="Miley",
-                   slack="aperson",
                    email="ap@gmail.com"),
         'u4': User(id=4,
                    username="Martha",
-                   slack="peeples",
                    email="apeep@gmail.com"),
         'usd': Currency(id=1, code="USD", name="US Dollar"),
         'btc': Currency(id=2, code="BTC", name="Bitcoin"),
@@ -110,13 +106,13 @@ def data_dict_builder(data):
 def user_data():
 
     label = 'user'
-    keys = ["username", "slack", "email"]
+    keys = ["username", "email"]
     user_data = [
-        ("name1", "slack1", "email@domain.tld"),
-        (None, "slack", "email@domain.tld"),
-        ("name1", None, "email@domain.tld"),
-        ("name1", "slack1", None),
-        ("name1", "slack1", "email@domain.tld")
+        ("name1", "email@domain.tld"),
+        (None, "email@domain.tld"),
+        ("name1", "email@domain.tld"),
+        ("name1", None),
+        ("name1", "email@domain.tld")
     ]
 
     return data_dict_builder({'label': label,
@@ -199,12 +195,16 @@ def stripe_subscription_data():
 def stripe_donation_data():
 
     label = "stripe_donation"
-    keys = ['anonymous', 'card', 'stripe_id', 'token', 'user', 'txs']
+    keys = ['anonymous', 'type', 'card', 'stripe_id',
+            'token', 'user_id', 'txs', 'amount']
 
     obj_data = [
-        (True, "1234-5678-9101", 1, uuid.uuid1().hex, "Billy", 2),
-        (False, "0987-6543-2112", 2, uuid.uuid1().hex, "Rachel", 5),
-        (False, "8888-9999-1111-2222", 6, uuid.uuid1().hex, "Sven", 1000), # NOQA
+        (True, 'stripe_donation', "1234-5678-9101", 1,
+         uuid.uuid1().hex, 1, 2, 2000),
+        (False, 'stripe_donation', "0987-6543-2112", 2,
+         uuid.uuid1().hex, 2, 5, 1000000),
+        (False, 'stripe_donation', "8888-9999-1111-2222", 6,
+         uuid.uuid1().hex, 3, 1000, 1.50), # NOQA
     ]
 
     return data_dict_builder({"label": label,

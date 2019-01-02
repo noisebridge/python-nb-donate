@@ -52,13 +52,11 @@ def test_bad_formed_ccy():
 
 def test_new_user():
     uname = "rando"
-    slname = "test"
     em = "test@gmail.com"
 
-    user = User(username=uname, slack=slname, email=em)
+    user = User(username=uname, email=em)
 
     assert user.username == uname
-    assert user.slack == slname
     assert user.email == em
 
 
@@ -66,11 +64,9 @@ def test_new_user():
 def test_insert_user():
 
     uname = 'rando'
-    slname = 'test'
     em = 'test@gmail.com'
 
     user = User(username=uname,
-                slack=slname,
                 email=em)
 
     db.session.add(user)
@@ -79,26 +75,19 @@ def test_insert_user():
     retrieved_user = db.session.query(User).one()
 
     assert user.username == retrieved_user.username
-    assert user.slack == retrieved_user.slack
     assert user.email == retrieved_user.email
 
 
 def test_bad_formed_user():
 
     with pytest.raises(ValidateError):
-        u = User(username=123, slack="test", email="test@test.com")
+        u = User(username=123, email="test@test.com")
 
     with pytest.raises(ValidateError):
-        u = User(username="testname", slack=1234, email="test@test.com")
+        u = User(username=None, email="test@test.com")
 
     with pytest.raises(ValidateError):
-        u = User(username=None, slack="test", email="test@test.com")
-
-    with pytest.raises(ValidateError):
-        u = User(username="testname", slack=None, email="test@test.com")
-
-    with pytest.raises(ValidateError):
-        u = User(username="testname", slack="test", email=None)
+        u = User(username="testname", email=None)
 
 
 @pytest.mark.usefixtures('db')

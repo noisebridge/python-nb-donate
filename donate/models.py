@@ -26,7 +26,6 @@ class User(db.Model):
 
     id:         unique ID of the user, e.g. primary key
     username:   name internal to the system
-    slack:      slack handle
     email:      email address of user
     '''
 
@@ -35,22 +34,18 @@ class User(db.Model):
     username = db.Column(db.String(80),
                          unique=True,
                          nullable=False)
-    slack = db.Column(db.String(80),
-                      unique=True,
-                      nullable=False)
     email = db.Column(db.String(80),
                       unique=True,
                       nullable=False)
     name_first = db.Column(db.String(80))
     name_last = db.Column(db.String(80))
 
-    donations = db.relationship('StripeDonation')
+    donations = db.relationship('Donation')
     subscriptions = db.relationship('StripeSubscription')
 
     @classmethod
     def __declare_last__(cls):
         ValidateString(User.username, False, True)
-        ValidateString(User.slack, False, True)
         ValidateString(User.email,
                        False,
                        True,
@@ -133,7 +128,33 @@ class Project(db.Model, TimestampMixin):
         ValidateNumeric(Project.goal, False, True)
 
 
-class StripeDonation(db.Model, TimestampMixin):
+class Donation(db.Model, TimestampMixin):
+    ''' An amount of currency donated by a user, possibly anonymous.
+    id:         unique ID of domnation
+    type:       Type of donation
+    amount:     Quantity of numeraire donated
+    anonymous:  flag to retain anonyminity
+    user:       user who donated
+    ccy_id:     id of currency
+    '''
+
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(50))
+    amount = db.Column(db.Float, nullable=False)
+    anonymous = db.Column(db.Boolean, nullable=False, default=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
+
+    ccy = db.relationship('Currency')
+    user = db.relationship('User')
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'donation',
+        'polymorphic_on': type
+    }
+
+
+class StripeDonation(Donation, TimestampMixin):
     ''' A stripe donation is made by a user and generates a transaction between
     the outside world and Noisebridge.  there is no direct account linked to a
     donation, it encapsulates the payment method and person. All financial data
@@ -144,10 +165,8 @@ class StripeDonation(db.Model, TimestampMixin):
     __tablename__ = 'stripe_donation'
 
     id = db.Column(db.Integer,
+                   db.ForeignKey('donation.id'),
                    primary_key=True)
-    anonymous = db.Column(db.Boolean,
-                          nullable=False,
-                          default=False)
     card = db.Column(db.String,
                      nullable=False)
     stripe_id = db.Column(db.String,
@@ -156,10 +175,12 @@ class StripeDonation(db.Model, TimestampMixin):
     token = db.Column(db.String(80),
                       nullable=False,
                       default=False)
-    user = db.Column(db.Integer,
-                     db.ForeignKey('user.id'))
     txs = db.Column(db.Integer,
                     db.ForeignKey('transaction.id'))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'stripe_donation'
+    }
 
 
 class Transaction(db.Model, TimestampMixin):
