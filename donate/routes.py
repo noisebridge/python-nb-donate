@@ -78,7 +78,7 @@ end fake data
 @home_page.route('/')
 @home_page.route('/index')
 def index():
-    projects = sorted(db.sesion.query(Project).all(),
+    projects = sorted(db.session.query(Project).all(),
                       key=lambda proj: proj.name)
 
     donations = db.session.query(Donation).limit(10)
@@ -103,7 +103,7 @@ def thanks():
 
 @projects_page.route('/projects')
 def projects():
-    projects = sorted(db.sesion.query(Project).all(),
+    projects = sorted(db.session.query(Project).all(),
                       key=lambda proj: proj.name)
 
     return render_template('projects.html',
