@@ -1,0 +1,83 @@
+{
+    "Currency": [
+        {
+            "code": "USD",
+            "name": "US Dollar"
+        },
+        {
+            "code": "BTC",
+            "name": "Bitcoin"
+        }
+    ],
+    "User": [
+        {
+            "username": "amber",
+            "email": "aheard@gmail.com",
+            "name_first": "Amber",
+            "name_last": "Heard"
+        },
+        {
+            "username": "bob",
+            "email": "bobthebuilder@gmail.com",
+            "name_first": "Bob",
+            "name_last": "The Builder"
+        },
+        {
+            "username": "<h1>hi</h1>",
+            "email": ";select * from tables;@gmail.com",
+            "name_first": "<b>billy</b>",
+            "name_last": "******"
+        },
+        {
+            "username": "Collette",
+            "email": "c.testcase@somewhere.com",
+            "name_first": "Amber",
+            "name_last": "Heard"
+        },
+        {
+            "username": "dday",
+            "email": "ddaylewis@gmail.com",
+            "name_first": "Daniel",
+            "name_last": "Day Lewis"
+        }
+    ],
+    "Account": [
+        {
+            "name": "Laser"
+        },
+        {
+            "name": "General Fund"
+        },
+        {
+            "name": "Sewing"
+        },
+        {
+            "name": "Electronics"
+        },
+        {
+            "name": "Snacks"
+        }
+    ],
+    "Project": [
+        {
+            "name": "Sawstop",
+            "desc": "Purchase a sawstop",
+            "goal": 1600
+        },
+        {
+            "name": "Forever Home",
+            "desc": "Purchase a building",
+            "goal": 4000000
+        },
+        {
+            "name": "Hackerstacks",
+            "desc": "Let Hackers sleep which is a bad idea",
+            "goal": 0
+        },
+        {
+            "name": "Fix Vending Machine",
+            "desc": "Fix the fucking vending machine",
+            "goal": 1000
+        }
+    ]
+}
