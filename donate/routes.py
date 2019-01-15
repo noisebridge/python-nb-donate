@@ -8,10 +8,11 @@ from flask import (
     Blueprint,
 )
 from donate.database import db
-# from donate.models import (
-#     Project,
-#     Account,
-# )
+from donate.models import (
+    Account,
+    Donation,
+    Project,
+)
 
 home_page = Blueprint('home', __name__, template_folder="templates")
 thanks_page = Blueprint('thanks', __name__, template_folder="templates")
@@ -35,51 +36,11 @@ deleted once we get the database working
 '''
 
 
-class Project:
-    def __init__(self, name, amount, goal):
-        self.name = name
-        self.amount = amount
-        self.goal = goal
-        self.ccy = "USD"
-
-
-class Donation:
-    def __init__(self, name, amount, project=None):
-        self.name = name
-        self.amount = amount
-        self.project = project
-
-
-FAKE_PROJECTS = [
-    Project("laser", 2000, 5000),
-    Project("Forever Home", 2000, 4000000),
-    Project("printer", 150, 200),
-    Project("Fire Drill 2018", 200, 20000),
-    Project("Axidraw", 222, 200),
-    Project("Flaschen", 12, 5000),
-    Project("Taschen", 52, 320),
-    Project("Being Excellent", 1793, 2000),
-    Project("Hello World", 97, 600),
-    Project("Learning things", 672, 950),
-    Project("Laser cutter", 0, 5250)
-]
-FAKE_RECENT_DONATIONS = [
-    Donation("Mark Mothersbaugh", 89, "A really long project name"),
-    Donation("Brad Pitt", 4, None),
-    Donation("Matthew Arcidy", 3, "Club Mate"),
-    Donation("Angelina Jolie", 4, "Whatever"),
-    Donation("Bill Gates", 5, "Club Mate")
-]
-'''
-end fake data
-'''
-
-
 @home_page.route('/')
 @home_page.route('/index')
 def index():
-    projects = sorted(db.sesion.query(Project).all(),
-                      key=lambda proj: proj.name)
+    sorted_projects = sorted(db.session.query(Project).all(),
+                             key=lambda proj: proj.name)
 
     donations = db.session.query(Donation).limit(10)
 
@@ -103,7 +64,7 @@ def thanks():
 
 @projects_page.route('/projects')
 def projects():
-    projects = sorted(db.sesion.query(Project).all(),
+    projects = sorted(db.session.query(Project).all(),
                       key=lambda proj: proj.name)
 
     return render_template('projects.html',
