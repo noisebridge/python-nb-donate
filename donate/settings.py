@@ -6,6 +6,9 @@ class Config:
     """ Base Configuration """
 
     SECRET_KEY = os.environ.get('DONATE_SECRET', 'key')
+    STRIPE_PK = os.environ.get('STRIPE_PK')
+    STRIPE_SK = os.environ.get('STRIPE_SK')
+    STRIPE_PRODUCT = os.environ.get('STRIPE_PRODUCT')
     APP_DIR = os.path.abspath(os.path.dirname(__file__))
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
     DEBUG_TB_INTERCEPT_REDIRECTS = False

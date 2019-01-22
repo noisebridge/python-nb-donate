@@ -40,9 +40,17 @@
         <div class="row">
     
           <!-- Donation form -->
-          <div class="col-md-4 col-md-offset-3 donation-form">
+          <div class="col-md-4 col-md-offset-3 donation-form" id="form">
             <h3>Make a donation</h3>
-            <div class="alerts"></div>
+            <div class="alerts">
+              {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                  {% for message in messages %}
+                    <p>{{ message }}</p>
+                  {% endfor %}
+                {% endif %}
+              {% endwith %}
+            </div>
        
             <div role="tabpanel" class="donations">
               <ul class="nav nav-tabs" role="tablist">
@@ -52,7 +60,7 @@
             
               <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="credit-card">
-                  <form class="donation-form" action="/donations/charges" accept-charset="UTF-8" method="post">
+                  <form class="donation-form" action="/donation" accept-charset="UTF-8" method="post">
     
                     <!-- 
                     <input name="utf8" type="hidden" value="&#x2713;" />
