@@ -10,22 +10,18 @@ from donate.models import (
 def add_users():
     users = [
         User(username='rando',
-             slack='rando',
              email='marcidy@gmail.com',
              name_first='Matt',
              name_last='Arcidy'),
         User(username='ruthgrace',
-             slack='ruthgrace',
              email='ruthgrace@gmail.com',
              name_first='Ruth Grace',
              name_last='Wong'),
         User(username='jams',
-             slack='jams',
              email='jams@gmail.com',
              name_first='Jeremey',
              name_last='Lleywen'),
         User(username='Nick',
-             slack='sigint',
              email='sigint@gmail.com',
              name_first='Nick',
              name_last='Whatever')]
