@@ -47,11 +47,11 @@ def register_shellcontext(app):
     def shell_context():
         return{
             'db': db,
-            'user': User,
-            'account': Account,
-            'project': Project,
-            'ccy': Currency,
-            'tx': Transaction
+            'User': User,
+            'Account': Account,
+            'Project': Project,
+            'Currency': Currency,
+            'Transaction': Transaction
         }
 
     app.shell_context_processor(shell_context)
