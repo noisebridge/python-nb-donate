@@ -1,5 +1,8 @@
 Donate
-======
+====
+.. image:: https://travis-ci.org/marcidy/nb_donate.svg?branch=master
+   :target: https://travis-ci.org/marcidy/nb_donate
+====
 
 A rewrite of Noisebridge's donation site in python using Flask.
 
