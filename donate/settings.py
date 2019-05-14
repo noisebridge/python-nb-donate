@@ -5,7 +5,6 @@ from datetime import timedelta
 class Config:
     """ Base Configuration """
 
-    SECRET_KEY = os.environ.get('DONATE_SECRET', 'key')
     APP_DIR = os.path.abspath(os.path.dirname(__file__))
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
     DEBUG_TB_INTERCEPT_REDIRECTS = False
