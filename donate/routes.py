@@ -30,15 +30,12 @@ git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
 repo_path = "https://github.com/marcidy/nb_donate/commits/"
 
 
-'''
-Project/Donation classes and FAKE_ data can be
-deleted once we get the database working
-'''
-
-
 @home_page.route('/')
 @home_page.route('/index')
 def index():
+    """ setup main page with overview of projects, recent donations, and
+    other summary data
+    """
     sorted_projects = sorted(db.session.query(Project).all(),
                              key=lambda proj: proj.name)
 
@@ -55,6 +52,7 @@ def index():
 
 @thanks_page.route('/thanks')
 def thanks():
+    """ A quick thank you shown after a person donates. """
     return render_template('thanks.html',
                            data={
                                'git_sha': git_sha,
@@ -64,6 +62,7 @@ def thanks():
 
 @projects_page.route('/projects')
 def projects():
+    """ Return a list of projects, sorted by project name """
     projects = sorted(db.session.query(Project).all(),
                       key=lambda proj: proj.name)
 
@@ -74,6 +73,9 @@ def projects():
 
 @project_page.route('/projects/<project_name>')
 def get_project(project_name):
+    """ Return a project indicated by the direcdt link. If it doesn't exist,
+    return the new project page.
+    """
     project = db.session.query(Project).filter_by(name == project_name)
     if len(project) == 0:
         return new_project(project_name)
@@ -82,11 +84,12 @@ def get_project(project_name):
                                 title=project_name,
                                 project=project[0]))
     if len(project) > 1:
-        raise ValueError("shit we're fucked in projects m8y!")
+        raise ValueError("Critical Error: Projects exist with identical name")
 
 
 @new_project_page.route('/new/project/<project_name>', methods=['GET', 'POST'])
 def new_project(project_name):
+    """ Return a page to create a new project """
     if request.method == "POST":
         goal = request.form['goal']
         ccy_code = request.form['ccy']
