@@ -1,4 +1,5 @@
 import pytest
+import os
 import uuid
 from random import randint
 from donate.app import create_app
@@ -23,6 +24,7 @@ from donate.models import (
 @pytest.yield_fixture(scope='function')
 def app():
     """ an application for the tests """
+
     _app = create_app(TestConfig)
     with _app.app_context():
         _db.create_all()

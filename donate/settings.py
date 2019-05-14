@@ -43,3 +43,4 @@ class TestConfig(Config):
     TESTING = True
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    os.environ['STRIPE_SECRET'] = "TEST_SECRET"
