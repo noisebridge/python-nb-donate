@@ -14,6 +14,11 @@ from donate.models import (
     Project,
 )
 
+import stripe
+from donate.donations import _get_stripe_key
+stripe.key = _get_stripe_key('SECRET')
+
+
 home_page = Blueprint('home', __name__, template_folder="templates")
 thanks_page = Blueprint('thanks', __name__, template_folder="templates")
 projects_page = Blueprint('projects', __name__, template_folder="templates")
@@ -28,6 +33,10 @@ new_account_page = Blueprint(
     template_folder="templates")
 git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
 repo_path = "https://github.com/marcidy/nb_donate/commits/"
+donation_charges = Blueprint(
+    'new_charge',
+    __name__,
+    template_folder="templates")
 
 
 @home_page.route('/')
@@ -36,6 +45,7 @@ def index():
     """ setup main page with overview of projects, recent donations, and
     other summary data
     """
+
     sorted_projects = sorted(db.session.query(Project).all(),
                              key=lambda proj: proj.name)
 
@@ -120,3 +130,13 @@ def new_project(project_name):
 @new_account_page.route('/new/account')
 def new_account():
     pass
+
+
+@donation_charges.route('/donations/charges')
+def new_charge():
+
+    if request.method == 'POST':
+        form = request.form
+
+        return(redirect('thanks.html'))
+    return(redirect('index'))
