@@ -58,8 +58,8 @@ def init_donation_product():
     """
     with stripe_api() as api:
         for prod in api.Product.list():
-            if prod['data']['name'] == "Monthly Donation":
-                return None
+            if prod['name'] == "Monthly Donation":
+                return prod['id']
 
         product = stripe_api.Product.create(name="Monthly Donation",
                                             type="service")

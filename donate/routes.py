@@ -37,12 +37,11 @@ donation_charges = Blueprint('new_charge',
                              __name__, template_folder="templates")
 
 
-def write_donation_to_db(full, params, stripe_donation):
+def write_donation_to_db(request_data, params, stripe_donation):
     """Note: stripe_donation can be the id of a charge or a subscription
     depending on params['recurring']
     """
-    print(stripe_donation)
-    print(params)
+
     # TODO: implement write_donation_to_db
     return "@TODO: implement write_donation_to_db"
 
@@ -76,7 +75,7 @@ def flash_donation_err(err):
 
 @donation_page.route('/donation', methods=['POST'])
 def donation():
-    full = request.get_data()
+    request_data = request.get_data()
 
     params = get_donation_params(request.form)
     amt = int(round(float(params['charge']), 2) * 100)
@@ -88,9 +87,7 @@ def donation():
     if err:
         return flash_donation_err(err)
 
-    err = write_donation_to_db(full, params, charge_id)
-    if err:
-        return flash_donation_err(err)
+    write_donation_to_db(request_data, params, charge_id)
 
     return redirect('/thanks')
 
