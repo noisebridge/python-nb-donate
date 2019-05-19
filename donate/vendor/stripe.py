@@ -4,9 +4,15 @@ from stripe.error import (
     StripeError,
     CardError
 )
-from donate.donations import _get_stripe_key
 from ..extensions import db
 from contextlib import contextmanager
+
+
+def _get_stripe_key(key_type):
+    if key_type.upper() == 'SECRET':
+        return os.environ['STRIPE_SECRET']
+    elif key_type.upper() == 'PUBLIC':
+        return os.environ['STRIPE_KEY']
 
 
 @contextmanager
@@ -30,25 +36,22 @@ def stringify_stripe_error(stripe_error):
 
 def create_charge(recurring, cc_token, amount_in_cents,
                   email, description="Noisebridge Donation"):
+    """Returns a stripe charge object, either recurring or one-time"""
 
-    try:
-        if recurring:
-            charge = charge_monthly(
-                cc_token,
-                amount_in_cents,
-                email,
-                description)
+    if recurring:
+        charge = charge_monthly(
+            cc_token,
+            amount_in_cents,
+            email,
+            description)
 
-        else:
-            charge = charge_once(
-                cc_token,
-                amount_in_cents,
-                description)
+    else:
+        charge = charge_once(
+            cc_token,
+            amount_in_cents,
+            description)
 
-        return (None, charge)
-
-    except StripeError as stripe_error:
-        return (stringify_stripe_error(stripe_error), None)
+    return charge
 
 
 def init_donation_product():
@@ -73,7 +76,7 @@ def get_plan(amount, currency='USD', interval='month', product=None):
 
     product = product or os.environ.get('STRIPE_PRODUCT', None)
     if product is None:
-        raise ValueError('Missing Product')
+        raise ValueError('No product configured, please initialize a product')
 
     with stripe_api() as api:
         plans = api.Plan.list(
@@ -93,17 +96,20 @@ def get_plan(amount, currency='USD', interval='month', product=None):
         return plans[0].id
 
     if len(plans) > 1:
-        print('log that we have an issue with the number of plans returned'
-              'and flash an error')
+        raise ValueError("Noisebridge should only have 1 plan for amt: {},"
+                         " ccy: {}], interval: {}, and product: {}.".format(
+                             amount, currency, interval, product))
 
 
 def create_plan(amount, currency, interval, product):
+    """ returns a plan for a subscription """
     with stripe_api() as api:
         plan = api.Plan.create(
             amount=amount,
             currency=currency,
             interval=interval,
             product=product)
+
     return plan
 
 
@@ -133,6 +139,6 @@ def charge_once(cc_token, amount_in_cents, description):
             amount=amount_in_cents,
             currency='usd',
             description=description,
-            source=cc_token
-        )
+            source=cc_token)
+
     return charge.id
