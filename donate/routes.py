@@ -15,8 +15,10 @@ from donate.models import (
     Donation,
     Project,
 )
-from donate.vendor.stripe import create_charge
-from donate.donations import _get_stripe_key
+from donate.vendor.stripe import (
+    create_charge,
+    _get_stripe_key,
+)
 import stripe
 
 stripe.api_key = _get_stripe_key('SECRET')
@@ -80,14 +82,16 @@ def donation():
     params = get_donation_params(request.form)
     amt = int(round(float(params['charge']), 2) * 100)
 
-    (err, charge_id) = create_charge(params['recurring'],
-                                     params['stripe_token'],
-                                     amt,
-                                     params['email'])
-    if err:
-        return flash_donation_err(err)
+    try:
+        charge = create_charge(params['recurring'],
+                               params['stripe_token'],
+                               amt,
+                               params['email'])
+    except StripeError as error:
+        flash_donation_err(error)
+        # TODO log request data, make sure charge failed
 
-    write_donation_to_db(request_data, params, charge_id)
+    # write_donation_to_db(request_data, params, charge_id)
 
     return redirect('/thanks')
 
@@ -184,13 +188,3 @@ def new_project(project_name):
 @new_account_page.route('/new/account')
 def new_account():
     pass
-
-
-@donation_charges.route('/donations/charges')
-def new_charge():
-
-    if request.method == 'POST':
-        form = request.form
-
-        return(redirect('thanks.html'))
-    return(redirect('index'))
