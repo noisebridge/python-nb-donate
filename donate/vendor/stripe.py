@@ -80,7 +80,7 @@ def get_plan(amount, currency='USD', interval='month'):
                                                            currency, interval))
 
 
-def create_plan(amount, currency, interval, product):
+def create_plan(amount, currency, interval):
     """ returns a plan for a subscription """
     with stripe_api() as api:
         plan = api.Plan.create(
