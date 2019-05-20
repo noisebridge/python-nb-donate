@@ -36,10 +36,12 @@ def register_extensions(app):
 
 def register_blueprints(app):
     app.register_blueprint(routes.home_page)
+    app.register_blueprint(routes.donation_page)
     app.register_blueprint(routes.project_page)
     app.register_blueprint(routes.projects_page)
     app.register_blueprint(routes.new_project_page)
     app.register_blueprint(routes.thanks_page)
+    app.register_blueprint(routes.donation_charges)
 
 
 def register_shellcontext(app):

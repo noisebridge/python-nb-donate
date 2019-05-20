@@ -25,6 +25,12 @@
       {% block head_css_section %}{% endblock head_css_section %}
       {% block head_css_page %}{% endblock head_css_page %}
     {% endblock head_css %}
+    {% block head_script_section %}
+      <script src="https://js.stripe.com/v2/"></script>
+      <script>
+        var stripe = Stripe.setPublishableKey({{ data.stripe_pk }})
+      </script>
+      {% endblock head_script_section %}
   </head>
   <body>
 
@@ -50,9 +56,9 @@
     <!-- External scripts -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script src="https://js.stripe.com/v2/"></script>
 
     <!-- Internal scripts -->
+    <script>Stripe.setPublishableKey("{{ data.stripe_pk }}");</script>
     <script src="../static/js/donate.js"></script>
 
   </body>
