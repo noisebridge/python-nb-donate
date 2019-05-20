@@ -4,7 +4,6 @@ from stripe.error import (
     StripeError,
     CardError
 )
-from ..extensions import db
 from contextlib import contextmanager
 
 
@@ -54,29 +53,10 @@ def create_charge(recurring, cc_token, amount_in_cents,
     return charge
 
 
-def init_donation_product():
-    """ Must be run once when using a new stripe account or switching
-        from a test stripe key to a live one
-        Store result in STRIPE_PRODUCT in .flaskenv
-    """
-    with stripe_api() as api:
-        for prod in api.Product.list():
-            if prod['name'] == "Monthly Donation":
-                return prod['id']
-
-        product = stripe_api.Product.create(name="Monthly Donation",
-                                            type="service")
-    return product.id
-
-
-def get_plan(amount, currency='USD', interval='month', product=None):
+def get_plan(amount, currency='USD', interval='month'):
     """ return a stripe plan for use with a subscription by finding it or
     creating it if not found.
     """
-
-    product = product or os.environ.get('STRIPE_PRODUCT', None)
-    if product is None:
-        raise ValueError('No product configured, please initialize a product')
 
     with stripe_api() as api:
         plans = api.Plan.list(
@@ -85,11 +65,10 @@ def get_plan(amount, currency='USD', interval='month', product=None):
             amount=amount,
             currency=currency,
             interval=interval,
-            product=product
         )
 
     if len(plans) == 0:
-        plan = create_plan(amount, currency, interval, product)
+        plan = create_plan(amount, currency, interval)
         return plan.id
 
     if len(plans) == 1:
@@ -97,18 +76,18 @@ def get_plan(amount, currency='USD', interval='month', product=None):
 
     if len(plans) > 1:
         raise ValueError("Noisebridge should only have 1 plan for amt: {},"
-                         " ccy: {}], interval: {}, and product: {}.".format(
-                             amount, currency, interval, product))
+                         " ccy: {}], interval: {}.".format(amount,
+                                                           currency, interval))
 
 
 def create_plan(amount, currency, interval, product):
     """ returns a plan for a subscription """
     with stripe_api() as api:
         plan = api.Plan.create(
+            name="${} / {}".format(amount/100, interval),
             amount=amount,
             currency=currency,
-            interval=interval,
-            product=product)
+            interval=interval)
 
     return plan
 
