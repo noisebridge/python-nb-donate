@@ -72,7 +72,7 @@ def get_plan(amount, currency='USD', interval='month'):
         return plan.id
 
     if len(plans) == 1:
-        return plans[0].id
+        return plans['data'][0].id
 
     if len(plans) > 1:
         raise ValueError("Noisebridge should only have 1 plan for amt: {},"
