@@ -4,6 +4,8 @@ from logging.handlers import TimedRotatingFileHandler
 from donate.app import create_app
 from donate.settings import DevConfig, ProdConfig
 import os
+from donate.log_utils import start_timer, log_request
+
 
 CONFIG = DevConfig if get_debug_flag() else ProdConfig
 
@@ -22,6 +24,9 @@ handler.setFormatter(formatter)
 #                     level=CONFIG.LOG_LEVEL)
 
 app = create_app(CONFIG)
+
+app.before_request(start_timer)
+app.after_request(log_request)
 
 app.logger.addHandler(handler)
 app.logger.info("App initialized")
