@@ -16,9 +16,8 @@ class Config:
     CORS_ORIGIN_WHITELIST = []
     JWT_HEADER_TYPE = 'Token'
     LOG_FILE = "/var/log/donate/donate.log"
-    LOG_FORMAT = logging.Formatter("%(asctime)s | %(pathname)s:%(lineno)d |"
-                                   "%(funcName)s | %(levelname)s |"
-                                   "%(message)s ")
+    LOG_FORMAT = "%(asctime)s | %(pathname)s:%(lineno)d |" \
+        "%(funcName)s | %(levelname)s | %(message)s "
 
 
 class ProdConfig(Config):
