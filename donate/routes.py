@@ -21,7 +21,6 @@ from donate.vendor.stripe import (
 )
 import stripe
 from stripe.error import StripeError
-from pudb import set_trace
 
 stripe.api_key = _get_stripe_key('SECRET')
 
@@ -66,7 +65,7 @@ def get_donation_params(form):
 
 @donation_page.route('/donation', methods=['POST'])
 def donation():
-    set_trace()
+
     request_data = request.get_data()
     try:
         params = get_donation_params(request.form)
