@@ -20,6 +20,8 @@ from donate.vendor.stripe import (
     _get_stripe_key,
 )
 import stripe
+from stripe.error import StripeError
+from pudb import set_trace
 
 stripe.api_key = _get_stripe_key('SECRET')
 
@@ -52,47 +54,43 @@ def get_donation_params(form):
     charges = [charge for charge
                in form.getlist('charge[amount]')
                if charge not in ["", "other"]]
-    try:
-        ret = {
-            'charge': charges[0],
-            'email': form['donor[email]'],
-            'name': form['donor[name]'],
-            'stripe_token': form['donor[stripe_token]'],
-            'recurring': 'charge[recurring]' in form,
-            'anonymous': 'donor[anonymous]' in form}
-        return ret
-
-    except KeyError as e:
-        flash("Error: required form value %s not set." % e.args[0])
-    except ValueError as e:
-        flash("Error: please enter a valid amount for your donation")
-
-    return redirect('/index#form')
-
-
-def flash_donation_err(err):
-    flash(err)
-    return redirect('/index#form')
+    ret = {
+        'charge': charges[0],
+        'email': form['donor[email]'],
+        'name': form.get('donor[name]', "Anonymous"),
+        'stripe_token': form['donor[stripe_token]'],
+        'recurring': 'charge[recurring]' in form,
+        'anonymous': 'donor[anonymous]' in form}
+    return ret
 
 
 @donation_page.route('/donation', methods=['POST'])
 def donation():
+    set_trace()
     request_data = request.get_data()
+    try:
+        params = get_donation_params(request.form)
+    except KeyError as e:
+        flash("Error: required form value %s not set." % e.args[0])
+        return redirect('/index#form')
+    except ValueError as e:
+        flash("Error: please enter a valid amount for your donation")
+        return redirect('/index#form')
 
-    params = get_donation_params(request.form)
     amt = int(round(float(params['charge']), 2) * 100)
 
     try:
-        charge = create_charge(params['recurring'],
-                               params['stripe_token'],
-                               amt,
-                               params['email'])
+        charge = create_charge(
+            params['recurring'],
+            params['stripe_token'],  # appended by donate.js
+            amt,
+            params['email'])
     except StripeError as error:
-        flash_donation_err(error)
+        flash(error)
+        return redirect('/index#form', error=error)
         # TODO log request data, make sure charge failed
 
     # write_donation_to_db(request_data, params, charge_id)
-
     return redirect('/thanks')
 
 

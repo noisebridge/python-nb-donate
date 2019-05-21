@@ -52,6 +52,9 @@
               {% endwith %}
             </div>
        
+            {% if error %}
+              <p class=error><strong>Error:</strong> {{error}}
+            {% endif %}
             <div role="tabpanel" class="donations">
               <ul class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active"><a href="#credit-card" aria-controls="credit-card" role="tab" data-toggle="tab">Credit Card</a></li>
