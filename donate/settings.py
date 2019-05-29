@@ -18,6 +18,7 @@ class Config:
     LOG_FILE = "/var/log/donate/donate.log"
     LOG_FORMAT = "%(asctime)s | %(pathname)s:%(lineno)d |" \
         "%(funcName)s | %(levelname)s | %(message)s "
+    SINGLE_CCY = True
 
 
 class ProdConfig(Config):
