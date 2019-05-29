@@ -31,8 +31,6 @@ from donate.vendor.stripe import (
 import stripe
 from stripe.error import StripeError
 
-from pudb import set_trace
-
 stripe.api_key = _get_stripe_key('SECRET')
 
 git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
@@ -78,22 +76,25 @@ def get_donation_params(form):
 def model_stripe_data(charge, req_data):
     app.logger.info("Modelling stripe data")
 
-    ccy_name = "USD"  # FIXME more generic...i mean..maybe
+    if app.config['SINGLE_CCY']:
+        ccy_name = "USD"  # FIXME more generic...i mean..maybe
+
     to_proj = req_data['project_select']
     from_acc_name = req_data['email']
     amount = int(round(float(req_data['charge']), 2) * 100)
 
+    # These will raise errors if not found or more than one found.  They
+    # should bubble up to the route.
     project = get_one(Project, {'name': to_proj})
     ccy = get_one(Currency, {'code': ccy_name})
 
+    # Check for user account (e.g. the account from which the spice will flow)
     app.logger.info("Finding account {}.".format(from_acc_name))
-
-    # check for user account (e.g. the account from which the spice will flow)
     try:
         from_acct = get_one(Account,
                             {'name': from_acc_name,
                              'ccy': ccy_name})
-
+    # if it doesn't exist, make it.
     except NoResultFound:
         app.logger.info("Customer Account not found, creating account"
                         " for new customer {}".format(from_acc_name))
@@ -116,7 +117,6 @@ def model_stripe_data(charge, req_data):
                      payer=from_acct,
                      recvr=to_acc)
 
-    db.session.add(tx)
     return tx
 
 
@@ -155,7 +155,6 @@ def donation():
         return redirect('/index#form')
         # TODO log request data, make sure charge failed
 
-    set_trace()
     tx = model_stripe_data(charge=charge, req_data=params)
 
     StripeDonation(card=params['stripe_token'],
