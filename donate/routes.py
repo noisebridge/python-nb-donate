@@ -10,11 +10,19 @@ from flask import (
     url_for,
     Blueprint,
 )
+from sqlalchemy.orm.exc import (
+    NoResultFound,
+    MultipleResultsFound,
+)
+from donate.util import get_one
 from donate.database import db
 from donate.models import (
     Account,
     Donation,
     Project,
+    Currency,
+    Transaction,
+    StripeDonation
 )
 from donate.vendor.stripe import (
     create_charge,
@@ -22,6 +30,8 @@ from donate.vendor.stripe import (
 )
 import stripe
 from stripe.error import StripeError
+
+from pudb import set_trace
 
 stripe.api_key = _get_stripe_key('SECRET')
 
@@ -53,15 +63,61 @@ def write_donation_to_db(request_data, params, stripe_donation):
 def get_donation_params(form):
     charges = [charge for charge
                in form.getlist('charge[amount]')
-               if charge not in ["", "other"]]
+               if charge not in ["", "other", ' ']]
     ret = {
         'charge': charges[0],
         'email': form['donor[email]'],
         'name': form.get('donor[name]', "Anonymous"),
         'stripe_token': form['donor[stripe_token]'],
         'recurring': 'charge[recurring]' in form,
-        'anonymous': 'donor[anonymous]' in form}
+        'anonymous': 'donor[anonymous]' in form,
+        'project_select': form['project_select']}
     return ret
+
+
+def model_stripe_data(charge, req_data):
+    app.logger.info("Modelling stripe data")
+
+    ccy_name = "USD"  # FIXME more generic...i mean..maybe
+    to_proj = req_data['project_select']
+    from_acc_name = req_data['email']
+    amount = int(round(float(req_data['charge']), 2) * 100)
+
+    project = get_one(Project, {'name': to_proj})
+    ccy = get_one(Currency, {'code': ccy_name})
+
+    app.logger.info("Finding account {}.".format(from_acc_name))
+
+    # check for user account (e.g. the account from which the spice will flow)
+    try:
+        from_acct = get_one(Account,
+                            {'name': from_acc_name,
+                             'ccy': ccy_name})
+
+    except NoResultFound:
+        app.logger.info("Customer Account not found, creating account"
+                        " for new customer {}".format(from_acc_name))
+        from_acct = Account(name=from_acc_name,
+                            ccy=ccy)
+
+    for project_account in project.accounts:
+        if project_account.ccy.code == ccy_name:
+            to_acct = project_account
+
+    try:
+        to_acct
+    except NameError:
+        app.logger.error("No account with ccy {} "
+                         "on project {}".format(ccy_name, to_proj))
+        raise NoResultFound
+
+    tx = Transaction(amount=amount,
+                     ccy=ccy,
+                     payer=from_acct,
+                     recvr=to_acc)
+
+    db.session.add(tx)
+    return tx
 
 
 @donation_page.route('/donation', methods=['POST'])
@@ -71,6 +127,7 @@ def donation():
     app.logger.debug("Entering route /donation")
     request_data = request.get_data()
     app.logger.debug("Request Data: {}".format(request_data))
+
     try:
         params = get_donation_params(request.form)
     except KeyError as e:
@@ -85,6 +142,7 @@ def donation():
     app.logger.debug("Params: {}".format(params))
     amt = int(round(float(params['charge']), 2) * 100)
     app.logger.debug("Amout: {}".format(amt))
+
     try:
         charge = create_charge(
             params['recurring'],
@@ -94,8 +152,16 @@ def donation():
         app.logger.debug("Charge created: {}".format(charge))
     except StripeError as error:
         flash(error)
-        return redirect('/index#form', error=error)
+        return redirect('/index#form')
         # TODO log request data, make sure charge failed
+
+    set_trace()
+    tx = model_stripe_data(charge=charge, req_data=params)
+
+    StripeDonation(card=params['stripe_token'],
+                   stripe_id=charge.id,
+                   token=charge.balance_transaction,
+                   txs=[tx])
 
     # write_donation_to_db(request_data, params, charge_id)
     return redirect('/thanks')
@@ -159,18 +225,19 @@ def get_project(project_name):
         raise ValueError("Critical Error: Projects exist with identical name")
 
 
-@new_project_page.route('/new/project/<project_name>', methods=['GET', 'POST'])
-def new_project(project_name):
+@new_project_page.route('/new/project', methods=['GET', 'POST'])
+def new_project():
     """ Return a page to create a new project """
 
     if request.method == "POST":
         goal = request.form['goal']
         ccy_code = request.form['ccy']
         desc = request.form['desc']
+        project_name = request.form['project_name']
 
+        ccy = db.session.query(Currency).filter_by(name=ccy_code).one()
         acct = Account(name="{}_{}_acct".format(project_name, ccy_code),
-                       ccy=db.session.query('Currency').
-                       filter(code=ccy_code).one())
+                       ccy=ccy)
 
         project = Project(name=project_name,
                           desc=desc,
@@ -186,7 +253,8 @@ def new_project(project_name):
                                 project=project))
     else:
         return render_template('new_project.html',
-                               project={'name': project_name})
+                               data={'git_sha': git_sha,
+                                     'repo_path': repo_path})
 
 
 @new_account_page.route('/new/account')
