@@ -293,3 +293,12 @@ class StripePlan(db.Model):
         ValidateString(StripePlan.name, False, True)
         ValidateInteger(StripePlan.ccy_id, False, True)
         ValidateString(StripePlan.interval, False, True)
+
+
+class DonateConfiguration(db.Model, TimestampMixin):
+    __tablename__ = 'donate_configuration'
+
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(32), nullable=False, unique=True)
+    type = db.Column(db.String(10), nullable=False)
+    value = db.Column(db.String(32), nullable=False)

@@ -1,11 +1,13 @@
 from flask.helpers import get_debug_flag
+from donate.app import create_app
+from donate.database import db
+from donate.log_utils import start_timer, log_request
+from donate.models import DonateConfiguration
+from donate.settings import DevConfig, ProdConfig
 import logging
 from logging.handlers import TimedRotatingFileHandler
-from donate.app import create_app
-from donate.settings import DevConfig, ProdConfig
 import os
-from donate.log_utils import start_timer, log_request
-
+from sqlalchemy.orm.exc import NoResultFound
 
 CONFIG = DevConfig if get_debug_flag() else ProdConfig
 
@@ -24,6 +26,12 @@ handler.setFormatter(formatter)
 #                     level=CONFIG.LOG_LEVEL)
 
 app = create_app(CONFIG)
+with app.app_context():
+    try:
+        db.session.query(DonateConfiguration).filter_by(key="INIT").one()
+    except NoResultFound:
+        raise ValueError("Donate is not initialized")
+
 
 app.before_request(start_timer)
 app.after_request(log_request)

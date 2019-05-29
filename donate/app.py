@@ -3,13 +3,13 @@ from flask import Flask
 from donate.extensions import db, migrate
 from donate.settings import ProdConfig
 from donate.models import (
-    User,
     Account,
-    Project,
     Currency,
-    Transaction,
+    Project,
     StripeDonation,
     StripePlan,
+    Transaction,
+    User,
 )
 from donate import routes
 
