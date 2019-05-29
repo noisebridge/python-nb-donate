@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 653c8a5b16fb
+Revision ID: bb7948d4118b
 Revises: 
-Create Date: 2018-12-23 19:34:11.435444
+Create Date: 2019-05-29 10:03:24.063247
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '653c8a5b16fb'
+revision = 'bb7948d4118b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -28,16 +28,24 @@ def upgrade():
     sa.UniqueConstraint('code'),
     sa.UniqueConstraint('name')
     )
+    op.create_table('donate_configuration',
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('key', sa.String(length=32), nullable=False),
+    sa.Column('type', sa.String(length=10), nullable=False),
+    sa.Column('value', sa.String(length=32), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('key')
+    )
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=80), nullable=False),
-    sa.Column('slack', sa.String(length=80), nullable=False),
     sa.Column('email', sa.String(length=80), nullable=False),
     sa.Column('name_first', sa.String(length=80), nullable=True),
-    sa.Column('name_last', sa.String(length=8), nullable=True),
+    sa.Column('name_last', sa.String(length=80), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
-    sa.UniqueConstraint('slack'),
     sa.UniqueConstraint('username')
     )
     op.create_table('account',
@@ -50,11 +58,25 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
+    op.create_table('donation',
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('type', sa.String(length=50), nullable=True),
+    sa.Column('amount', sa.Float(), nullable=False),
+    sa.Column('anonymous', sa.Boolean(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('ccy_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['ccy_id'], ['currency.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('project',
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=120), nullable=False),
+    sa.Column('desc', sa.String(length=160), nullable=True),
     sa.Column('account_id', sa.Integer(), nullable=False),
     sa.Column('goal', sa.Float(), nullable=False),
     sa.ForeignKeyConstraint(['account_id'], ['account.id'], ),
@@ -92,17 +114,13 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('stripe_donation',
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('anonymous', sa.Boolean(), nullable=False),
     sa.Column('card', sa.String(), nullable=False),
     sa.Column('stripe_id', sa.String(), nullable=False),
     sa.Column('token', sa.String(length=80), nullable=False),
-    sa.Column('user', sa.Integer(), nullable=True),
     sa.Column('txs', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['id'], ['donation.id'], ),
     sa.ForeignKeyConstraint(['txs'], ['transaction.id'], ),
-    sa.ForeignKeyConstraint(['user'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('stripe_subscription',
@@ -127,7 +145,9 @@ def downgrade():
     op.drop_table('transaction')
     op.drop_table('stripeplan')
     op.drop_table('project')
+    op.drop_table('donation')
     op.drop_table('account')
     op.drop_table('user')
+    op.drop_table('donate_configuration')
     op.drop_table('currency')
     # ### end Alembic commands ###
