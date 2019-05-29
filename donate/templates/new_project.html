@@ -1,11 +1,82 @@
-<div class="header">
-  <img src="/static/images/noisebridge_logo.jpg" alt="Noisebridge">
-  <h1>Noisebridge: a hackerspace needs your help!</h1>
-</div>
+{% extends "base.html" %}
+{% block content %}
 
-<h2>New project {{project.name}}</h2>
 
-<form action="/new/project/{{project.name}}" method="POST">
-  <p>Goal (put 0 if you have no goal)<input type="number" step="1" name="goal" /></p>
-  <p><input type="submit" value="submit" /></p>
-</form>
+<div class="container">
+  <div class="row donation-header">
+    <div class="col-md-8 col-md-offset-3 donate-title">
+      <div class="header">
+        <a href="https://donate.noisebridge.net">
+          <img class="center noisebridge-logo" 
+               src="{{ url_for('static', filename='images/noisebridge_logo.jpg') }}" 
+               alt="Noisebridge logo" />
+        </a>
+        <h1>Create A New Project</h1>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-8 col-md-offset-3 new-project-instructions">
+
+      <p>A project is something to which someone can donate.  A project can have a defined lifetime with a set amount to be raised, or it can represent an area like Sewing or Electronics which has incoming donations and outgoing expendatures.</p>
+
+      <p>Start a new project by entering a name and a description.  If this project is trying to raise
+      a specific amount, enter that as the goal, and select the currency as well.</p>
+    </div>
+  </div>
+
+  <div class="row"></div>
+
+  <div class="new-project-form">
+    <form action="/new/project" method="POST">
+      <div class="row">
+        <div class="col-md-5 col-md-offset-3 new-project-form" >
+
+          <div class="row">
+            <div class="col-md-2">
+              <label>Project Name</label>
+            </div>
+            <div class="col-md">
+              <input class="project-name" name="project-name" maxlength="40" required/>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-2">
+              <label>Goal</label>
+            </div>
+            <div class="col-md">
+              <input class="project-goal" step="1" name="goal" type="number" min="0" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-2">
+              <label>Currency</label>
+            </div>
+            <div class="col-md">
+              <input class="project-currency" name="ccy" type="text" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4">
+              <label>Description</label>
+            </div>
+            <div class="col-md">
+              <input class="project-description" name="desc" type="text" required/>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row">
+          <div class="col-md-2 col-md-offset-3">
+            <input type="submit" value="submit" />
+          </div>
+        </div>
+    </form>
+      </div>
+  </div>
+
+  {% endblock %}

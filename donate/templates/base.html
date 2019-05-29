@@ -20,17 +20,18 @@
         >
       {% endblock head_css_lib %}
       {% block head_css_site %}
-        <link href="static/css/donate.css" rel="stylesheet" media="screen">
+        <!-- link href="static/css/donate.css" rel="stylesheet" media="screen"-->
+        <link href="{{ url_for('static', filename='css/donate.css') }}" rel="stylesheet" media="screen">
       {% endblock head_css_site %}
       {% block head_css_section %}{% endblock head_css_section %}
       {% block head_css_page %}{% endblock head_css_page %}
     {% endblock head_css %}
     {% block head_script_section %}
       <script src="https://js.stripe.com/v2/"></script>
-      <script>
-        var stripe = Stripe.setPublishableKey({{ data.stripe_pk }})
-      </script>
-      {% endblock head_script_section %}
+      <!-- script>
+        var stripe = Stripe.setPublishableKey({# {{ data.stripe_pk }}) #}
+      </script-->
+    {% endblock head_script_section %}
   </head>
   <body>
 
@@ -58,8 +59,8 @@
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
     <!-- Internal scripts -->
-    <script>Stripe.setPublishableKey("{{ data.stripe_pk }}");</script>
-    <script src="../static/js/donate.js"></script>
+    <!-- script>Stripe.setPublishableKey("{{ data.stripe_pk }}");</script -->
+    <script src="{{ url_for('static', filename='js/donate.js') }}"></script>
 
   </body>
 </html>

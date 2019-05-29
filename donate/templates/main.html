@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+{% block head_script_section %}
+  {{ super() }}
+  <script>
+    var stripe = Stripe.setPublishableKey({{ data.stripe_pk }})
+  </script>
+{% endblock %}
 {% block content %}
       <div class="container">
     
@@ -6,7 +12,9 @@
         <div class="row donation-header">
           <div class="col-md-8 col-md-offset-3 donation-title">
             <a href="https://donate.noisebridge.net/">
-              <img class="center noisebridge-logo" src="../static/images/noisebridge_logo.jpg" alt="Noisebridge logo" />
+              <img class="center noisebridge-logo" 
+                   src="{{ url_for('static', filename='images/noisebridge_logo.jpg') }}" 
+                   alt="Noisebridge logo" />
             </a>
             <h1>Donate Now! Keep Noisebridge Hackerspace Alive in San Francisco!!</h1>
           </div>
@@ -97,6 +105,22 @@
                       </div>
                     </div>
                     
+                    <div class="form-group project">
+                      <label for="project_select">
+                      For Project:
+                      </label>
+                    </div>
+                    <div id="project-selection">
+                      <select name="project_select" id="donation-for-project" class="form-control">
+                          <option selected="selected" value="General Fund">General Fund</option>
+                          {% if projects %}
+                            {% for project in projects %}
+                              <option value="{{ project.name }}">{{ project.name }}</option>
+                            {% endfor %}
+                          {% endif %}
+                        </select>
+                      </div>
+
                     <!-- Credit card details -->
                     <div class="form-group cc-details">
                       <input type="text" class="form-control cc-number" data-stripe="number" inputmode="numeric" placeholder="Card number" required />
