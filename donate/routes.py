@@ -2,9 +2,10 @@ import os
 import git
 import json
 from flask import (
-    render_template,
+    current_app as app,
     flash,
     redirect,
+    render_template,
     request,
     url_for,
     Blueprint,
@@ -65,25 +66,32 @@ def get_donation_params(form):
 
 @donation_page.route('/donation', methods=['POST'])
 def donation():
+    """ Processes a stripe donation. """
 
+    app.logger.debug("Entering route /donation")
     request_data = request.get_data()
+    app.logger.debug("Request Data: {}".format(request_data))
     try:
         params = get_donation_params(request.form)
     except KeyError as e:
+        app.logger.debug("Params not set: {}".format(e.args[0]))
         flash("Error: required form value %s not set." % e.args[0])
         return redirect('/index#form')
     except ValueError as e:
+        app.logger.debug("Params bad Value: {}".format(e.args[0]))
         flash("Error: please enter a valid amount for your donation")
         return redirect('/index#form')
 
+    app.logger.debug("Params: {}".format(params))
     amt = int(round(float(params['charge']), 2) * 100)
-
+    app.logger.debug("Amout: {}".format(amt))
     try:
         charge = create_charge(
             params['recurring'],
             params['stripe_token'],  # appended by donate.js
             amt,
             params['email'])
+        app.logger.debug("Charge created: {}".format(charge))
     except StripeError as error:
         flash(error)
         return redirect('/index#form', error=error)
@@ -177,9 +185,8 @@ def new_project(project_name):
                                 title=project_name,
                                 project=project))
     else:
-        return (render_template('new_project.html',
-                                title=project_name,
-                                project=project))
+        return render_template('new_project.html',
+                               project={'name': project_name})
 
 
 @new_account_page.route('/new/account')

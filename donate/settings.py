@@ -1,4 +1,5 @@
 import os
+import logging
 from datetime import timedelta
 
 
@@ -14,6 +15,9 @@ class Config:
     JWT_AUTH_HEADERS_PREFIX = 'Token'
     CORS_ORIGIN_WHITELIST = []
     JWT_HEADER_TYPE = 'Token'
+    LOG_FILE = "/var/log/donate/donate.log"
+    LOG_FORMAT = "%(asctime)s | %(pathname)s:%(lineno)d |" \
+        "%(funcName)s | %(levelname)s | %(message)s "
 
 
 class ProdConfig(Config):
@@ -23,6 +27,7 @@ class ProdConfig(Config):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL',
                                              'postresql://localhost/example')
+    LOG_LEVEL = logging.WARN
 
 
 class DevConfig(Config):
@@ -35,6 +40,8 @@ class DevConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:////{0}'.format(DB_PATH)
     CACHE_TYPE = 'simple'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(10**6)
+    LOG_LEVEL = logging.INFO
+    LOG_FILE = "/home/marcidy/projects/noisebridge/new_donate/logs/donate.log"
 
 
 class TestConfig(Config):
@@ -43,3 +50,4 @@ class TestConfig(Config):
     TESTING = True
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    LOG_LEVEL = logging.DEBUG
