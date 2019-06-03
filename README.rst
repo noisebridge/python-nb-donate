@@ -52,6 +52,7 @@ Database Creation / Migration
 _____________________________
 
 We use Flask-Migrate to create and run the database.  The workflow is
+
 1. [Once] flask db init to create the migrations folder
 2. [Once] edit migrations/env.py to add the model data
 3. flask db migrate - creates a migration in the migrations/versions folder which represents the commands to go from teh existing DB state to the new state.  These migration scripts may need to be edited.
