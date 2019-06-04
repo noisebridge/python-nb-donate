@@ -83,6 +83,41 @@
     >]
     
 
+        DonateConfiguration [label=<
+        <TABLE BGCOLOR="lightyellow" BORDER="0"
+            CELLBORDER="0" CELLSPACING="0">
+                <TR><TD COLSPAN="2" CELLPADDING="4"
+                        ALIGN="CENTER" BGCOLOR="palegoldenrod"
+                ><FONT FACE="Helvetica Bold" COLOR="black"
+                >DonateConfiguration</FONT></TD></TR><TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">★ id</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ created_at</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">DATETIME</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ key</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">VARCHAR(32)</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ type</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">VARCHAR(10)</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ updated_at</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">DATETIME</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ value</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">VARCHAR(32)</FONT
+        ></TD></TR>
+        </TABLE>
+    >]
+    
+
         Donation [label=<
         <TABLE BGCOLOR="lightyellow" BORDER="0"
             CELLBORDER="0" CELLSPACING="0">
@@ -154,6 +189,10 @@
         ><FONT FACE="Bitstream Vera Sans">⚪ created_at</FONT
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">DATETIME</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ desc</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">VARCHAR(160)</FONT
         ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
         ><FONT FACE="Bitstream Vera Sans">⚪ goal</FONT
         ></TD><TD ALIGN="LEFT"

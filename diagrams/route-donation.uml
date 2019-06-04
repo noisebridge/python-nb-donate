@@ -1,0 +1,20 @@
+@startuml
+
+request -> donate: POST request to /donation route
+donate -> route: route request to donation_page blueprint
+route -> route: parse request form data with get_donation_params()
+route -> route: check required parameters
+route -> route: check donation amount validity
+route -> create_charge: Create stripe charge
+activate create_charge
+route <-- create_charge: redirect back to form on error
+deactivate create_charge
+request <-- route: User retry on error
+route -> model_stripe_data: pass donation data to create models for this donation
+activate model_stripe_data
+route <- model_stripe_data: Transaction with all required models attached
+deactivate model_stripe_data
+route -> route: Create StripeDonation object
+route -> database: add Trasnaction and StripeDonation
+route -> donate: redirect to route /thanks
+@enduml
