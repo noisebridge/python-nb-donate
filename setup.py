@@ -7,6 +7,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        'ansicolors',
         'flask',
         'flask-migrate',
         'flask-sqlalchemy',
@@ -16,7 +17,9 @@ setup(
         'pdoc',
         'pytest',
         'python-dotenv',
+        'rfc3339',
         'sadisplay',
+        'stripe'
         'werkzeug',
     ],
 )
