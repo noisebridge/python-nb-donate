@@ -40,7 +40,7 @@ def app():
 @pytest.fixture(scope='function')
 def testapp(app):
     """ A webtest app """
-    return app
+    return app.test_client()
 
 
 @pytest.yield_fixture(scope='function')

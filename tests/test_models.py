@@ -1,7 +1,6 @@
 from datetime import datetime
-from donate.app import create_app
+from donate.app import app, create_app
 from donate.database import db
-from donate.settings import TestConfig
 from donate.models import (
     Currency,
     Account,
@@ -16,7 +15,6 @@ import pytest
 
 
 def test_new_ccy():
-    # app = create_app(TestConfig)
     ccy = Currency(code="USD", name="US Dollar")
 
     assert ccy.code == "USD"

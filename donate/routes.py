@@ -24,17 +24,12 @@ from donate.models import (
     Transaction,
     StripeDonation
 )
-from donate.vendor.stripe import (
-    create_charge,
-    _get_stripe_key,
-)
+from donate.vendor.stripe import create_charge
 import stripe
 from stripe.error import StripeError
 
-# stripe.api_key = _get_stripe_key('SECRET')
-
 git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
-repo_path = "https://github.com/marcidy/nb_donate/commits/"
+repo_path = "FIXME" #  FIXME or don't.  Why is this even here.
 
 donation_page = Blueprint('donation', __name__, template_folder="templates")
 home_page = Blueprint('home', __name__, template_folder="templates")
@@ -47,15 +42,6 @@ new_account_page = Blueprint('new_account',
                              __name__, template_folder="templates")
 donation_charges = Blueprint('new_charge',
                              __name__, template_folder="templates")
-
-
-def write_donation_to_db(request_data, params, stripe_donation):
-    """Note: stripe_donation can be the id of a charge or a subscription
-    depending on params['recurring']
-    """
-
-    # TODO: implement write_donation_to_db
-    return "@TODO: implement write_donation_to_db"
 
 
 def get_donation_params(form):
