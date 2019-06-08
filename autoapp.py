@@ -26,11 +26,11 @@ handler.setFormatter(formatter)
 #                     level=CONFIG.LOG_LEVEL)
 
 app = create_app(CONFIG)
-with app.app_context():
-    try:
-        db.session.query(DonateConfiguration).filter_by(key="INIT").one()
-    except NoResultFound:
-        raise ValueError("Donate is not initialized")
+# with app.app_context():
+#    try:
+#        db.session.query(DonateConfiguration).filter_by(key="INIT").one()
+#    except NoResultFound:
+#        raise ValueError("Donate is not initialized")
 
 
 app.before_request(start_timer)
