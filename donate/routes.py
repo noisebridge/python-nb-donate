@@ -31,7 +31,7 @@ from donate.vendor.stripe import (
 import stripe
 from stripe.error import StripeError
 
-stripe.api_key = _get_stripe_key('SECRET')
+# stripe.api_key = _get_stripe_key('SECRET')
 
 git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
 repo_path = "https://github.com/marcidy/nb_donate/commits/"
@@ -157,12 +157,19 @@ def donation():
 
     tx = model_stripe_data(charge=charge, req_data=params)
 
-    StripeDonation(card=params['stripe_token'],
+    sd = StripeDonation(card=params['stripe_token'],
                    stripe_id=charge.id,
                    token=charge.balance_transaction,
                    txs=[tx])
 
-    # write_donation_to_db(request_data, params, charge_id)
+    try:
+        db.session.add(tx)
+        db.session.add(sd)
+        db.session.commit()
+    except Error as e:
+        db.session.rollback()
+        raise e
+
     return redirect('/thanks')
 
 
@@ -178,7 +185,7 @@ def index():
 
     donations = db.session.query(Donation).limit(10)
 
-    STRIPE_KEY = _get_stripe_key('PUBLIC')
+    STRIPE_KEY = app.get_stripe_key('PUBLIC')
 
     return render_template('main.html',
                            data={

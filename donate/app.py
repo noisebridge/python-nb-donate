@@ -11,6 +11,7 @@ from donate.models import (
     Transaction,
     User,
 )
+from donate.vendor.stripe import _get_stripe_key as get_stripe_key
 from donate import routes
 
 
@@ -25,6 +26,8 @@ def create_app(config_object=ProdConfig):
     register_extensions(app)
     register_shellcontext(app)
     register_blueprints(app)
+
+    app.get_stripe_key = get_stripe_key
 
     return(app)
 
