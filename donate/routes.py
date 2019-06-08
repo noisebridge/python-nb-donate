@@ -137,6 +137,7 @@ def donation():
             params['email'])
         app.logger.debug("Charge created: {}".format(charge))
     except StripeError as error:
+        app.logger.error("StripeError: ")
         flash(error)
         return redirect('/index#form')
         # TODO log request data, make sure charge failed

@@ -181,21 +181,22 @@ def test_new_transaction():
     pay_acct = 60
     rec_acct = 70
 
-    tx = Transaction(approver_id=approver_id,
+    tx = Transaction(
+        # approver_id=approver_id,
                      ccy_id=ccy,
                      payer_id=payer_id,
                      recvr_id=recvr_id,
-                     requestor_id=requestor_id,
+                     # requestor_id=requestor_id,
                      amount=amount,
                      datetime=now,
                      payer=pay_acct,
                      recvr=rec_acct)
 
-    assert tx.approver_id == approver_id
+    # assert tx.approver_id == approver_id
     assert tx.ccy_id == ccy
     assert tx.payer_id == payer_id
     assert tx.recvr_id == recvr_id
-    assert tx.requestor_id == requestor_id
+    # assert tx.requestor_id == requestor_id
     assert tx.amount == amount
     assert tx.datetime == now
     assert tx.payer == pay_acct
@@ -220,8 +221,8 @@ def test_insert_transaction(model_objects):
                      amount=amount,
                      payer_id=pay_acct,
                      recvr_id=rec_acct,
-                     requestor_id=requestor,
-                     approver_id=approver,
+                     # requestor_id=requestor,
+                     # approver_id=approver,
                      datetime=now,
                      )
 

@@ -213,22 +213,22 @@ class Transaction(db.Model, TimestampMixin):
     recvr_id = db.Column(db.Integer,
                          db.ForeignKey('account.id'),
                          nullable=False)
-    requestor_id = db.Column(db.Integer,
-                             db.ForeignKey('user.id'),
-                             nullable=False)
-    approver_id = db.Column(db.Integer,
-                            db.ForeignKey('user.id'),
-                            nullable=False)
+    # requestor_id = db.Column(db.Integer,
+    #                          db.ForeignKey('user.id'),
+    #                          nullable=False)
+    # approver_id = db.Column(db.Integer,
+    #                         db.ForeignKey('user.id'),
+    #                         nullable=False)
 
     ccy = db.relationship('Currency')
     payer = db.relationship('Account',
                             foreign_keys=[payer_id])
     recvr = db.relationship('Account',
                             foreign_keys=[recvr_id])
-    requestor = db.relationship("User",
-                                foreign_keys=[requestor_id])
-    approver = db.relationship("User",
-                               foreign_keys=[approver_id])
+    # requestor = db.relationship("User",
+    #                             foreign_keys=[requestor_id])
+    # approver = db.relationship("User",
+    #                            foreign_keys=[approver_id])
 
     @classmethod
     def __declare_last__(cls):
@@ -236,8 +236,10 @@ class Transaction(db.Model, TimestampMixin):
         ValidateNumeric(Transaction.amount, False, True)
         ValidateInteger(Transaction.payer_id, False, True)
         ValidateInteger(Transaction.recvr_id, False, True)
-        ValidateInteger(Transaction.requestor_id, False, True)
-        ValidateInteger(Transaction.approver_id, False, True)
+        # ValidateInteger(Transaction.requestor_id, False, True)
+        # ValidateInteger(Transaction.approver_id, False, True)
+        # validate that the transaction is between two accounts with the
+        # same ccy
 
 
 class StripeSubscription(db.Model, TimestampMixin):

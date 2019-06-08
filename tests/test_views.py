@@ -1,3 +1,4 @@
+import donate
 import pytest
 from flask_validator import ValidateError
 import git
@@ -12,6 +13,7 @@ from donate.routes import (
     model_stripe_data,
 )
 from sqlalchemy.orm.exc import NoResultFound
+from unittest.mock import MagicMock, patch
 
 
 def validate_main_page_data(data):
@@ -176,6 +178,26 @@ def test_model_stripe_data(testapp, test_form, db):
         tx = model_stripe_data(req_data)
 
     proj = db.session.query(Project).one()
+    acct = proj.accounts[0]
+    ccy = acct.ccy
+
     req_data['project_select'] = proj.name
 
     tx = model_stripe_data(req_data)
+    db.session.add(tx)
+
+    payer = db.session.query(Account).filter_by(name=req_data['email']).one()
+
+    assert tx.amount == int(req_data['charge'])*100
+    assert tx.payer == payer
+    assert tx.recvr == acct
+    assert tx.payer.ccy_id == tx.recvr.ccy_id
+
+
+@patch('donate.vendor.stripe.create_charge')
+def test_donation_post(testapp, test_form):
+    app = testapp
+    test_form.vals['charge[amount]'] = [" ", test_form.amt, ""]
+
+    response = app.post("/donation", data=test_form)
+    assert donate.vendor.stripe.create_charge.called == False # fix this, the request or request data is wrong.

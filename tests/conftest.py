@@ -245,7 +245,7 @@ def test_form():
         amt = 100
 
         def getlist(self, x):
-            return ['other', self.amt, '']
+            return [" ", self.amt, '']
 
         def __getitem__(self, x):
             return self.vals[x]
@@ -258,5 +258,7 @@ def test_form():
                 return self.vals[x]
             else:
                 return y
+        def items(self):
+            return self.vals.items()
 
     return form()
