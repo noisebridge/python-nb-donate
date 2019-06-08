@@ -1,0 +1,12 @@
+@startuml
+title donate.routes.model_stripe_data
+donate-> func: stripe charge and request data
+func -> database: request currency and project by name
+func <- database: return Currency and Project objects
+func -> database: request account by name and currency
+func <-- database: return Account object if it exists
+func --> func: if it doesnt, create new Account 
+func --> func: add new account to Project
+func -> func: create transaction object between accounts
+donate <- func: return transaction objects
+@enduml
