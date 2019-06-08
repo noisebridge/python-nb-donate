@@ -1,0 +1,25 @@
+@startuml
+(*) -down-> "create_charge"
+if "recurring" then
+    -right->[true] "charge_monthly"
+    -right-> "stripe api: Customer.create"
+    partition StripePlan {
+        -down-> "get_plan"
+        -down-> "stripe api: Plan.list"
+        if "plan exists" then
+            -right->[false] "create_plan"
+            -down->"stripe api: Plan.create"
+            -down->"return plan.id"
+        else
+            -down->[true] "return plan.id"
+        endif
+    }
+    -down-> "stripe api: Subscription.create"
+    -left-> "return subscription.id"
+else
+    -left->[false] "charge_once"
+    --> "stripe api: Charge.create"
+    --> "return charge.id"
+endif
+
+@enduml

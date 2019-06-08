@@ -1,0 +1,13 @@
+@startuml
+title: Main workflow
+User --> donate : GET index.html on route home via / or /index
+donate --> database: query project, donations
+donate --> os: strike key env variable
+User <-- donate: render main.html
+
+User --> donate : POST donation-form to route /donation
+donate <-- stripe : get card token via stripe.js
+donate --> stripe : create stripe charge
+donate --> database : create transaction model from stripe charge
+User <-- donate : redirect to thanks.html on route /thanks
+@enduml

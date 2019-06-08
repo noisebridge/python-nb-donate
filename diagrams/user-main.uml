@@ -1,0 +1,25 @@
+http://plantuml.com/activity-diagram-legacy
+java -jar ~/bin/plantuml <this file>
+
+@startuml
+title Donate Business Logic
+
+(*) -> visit https://donate.noisebridge.net
+if "donate nitialized?" then
+    ->[false] "error: run initialization script"
+else
+    -->[true] "render main page"
+endif
+--> "Select Amount"
+--> "Enter Card Data and Project"
+--> "Select Recurrance"
+--> "Enter Email"
+if "Select Anonymous" then
+    -->[true] "Submit"
+else
+    -->[false] "Enter Name"
+    --> "Submit"
+endif
+--> "Render thank you page"
+->(*) 
+@enduml
