@@ -1,5 +1,4 @@
 from datetime import datetime
-from donate.app import app, create_app
 from donate.database import db
 from donate.models import (
     Currency,
@@ -139,11 +138,9 @@ def test_new_project():
     goal = 4000000
     name = "Forever Home"
 
-    proj = Project(account_id=acc_id,
-                   goal=goal,
+    proj = Project(goal=goal,
                    name=name)
 
-    assert proj.account_id == acc_id
     assert proj.goal == goal
     assert proj.name == name
 
@@ -151,7 +148,7 @@ def test_new_project():
 @pytest.mark.usefixtures('db')
 def test_insert_project():
 
-    proj = Project(account_id=1, goal=4000000, name="Forever Home")
+    proj = Project(goal=4000000, name="Forever Home")
     db.session.add(proj)
     db.session.commit()
 
@@ -162,18 +159,14 @@ def test_insert_project():
 
 def test_bad_formed_project():
 
-    acc_id = 1
     goal = 4000000
     name = "Forever Home"
 
     with pytest.raises(ValidateError):
-        proj = Project(account_id="test", goal=goal, name=name)
+        proj = Project(goal="test", name=name)
 
     with pytest.raises(ValidateError):
-        proj = Project(account_id=acc_id, goal="test", name=name)
-
-    with pytest.raises(ValidateError):
-        proj = Project(account_id=acc_id, goal=goal, name=1234)
+        proj = Project(goal=goal, name=1234)
 
 
 def test_new_transaction():

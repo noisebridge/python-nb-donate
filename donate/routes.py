@@ -198,7 +198,7 @@ def projects():
 
     return render_template('projects.html',
                            title='Projects',
-                           projects=sorted_projects)
+                           projects=projects)
 
 
 @project_page.route('/projects/<project_name>')
@@ -206,7 +206,7 @@ def get_project(project_name):
     """ Return a project indicated by the direcdt link. If it doesn't exist,
     return the new project page.
     """
-    project = db.session.query(Project).filter_by(name == project_name)
+    project = db.session.query(Project).filter_by(name=project_name).all()
     if len(project) == 0:
         return new_project(project_name)
     if len(project) == 1:
@@ -222,19 +222,19 @@ def new_project():
     """ Return a page to create a new project """
 
     if request.method == "POST":
-        goal = request.form['goal']
+        goal = int(request.form['goal'])
         ccy_code = request.form['ccy']
         desc = request.form['desc']
         project_name = request.form['project_name']
 
-        ccy = db.session.query(Currency).filter_by(name=ccy_code).one()
+        ccy = db.session.query(Currency).filter_by(code=ccy_code).one()
         acct = Account(name="{}_{}_acct".format(project_name, ccy_code),
                        ccy=ccy)
 
         project = Project(name=project_name,
                           desc=desc,
-                          goal=goal,
-                          accounts=[acct])
+                          goal=goal)
+        project.accounts = [acct]
 
         db.session.add(project)
         db.session.commit()

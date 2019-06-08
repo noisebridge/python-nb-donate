@@ -84,10 +84,11 @@ class Account(db.Model, TimestampMixin):
     name = db.Column(db.String(120),
                      unique=True,
                      nullable=False)
-    ccy_id = db.Column(db.Integer,
-                       db.ForeignKey('currency.id'))
+    proj_id = db.Column(db.Integer, db.ForeignKey('project.id'))
 
+    ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
     ccy = db.relationship('Currency')
+
 
     @classmethod
     def __declare_last__(cls):
@@ -114,9 +115,6 @@ class Project(db.Model, TimestampMixin):
                      unique=True,
                      nullable=False)
     desc = db.Column(db.String(160))
-    account_id = db.Column(db.Integer,
-                           db.ForeignKey('account.id'),
-                           nullable=False)
     goal = db.Column(db.Float,
                      nullable=False,
                      default=0)
@@ -126,7 +124,6 @@ class Project(db.Model, TimestampMixin):
     @classmethod
     def __declare_last__(cls):
         ValidateString(Project.name, False, True)
-        ValidateInteger(Project.account_id, False, True)
         ValidateNumeric(Project.goal, False, True)
 
 

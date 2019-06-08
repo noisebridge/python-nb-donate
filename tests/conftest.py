@@ -212,3 +212,50 @@ def stripe_donation_data():
     return data_dict_builder({"label": label,
                               "keys": keys,
                               "obj_data": obj_data})
+
+
+@pytest.fixture(scope='function')
+def test_db_project(db):
+    proj_name = "Test Proj"
+    proj_desc = "A project for testing"
+    proj_goal = 100
+    ccy_name = "USD Dollar"
+    ccy_code = "USD"
+    acct_name = "{}_{}_acct".format(proj_name, ccy_code)
+
+    ccy = Currency(name=ccy_name, code=ccy_code)
+    account = Account(name=acct_name, ccy=ccy)
+    proj = Project(name=proj_name, desc=proj_desc, goal=proj_goal)
+    proj.accounts = [account]
+
+    db.session.add(proj)
+    db.session.commit()
+
+
+@pytest.fixture(scope='function')
+def test_form():
+
+    class form:
+        vals = {"donor[email]": "jimmy@whatever.net",
+                "donor[name]": "Jimmy Hoffa",
+                "donor[stripe_token]": "abc123",
+                "charge[recurring]": True,
+                "donor[anonymous]": True,
+                "project_select": "test project"}
+
+        def getlist(self, x):
+            return ['0', '100', '']
+
+        def __getitem__(self, x):
+            return self.vals[x]
+
+        def __contains__(self, x):
+            return x in self.vals
+
+        def get(self, x, y):
+            if x in self.vals:
+                return self.vals[x]
+            else:
+                return y
+
+    return form()
