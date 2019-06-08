@@ -12,9 +12,11 @@ def get_one(cls, criteria):
         app.logger.info("Looking for {} "
                         "with critera {}".format(cls.__name__, criteria))
         return db.session.query(cls).filter_by(**criteria).one()
-    except NoResultFound:
+    except NoResultFound as e:
         app.logger.error("{} not found with critera {}"
-                         .format(cls.__name__, critera))
-    except MultipleResultsFound:
+                         .format(cls.__name__, criteria))
+        raise e
+    except MultipleResultsFound as e:
         app.logger.error("Multiple {} found wiht criteria {}"
                          .format(cls.__name__, criteria))
+        raise e

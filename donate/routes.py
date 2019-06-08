@@ -59,7 +59,7 @@ def get_donation_params(form):
     return ret
 
 
-def model_stripe_data(charge, req_data):
+def model_stripe_data(req_data):
     app.logger.info("Modelling stripe data")
 
     if app.config['SINGLE_CCY']:
@@ -79,7 +79,7 @@ def model_stripe_data(charge, req_data):
     try:
         from_acct = get_one(Account,
                             {'name': from_acc_name,
-                             'ccy': ccy_name})
+                             'ccy': ccy})
     # if it doesn't exist, make it.
     except NoResultFound:
         app.logger.info("Customer Account not found, creating account"
@@ -101,7 +101,7 @@ def model_stripe_data(charge, req_data):
     tx = Transaction(amount=amount,
                      ccy=ccy,
                      payer=from_acct,
-                     recvr=to_acc)
+                     recvr=to_acct)
 
     return tx
 

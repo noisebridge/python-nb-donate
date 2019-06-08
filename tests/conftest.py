@@ -242,9 +242,10 @@ def test_form():
                 "charge[recurring]": True,
                 "donor[anonymous]": True,
                 "project_select": "test project"}
+        amt = 100
 
         def getlist(self, x):
-            return ['0', '100', '']
+            return ['other', self.amt, '']
 
         def __getitem__(self, x):
             return self.vals[x]

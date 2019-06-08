@@ -1,4 +1,5 @@
 import pytest
+from flask_validator import ValidateError
 import git
 import json
 from donate.models import (
@@ -6,7 +7,11 @@ from donate.models import (
     Currency,
     Project,
 )
-from donate.routes import get_donation_params
+from donate.routes import (
+    get_donation_params,
+    model_stripe_data,
+)
+from sqlalchemy.orm.exc import NoResultFound
 
 
 def validate_main_page_data(data):
@@ -128,7 +133,6 @@ def test_one_project_page(testapp, db):
     app = testapp
 
     proj = db.session.query(Project).one()
-
     response = app.get('/projects/{}'.format(proj.name))
 
     assert response.status_code == 200
@@ -141,5 +145,37 @@ def test_one_project_page(testapp, db):
 
 def test_get_donation_params(testapp, test_form):
     app = testapp
+    form = test_form
 
-    result = get_donation_params(test_form)
+    result = get_donation_params(form)
+
+    assert result['charge'] == form.amt
+    assert result['email'] == form.vals["donor[email]"]
+    assert result['name'] == form.vals["donor[name]"]
+    assert result['stripe_token'] == form.vals["donor[stripe_token]"]
+    assert result['recurring'] == ("charge[recurring]" in form.vals)
+    assert result['anonymous'] == ("donor[anonymous]" in form.vals)
+    assert result['project_select'] == form.vals['project_select']
+
+
+@pytest.mark.usefixtures('test_db_project')
+def test_model_stripe_data(testapp, test_form, db):
+    app = testapp
+
+    req_data = {
+        'charge': "100",
+        'email': "rando@thewhatever.org",
+        'name': "Jeru the Damaga",
+        'stripe_token': "abcd1234",
+        'recurring': False,
+        'anonymous': False,
+        'project_select': "Throws Error"
+    }
+
+    with pytest.raises(NoResultFound):
+        tx = model_stripe_data(req_data)
+
+    proj = db.session.query(Project).one()
+    req_data['project_select'] = proj.name
+
+    tx = model_stripe_data(req_data)
