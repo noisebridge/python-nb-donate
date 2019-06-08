@@ -19,7 +19,7 @@ setup(
         'python-dotenv',
         'rfc3339',
         'sadisplay',
-        'stripe'
+        'stripe',
         'werkzeug',
     ],
 )
