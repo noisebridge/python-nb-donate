@@ -194,10 +194,21 @@ def test_model_stripe_data(testapp, test_form, db):
     assert tx.payer.ccy_id == tx.recvr.ccy_id
 
 
-@patch('donate.vendor.stripe.create_charge')
-def test_donation_post(testapp, test_form):
+@patch('donate.routes.create_charge')
+def test_donation_post(create_charge, testapp, test_form, test_db_project, db):
     app = testapp
-    test_form.vals['charge[amount]'] = [" ", test_form.amt, ""]
 
-    response = app.post("/donation", data=test_form)
-    assert donate.vendor.stripe.create_charge.called == False # fix this, the request or request data is wrong.
+    proj = db.session.query(Project).one()
+    test_form.vals['charge[amount]'] = [" ", str(test_form.amt), ""]
+    test_form.vals['project_select'] = proj.name
+
+    vals = {}
+    with pytest.raises(IndexError):
+        response = app.post("/donation", data=vals)
+
+    create_charge().id = 1
+    create_charge().balance_transaction = 2
+    response = app.post("/donation", data=test_form.vals)
+    assert create_charge.called
+
+    assert response.status_code == 200

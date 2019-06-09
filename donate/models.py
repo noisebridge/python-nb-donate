@@ -40,7 +40,7 @@ class User(db.Model):
     name_first = db.Column(db.String(80))
     name_last = db.Column(db.String(80))
 
-    donations = db.relationship('Donation')
+    # donations = db.relationship('Donation')
     subscriptions = db.relationship('StripeSubscription')
 
     @classmethod
@@ -141,11 +141,11 @@ class Donation(db.Model, TimestampMixin):
     type = db.Column(db.String(50))
     amount = db.Column(db.Float, nullable=False)
     anonymous = db.Column(db.Boolean, nullable=False, default=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
 
     ccy = db.relationship('Currency')
-    user = db.relationship('User')
+    # user = db.relationship('User')
 
     __mapper_args__ = {
         'polymorphic_identity': 'donation',

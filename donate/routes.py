@@ -142,18 +142,22 @@ def donation():
         return redirect('/index#form')
         # TODO log request data, make sure charge failed
 
-    tx = model_stripe_data(charge=charge, req_data=params)
+    tx = model_stripe_data(req_data=params)
 
-    sd = StripeDonation(card=params['stripe_token'],
-                   stripe_id=charge.id,
-                   token=charge.balance_transaction,
-                   txs=[tx])
+    sd = StripeDonation(
+        anonymous=params['anonymous'],
+        card=params['stripe_token'],
+        stripe_id=charge.id,
+        token=charge.balance_transaction,
+        amount = tx.amount)
+    sd.txs = [tx]
+    sd.ccy = tx.ccy
 
     try:
         db.session.add(tx)
         db.session.add(sd)
         db.session.commit()
-    except Error as e:
+    except Exception as e:
         db.session.rollback()
         raise e
 
