@@ -208,7 +208,7 @@ def test_donation_post(create_charge, testapp, test_form, test_db_project, db):
 
     create_charge().id = 1
     create_charge().balance_transaction = 2
-    response = app.post("/donation", data=test_form.vals)
-    assert create_charge.called
+    response = app.post("/donation", data=test_form, follow_redirects=True)
 
+    assert create_charge.called
     assert response.status_code == 200

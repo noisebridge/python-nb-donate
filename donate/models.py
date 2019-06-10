@@ -89,7 +89,6 @@ class Account(db.Model, TimestampMixin):
     ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
     ccy = db.relationship('Currency')
 
-
     @classmethod
     def __declare_last__(cls):
         ValidateString(Account.name, False, True)
@@ -131,7 +130,6 @@ class Donation(db.Model, TimestampMixin):
     ''' An amount of currency donated by a user, possibly anonymous.
     id:         unique ID of domnation
     type:       Type of donation
-    amount:     Quantity of numeraire donated
     anonymous:  flag to retain anonyminity
     user:       user who donated
     ccy_id:     id of currency
@@ -139,13 +137,11 @@ class Donation(db.Model, TimestampMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(50))
-    amount = db.Column(db.Float, nullable=False)
     anonymous = db.Column(db.Boolean, nullable=False, default=False)
     # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
-
-    ccy = db.relationship('Currency')
     # user = db.relationship('User')
+    tx_id = db.Column(db.Integer, db.ForeignKey('transaction.id'))
+    txs = db.relationship('Transaction')
 
     __mapper_args__ = {
         'polymorphic_identity': 'donation',
@@ -166,17 +162,14 @@ class StripeDonation(Donation, TimestampMixin):
     id = db.Column(db.Integer,
                    db.ForeignKey('donation.id'),
                    primary_key=True)
-    card = db.Column(db.String,
-                     nullable=False)
-    stripe_id = db.Column(db.String,
+    card_id = db.Column(db.String,
+                        nullable=False)
+    charge_id = db.Column(db.String,
                           nullable=False,
                           default=False)
-    token = db.Column(db.String(80),
-                      nullable=False,
-                      default=False)
-    txs = db.Column(db.Integer,
-                    db.ForeignKey('transaction.id'))
-
+    # customer_id = db.Column(db.String,
+    #                         nullable=False,
+    #                         default=False)
     __mapper_args__ = {
         'polymorphic_identity': 'stripe_donation'
     }
@@ -248,6 +241,8 @@ class StripeSubscription(db.Model, TimestampMixin):
 
     # Note: Subscriptions will literally subscribe to updates via API request
     #       to generate appropriate transactions.'''
+
+    # Really should be subscribe from an account to an account through a Project
 
     __tablename__ = "stripe_subscription"
     id = db.Column(db.Integer,

@@ -142,16 +142,18 @@ def donation():
         return redirect('/index#form')
         # TODO log request data, make sure charge failed
 
+    app.logger.debug("Creating Transaction")
     tx = model_stripe_data(req_data=params)
 
+    app.logger.debug("Creating StripeDonation -  anon: {}, card_id: {}, "
+                     "charge_id: {}".format(False,
+                                            params['stripe_token'],
+                                            charge.balance_transaction))
     sd = StripeDonation(
-        anonymous=params['anonymous'],
-        card=params['stripe_token'],
-        stripe_id=charge.id,
-        token=charge.balance_transaction,
-        amount = tx.amount)
-    sd.txs = [tx]
-    sd.ccy = tx.ccy
+        anonymous=False,
+        card_id=params['stripe_token'],
+        charge_id=charge.balance_transaction)
+    sd.txs = tx
 
     try:
         db.session.add(tx)

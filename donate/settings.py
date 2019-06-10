@@ -53,3 +53,4 @@ class TestConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
     LOG_LEVEL = logging.DEBUG
     LOG_FILE = os.path.join(Config.PROJECT_ROOT, "logs/test.log")
+    PRESERVE_CONTEXT_ON_EXCEPTION = False
