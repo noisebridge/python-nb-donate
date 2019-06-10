@@ -1,7 +1,5 @@
 from datetime import datetime
-from donate.app import create_app
 from donate.database import db
-from donate.settings import TestConfig
 from donate.models import (
     Currency,
     Account,
@@ -16,7 +14,6 @@ import pytest
 
 
 def test_new_ccy():
-    # app = create_app(TestConfig)
     ccy = Currency(code="USD", name="US Dollar")
 
     assert ccy.code == "USD"
@@ -141,11 +138,9 @@ def test_new_project():
     goal = 4000000
     name = "Forever Home"
 
-    proj = Project(account_id=acc_id,
-                   goal=goal,
+    proj = Project(goal=goal,
                    name=name)
 
-    assert proj.account_id == acc_id
     assert proj.goal == goal
     assert proj.name == name
 
@@ -153,7 +148,7 @@ def test_new_project():
 @pytest.mark.usefixtures('db')
 def test_insert_project():
 
-    proj = Project(account_id=1, goal=4000000, name="Forever Home")
+    proj = Project(goal=4000000, name="Forever Home")
     db.session.add(proj)
     db.session.commit()
 
@@ -164,18 +159,14 @@ def test_insert_project():
 
 def test_bad_formed_project():
 
-    acc_id = 1
     goal = 4000000
     name = "Forever Home"
 
     with pytest.raises(ValidateError):
-        proj = Project(account_id="test", goal=goal, name=name)
+        proj = Project(goal="test", name=name)
 
     with pytest.raises(ValidateError):
-        proj = Project(account_id=acc_id, goal="test", name=name)
-
-    with pytest.raises(ValidateError):
-        proj = Project(account_id=acc_id, goal=goal, name=1234)
+        proj = Project(goal=goal, name=1234)
 
 
 def test_new_transaction():
@@ -190,21 +181,22 @@ def test_new_transaction():
     pay_acct = 60
     rec_acct = 70
 
-    tx = Transaction(approver_id=approver_id,
+    tx = Transaction(
+        # approver_id=approver_id,
                      ccy_id=ccy,
                      payer_id=payer_id,
                      recvr_id=recvr_id,
-                     requestor_id=requestor_id,
+                     # requestor_id=requestor_id,
                      amount=amount,
                      datetime=now,
                      payer=pay_acct,
                      recvr=rec_acct)
 
-    assert tx.approver_id == approver_id
+    # assert tx.approver_id == approver_id
     assert tx.ccy_id == ccy
     assert tx.payer_id == payer_id
     assert tx.recvr_id == recvr_id
-    assert tx.requestor_id == requestor_id
+    # assert tx.requestor_id == requestor_id
     assert tx.amount == amount
     assert tx.datetime == now
     assert tx.payer == pay_acct
@@ -229,8 +221,8 @@ def test_insert_transaction(model_objects):
                      amount=amount,
                      payer_id=pay_acct,
                      recvr_id=rec_acct,
-                     requestor_id=requestor,
-                     approver_id=approver,
+                     # requestor_id=requestor,
+                     # approver_id=approver,
                      datetime=now,
                      )
 

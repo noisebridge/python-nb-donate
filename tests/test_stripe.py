@@ -2,7 +2,7 @@ import stripe
 import donate.vendor.stripe as stripe_utils
 import pytest
 import os
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 
 def test_api_context_manager():
@@ -38,43 +38,108 @@ def test_stringify_stripe_error():
     assert msg == "An unexpected error occured processing your payment request"
 
 
-def test_create_onetime_charge():
+@patch('donate.vendor.stripe.stripe.Charge')
+def test_create_onetime_charge(charge):
 
-    with pytest.raises(stripe.error.CardError):
-        stripe_utils.charge_once(
-            "tok_chargeDeclinedExpiredCard",
-            10000,
-            "lasers")
+    tok = "token"
+    amt = 10000
+    desc = "lasers"
+    charge_id = stripe_utils.charge_once(tok, amt, desc)
 
-    charge_id = stripe_utils.charge_once(
-        "tok_visa",
-        10000,
-        "lasers")
-
-    assert charge_id is not None
-
-    with pytest.raises(stripe.error.InvalidRequestError):
-        charge_id = stripe_utils.charge_once(
-            "tok_visa",
-            -100,
-            "lasers")
+    assert charge.create.called
+    charge.create.assert_called_with(amount=amt,
+                                     currency="usd",
+                                     description=desc,
+                                     source=tok)
 
 
-def test_get_plan():
+@patch('donate.vendor.stripe.create_plan')
+@patch('donate.vendor.stripe.stripe.Plan')
+def test_get_plan(plan, create_plan):
     amt = 20000
     ccy = "USD"
     interval = "month"
 
     plan_id = stripe_utils.get_plan(amt, ccy, interval)
-    assert plan_id is not None
+    assert plan.list.called
+
+    plan.list.assert_called_with(amount=amt,
+                                 limit=1,
+                                 active=True,
+                                 currency=ccy,
+                                 interval=interval)
+
+    plan.list.return_value = []
+    plan_id = stripe_utils.get_plan(amt, ccy, interval)
+
+    plan.list.assert_called_with(amount=amt,
+                                 limit=1,
+                                 active=True,
+                                 currency=ccy,
+                                 interval=interval)
+    assert create_plan.called
+    create_plan.assert_called_with(amt, ccy, interval)
+
+    plan.list.return_value = [1, 2]
+    with pytest.raises(ValueError):
+        plan_id = stripe_utils.get_plan(amt, ccy, interval)
+
+    m = Mock
+    m.id = 10
+
+    plan.list.return_value = {'data': [m]}
+    plan_id = stripe_utils.get_plan(amt, ccy, interval)
+    assert plan_id == 10
+
+@patch('donate.vendor.stripe.stripe.Plan')
+def test_create_plan(plan):
+
+    amt = 10000
+    ccy = "USD",
+    interval = "monthly"
+
+    stripe_utils.create_plan(amt, ccy, interval)
+
+    plan.create.assert_called_with(name="${} / {}".format(amt/100, interval),
+                                   amount=amt,
+                                   currency=ccy,
+                                   interval=interval)
 
 
-def test_create_charge():
+@patch('donate.vendor.stripe.get_plan')
+@patch('donate.vendor.stripe.stripe.Customer')
+@patch('donate.vendor.stripe.stripe.Subscription')
+def test_charge_monthly(sub, customer, plan):
+    tok = "abc123"
+    amt = 1000
+    email = "someone@somewhere.net"
+    desc = "A plan"
 
-    token = "tok_visa"
-    amount = 12500
-    email = "billbrandly@snl.com"
-    desc = "for some bananas"
+    plan.return_value = 10
+    customer.create().id = 100
 
-    # Test recurring
-    result = stripe_utils.create_charge(True, token, amount, email, desc)
+    stripe_utils.charge_monthly(cc_token=tok,
+                                amount_in_cents=amt,
+                                email=email,
+                                description=desc)
+
+    customer.create.assert_called_with(source=tok,
+                                       email=email)
+
+    sub.create.assert_called_with(customer=100, items=[{'plan': 10}])
+
+
+@patch('donate.vendor.stripe.charge_monthly')
+@patch('donate.vendor.stripe.charge_once')
+def test_create_charge(once, monthly):
+
+    recurring = True
+    cc_token = 'tok'
+    amt = 10000
+    email = "someone@womewhere.net"
+
+    stripe_utils.create_charge(recurring, cc_token, amt, email)
+    assert monthly.called
+
+    stripe_utils.create_charge(not recurring, cc_token, amt, email)
+    assert once.called

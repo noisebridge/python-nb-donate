@@ -40,7 +40,7 @@ class User(db.Model):
     name_first = db.Column(db.String(80))
     name_last = db.Column(db.String(80))
 
-    donations = db.relationship('Donation')
+    # donations = db.relationship('Donation')
     subscriptions = db.relationship('StripeSubscription')
 
     @classmethod
@@ -84,9 +84,9 @@ class Account(db.Model, TimestampMixin):
     name = db.Column(db.String(120),
                      unique=True,
                      nullable=False)
-    ccy_id = db.Column(db.Integer,
-                       db.ForeignKey('currency.id'))
+    proj_id = db.Column(db.Integer, db.ForeignKey('project.id'))
 
+    ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
     ccy = db.relationship('Currency')
 
     @classmethod
@@ -114,9 +114,6 @@ class Project(db.Model, TimestampMixin):
                      unique=True,
                      nullable=False)
     desc = db.Column(db.String(160))
-    account_id = db.Column(db.Integer,
-                           db.ForeignKey('account.id'),
-                           nullable=False)
     goal = db.Column(db.Float,
                      nullable=False,
                      default=0)
@@ -126,7 +123,6 @@ class Project(db.Model, TimestampMixin):
     @classmethod
     def __declare_last__(cls):
         ValidateString(Project.name, False, True)
-        ValidateInteger(Project.account_id, False, True)
         ValidateNumeric(Project.goal, False, True)
 
 
@@ -134,7 +130,6 @@ class Donation(db.Model, TimestampMixin):
     ''' An amount of currency donated by a user, possibly anonymous.
     id:         unique ID of domnation
     type:       Type of donation
-    amount:     Quantity of numeraire donated
     anonymous:  flag to retain anonyminity
     user:       user who donated
     ccy_id:     id of currency
@@ -142,13 +137,11 @@ class Donation(db.Model, TimestampMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(50))
-    amount = db.Column(db.Float, nullable=False)
     anonymous = db.Column(db.Boolean, nullable=False, default=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
-
-    ccy = db.relationship('Currency')
-    user = db.relationship('User')
+    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # user = db.relationship('User')
+    tx_id = db.Column(db.Integer, db.ForeignKey('transaction.id'))
+    txs = db.relationship('Transaction')
 
     __mapper_args__ = {
         'polymorphic_identity': 'donation',
@@ -169,17 +162,14 @@ class StripeDonation(Donation, TimestampMixin):
     id = db.Column(db.Integer,
                    db.ForeignKey('donation.id'),
                    primary_key=True)
-    card = db.Column(db.String,
-                     nullable=False)
-    stripe_id = db.Column(db.String,
+    card_id = db.Column(db.String,
+                        nullable=False)
+    charge_id = db.Column(db.String,
                           nullable=False,
                           default=False)
-    token = db.Column(db.String(80),
-                      nullable=False,
-                      default=False)
-    txs = db.Column(db.Integer,
-                    db.ForeignKey('transaction.id'))
-
+    # customer_id = db.Column(db.String,
+    #                         nullable=False,
+    #                         default=False)
     __mapper_args__ = {
         'polymorphic_identity': 'stripe_donation'
     }
@@ -216,22 +206,22 @@ class Transaction(db.Model, TimestampMixin):
     recvr_id = db.Column(db.Integer,
                          db.ForeignKey('account.id'),
                          nullable=False)
-    requestor_id = db.Column(db.Integer,
-                             db.ForeignKey('user.id'),
-                             nullable=False)
-    approver_id = db.Column(db.Integer,
-                            db.ForeignKey('user.id'),
-                            nullable=False)
+    # requestor_id = db.Column(db.Integer,
+    #                          db.ForeignKey('user.id'),
+    #                          nullable=False)
+    # approver_id = db.Column(db.Integer,
+    #                         db.ForeignKey('user.id'),
+    #                         nullable=False)
 
     ccy = db.relationship('Currency')
     payer = db.relationship('Account',
                             foreign_keys=[payer_id])
     recvr = db.relationship('Account',
                             foreign_keys=[recvr_id])
-    requestor = db.relationship("User",
-                                foreign_keys=[requestor_id])
-    approver = db.relationship("User",
-                               foreign_keys=[approver_id])
+    # requestor = db.relationship("User",
+    #                             foreign_keys=[requestor_id])
+    # approver = db.relationship("User",
+    #                            foreign_keys=[approver_id])
 
     @classmethod
     def __declare_last__(cls):
@@ -239,8 +229,10 @@ class Transaction(db.Model, TimestampMixin):
         ValidateNumeric(Transaction.amount, False, True)
         ValidateInteger(Transaction.payer_id, False, True)
         ValidateInteger(Transaction.recvr_id, False, True)
-        ValidateInteger(Transaction.requestor_id, False, True)
-        ValidateInteger(Transaction.approver_id, False, True)
+        # ValidateInteger(Transaction.requestor_id, False, True)
+        # ValidateInteger(Transaction.approver_id, False, True)
+        # validate that the transaction is between two accounts with the
+        # same ccy
 
 
 class StripeSubscription(db.Model, TimestampMixin):
@@ -249,6 +241,8 @@ class StripeSubscription(db.Model, TimestampMixin):
 
     # Note: Subscriptions will literally subscribe to updates via API request
     #       to generate appropriate transactions.'''
+
+    # Really should be subscribe from an account to an account through a Project
 
     __tablename__ = "stripe_subscription"
     id = db.Column(db.Integer,

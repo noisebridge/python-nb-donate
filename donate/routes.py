@@ -24,17 +24,12 @@ from donate.models import (
     Transaction,
     StripeDonation
 )
-from donate.vendor.stripe import (
-    create_charge,
-    _get_stripe_key,
-)
+from donate.vendor.stripe import create_charge
 import stripe
 from stripe.error import StripeError
 
-stripe.api_key = _get_stripe_key('SECRET')
-
 git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
-repo_path = "https://github.com/marcidy/nb_donate/commits/"
+repo_path = "FIXME" #  FIXME or don't.  Why is this even here.
 
 donation_page = Blueprint('donation', __name__, template_folder="templates")
 home_page = Blueprint('home', __name__, template_folder="templates")
@@ -47,15 +42,6 @@ new_account_page = Blueprint('new_account',
                              __name__, template_folder="templates")
 donation_charges = Blueprint('new_charge',
                              __name__, template_folder="templates")
-
-
-def write_donation_to_db(request_data, params, stripe_donation):
-    """Note: stripe_donation can be the id of a charge or a subscription
-    depending on params['recurring']
-    """
-
-    # TODO: implement write_donation_to_db
-    return "@TODO: implement write_donation_to_db"
 
 
 def get_donation_params(form):
@@ -73,7 +59,7 @@ def get_donation_params(form):
     return ret
 
 
-def model_stripe_data(charge, req_data):
+def model_stripe_data(req_data):
     app.logger.info("Modelling stripe data")
 
     if app.config['SINGLE_CCY']:
@@ -93,7 +79,7 @@ def model_stripe_data(charge, req_data):
     try:
         from_acct = get_one(Account,
                             {'name': from_acc_name,
-                             'ccy': ccy_name})
+                             'ccy': ccy})
     # if it doesn't exist, make it.
     except NoResultFound:
         app.logger.info("Customer Account not found, creating account"
@@ -115,7 +101,7 @@ def model_stripe_data(charge, req_data):
     tx = Transaction(amount=amount,
                      ccy=ccy,
                      payer=from_acct,
-                     recvr=to_acc)
+                     recvr=to_acct)
 
     return tx
 
@@ -151,18 +137,32 @@ def donation():
             params['email'])
         app.logger.debug("Charge created: {}".format(charge))
     except StripeError as error:
+        app.logger.error("StripeError: ")
         flash(error)
         return redirect('/index#form')
         # TODO log request data, make sure charge failed
 
-    tx = model_stripe_data(charge=charge, req_data=params)
+    app.logger.debug("Creating Transaction")
+    tx = model_stripe_data(req_data=params)
 
-    StripeDonation(card=params['stripe_token'],
-                   stripe_id=charge.id,
-                   token=charge.balance_transaction,
-                   txs=[tx])
+    app.logger.debug("Creating StripeDonation -  anon: {}, card_id: {}, "
+                     "charge_id: {}".format(False,
+                                            params['stripe_token'],
+                                            charge.balance_transaction))
+    sd = StripeDonation(
+        anonymous=False,
+        card_id=params['stripe_token'],
+        charge_id=charge.balance_transaction)
+    sd.txs = tx
 
-    # write_donation_to_db(request_data, params, charge_id)
+    try:
+        db.session.add(tx)
+        db.session.add(sd)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise e
+
     return redirect('/thanks')
 
 
@@ -178,7 +178,7 @@ def index():
 
     donations = db.session.query(Donation).limit(10)
 
-    STRIPE_KEY = _get_stripe_key('PUBLIC')
+    STRIPE_KEY = app.get_stripe_key('PUBLIC')
 
     return render_template('main.html',
                            data={
@@ -205,7 +205,7 @@ def projects():
 
     return render_template('projects.html',
                            title='Projects',
-                           projects=sorted_projects)
+                           projects=projects)
 
 
 @project_page.route('/projects/<project_name>')
@@ -213,7 +213,7 @@ def get_project(project_name):
     """ Return a project indicated by the direcdt link. If it doesn't exist,
     return the new project page.
     """
-    project = db.session.query(Project).filter_by(name == project_name)
+    project = db.session.query(Project).filter_by(name=project_name).all()
     if len(project) == 0:
         return new_project(project_name)
     if len(project) == 1:
@@ -229,19 +229,19 @@ def new_project():
     """ Return a page to create a new project """
 
     if request.method == "POST":
-        goal = request.form['goal']
+        goal = int(request.form['goal'])
         ccy_code = request.form['ccy']
         desc = request.form['desc']
         project_name = request.form['project_name']
 
-        ccy = db.session.query(Currency).filter_by(name=ccy_code).one()
+        ccy = db.session.query(Currency).filter_by(code=ccy_code).one()
         acct = Account(name="{}_{}_acct".format(project_name, ccy_code),
                        ccy=ccy)
 
         project = Project(name=project_name,
                           desc=desc,
-                          goal=goal,
-                          accounts=[acct])
+                          goal=goal)
+        project.accounts = [acct]
 
         db.session.add(project)
         db.session.commit()

@@ -40,7 +40,7 @@ def app():
 @pytest.fixture(scope='function')
 def testapp(app):
     """ A webtest app """
-    return app
+    return app.test_client()
 
 
 @pytest.yield_fixture(scope='function')
@@ -197,18 +197,63 @@ def stripe_subscription_data():
 def stripe_donation_data():
 
     label = "stripe_donation"
-    keys = ['anonymous', 'type', 'card', 'stripe_id',
-            'token', 'user_id', 'txs', 'amount']
+    keys = ['anonymous', 'type', 'card_id', 'charge_id']
 
     obj_data = [
-        (True, 'stripe_donation', "1234-5678-9101", 1,
-         uuid.uuid1().hex, 1, 2, 2000),
-        (False, 'stripe_donation', "0987-6543-2112", 2,
-         uuid.uuid1().hex, 2, 5, 1000000),
-        (False, 'stripe_donation', "8888-9999-1111-2222", 6,
-         uuid.uuid1().hex, 3, 1000, 1.50), # NOQA
-    ]
+        (True, 'stripe_donation', "1234-5678-9101", uuid.uuid1().hex),
+        (False, 'stripe_donation', "0987-6543-2112", uuid.uuid1().hex),
+        (False, 'stripe_donation', "8888-9999-1111-2222", uuid.uuid1().hex)]
 
     return data_dict_builder({"label": label,
                               "keys": keys,
                               "obj_data": obj_data})
+
+
+@pytest.fixture(scope='function')
+def test_db_project(db):
+    proj_name = "Test Proj"
+    proj_desc = "A project for testing"
+    proj_goal = 100
+    ccy_name = "USD Dollar"
+    ccy_code = "USD"
+    acct_name = "{}_{}_acct".format(proj_name, ccy_code)
+
+    ccy = Currency(name=ccy_name, code=ccy_code)
+    account = Account(name=acct_name, ccy=ccy)
+    proj = Project(name=proj_name, desc=proj_desc, goal=proj_goal)
+    proj.accounts = [account]
+
+    db.session.add(proj)
+    db.session.commit()
+
+
+@pytest.fixture(scope='function')
+def test_form():
+
+    class form:
+        vals = {"donor[email]": "jimmy@whatever.net",
+                "donor[name]": "Jimmy Hoffa",
+                "donor[stripe_token]": "abc123",
+                "charge[recurring]": True,
+                "donor[anonymous]": True,
+                "project_select": "test project"}
+        amt = 100
+
+        def getlist(self, x):
+            return [" ", self.amt, '']
+
+        def __getitem__(self, x):
+            return self.vals[x]
+
+        def __contains__(self, x):
+            return x in self.vals
+
+        def get(self, x, y):
+            if x in self.vals:
+                return self.vals[x]
+            else:
+                return y
+        def items(self):
+            return self.vals.items()
+
+    return form()
