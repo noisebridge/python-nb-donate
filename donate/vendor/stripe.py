@@ -50,8 +50,7 @@ def create_charge(recurring, cc_token, amount_in_cents,
             amount_in_cents,
             description)
 
-    customer = get_customer(cc_token, email)
-    return {**charge, **customer}
+    return charge
 
 
 def get_plan(amount, currency='USD', interval='month'):
@@ -70,7 +69,7 @@ def get_plan(amount, currency='USD', interval='month'):
 
     if len(plans) == 0:
         plan = create_plan(amount, currency, interval)
-        return {'plan_id': plan.id}
+        return {'plan_id': plan['plan_id']}
 
     if len(plans) == 1:
         return {'plan_id': plans['data'][0].id}
@@ -117,7 +116,7 @@ def charge_once(cc_token, amount_in_cents, description):
             description=description,
             source=cc_token)
 
-    return {'charge_id': charge.id}
+    return {'charge_id': charge.id, 'customer_id': charge.customer}
 
 
 def get_customer(cc_token, email):

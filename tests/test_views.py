@@ -206,8 +206,7 @@ def test_donation_post(create_charge, testapp, test_form, test_db_project, db):
     with pytest.raises(IndexError):
         response = app.post("/donation", data=vals)
 
-    create_charge().id = 1
-    create_charge().balance_transaction = 2
+    create_charge.return_value = {'charge_id': 1, 'plan_id': 2, 'customer_id': 3}
     response = app.post("/donation", data=test_form, follow_redirects=True)
 
     assert create_charge.called

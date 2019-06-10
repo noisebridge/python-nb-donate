@@ -41,7 +41,7 @@ class User(db.Model):
     name_last = db.Column(db.String(80))
 
     # donations = db.relationship('Donation')
-    subscriptions = db.relationship('StripeSubscription')
+    # subscriptions = db.relationship('StripeSubscription')
 
     @classmethod
     def __declare_last__(cls):
@@ -167,9 +167,9 @@ class StripeDonation(Donation, TimestampMixin):
     charge_id = db.Column(db.String,
                           nullable=False,
                           default=False)
-    # customer_id = db.Column(db.String,
-    #                         nullable=False,
-    #                         default=False)
+    customer_id = db.Column(db.String,
+                            nullable=False,
+                            default=False)
     __mapper_args__ = {
         'polymorphic_identity': 'stripe_donation'
     }
@@ -250,9 +250,11 @@ class StripeSubscription(db.Model, TimestampMixin):
     stripe_plan_id = db.Column(db.Integer,
                                db.ForeignKey('stripeplan.id'),
                                nullable=False)
-    user = db.Column(db.Integer,
-                     db.ForeignKey('user.id'),
-                     nullable=False)
+    # user = db.Column(db.Integer,
+    #                  db.ForeignKey('user.id'),
+    #                  nullable=False)
+    email = db.Column(db.String)
+    customer_id = db.Column(db.String)
     txs = db.Column(db.Integer,
                     db.ForeignKey('transaction.id'))
 
@@ -274,11 +276,6 @@ class StripePlan(db.Model):
                          nullable=False)
     desc = db.Column(db.String,
                      nullable=False)
-    acct_id = db.Column(db.Integer,
-                        db.ForeignKey('account.id'),
-                        nullable=False)
-
-    acct = db.relationship('Account')
     subscriptions = db.relationship('StripeSubscription')
 
     @classmethod

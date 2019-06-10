@@ -276,9 +276,7 @@ def test_new_stripe_plan():
                       name=name,
                       amount=amount,
                       interval=interval,
-                      desc=desc,
-                      acct_id=acct_id,
-                      acct=acct)
+                      desc=desc)
 
     assert id == plan.id
     assert ccy_id == plan.ccy_id
@@ -286,8 +284,6 @@ def test_new_stripe_plan():
     assert amount == plan.amount
     assert interval == plan.interval
     assert desc == plan.desc
-    assert acct_id == plan.acct_id
-    assert acct == plan.acct
 
 
 @pytest.mark.usefixtures('db')
