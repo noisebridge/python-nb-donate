@@ -34,7 +34,7 @@ def init():
     project = Project(name="General Fund",
                       desc="Noisebridge's account of record",
                       goal=0,
-                      accounts=acct)
+                      accounts=[acct])
 
     session = create_session()
 
@@ -48,3 +48,7 @@ def init():
     except Exception as e:
         session.rollback()
         raise e
+
+
+if __name__ == "__main__":
+    init()
