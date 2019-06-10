@@ -2,7 +2,7 @@
 {% block head_script_section %}
   {{ super() }}
   <script>
-    var stripe = Stripe.setPublishableKey({{ data.stripe_pk }})
+    var stripe = Stripe.setPublishableKey("{{ data.stripe_pk }}")
   </script>
 {% endblock %}
 {% block content %}
