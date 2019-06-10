@@ -197,12 +197,12 @@ def stripe_subscription_data():
 def stripe_donation_data():
 
     label = "stripe_donation"
-    keys = ['anonymous', 'type', 'card_id', 'charge_id']
+    keys = ['anonymous', 'type', 'card_id', 'charge_id', 'customer_id']
 
     obj_data = [
-        (True, 'stripe_donation', "1234-5678-9101", uuid.uuid1().hex),
-        (False, 'stripe_donation', "0987-6543-2112", uuid.uuid1().hex),
-        (False, 'stripe_donation', "8888-9999-1111-2222", uuid.uuid1().hex)]
+        (True, 'stripe_donation', "1234-5678-9101", uuid.uuid1().hex, '10'),
+        (False, 'stripe_donation', "0987-6543-2112", uuid.uuid1().hex, '11'),
+        (False, 'stripe_donation', "8888-9999-1111-2222", uuid.uuid1().hex, '12')]
 
     return data_dict_builder({"label": label,
                               "keys": keys,
