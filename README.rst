@@ -57,5 +57,6 @@ We use Flask-Migrate to create and run the database.  The workflow is
 2. [Once] edit migrations/env.py to add the model data
 3. flask db migrate - creates a migration in the migrations/versions folder which represents the commands to go from teh existing DB state to the new state.  These migration scripts may need to be edited.
 4. flask db upgrade - run the migration script.
+5. run `$ FLASK_ENV=<env> python scripts/initialize_database.py` to populate database with initial data.
 
-If having an a issue with a migration, it's important to remore __pycache__ from the migration folder tree to make sure cached versions which may be repeating the same issues.
+If having an a issue with a migration, it's important to remove __pycache__ from the migration folder tree to make sure cached versions which may be repeating the same issues.
