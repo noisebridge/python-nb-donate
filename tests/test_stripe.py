@@ -88,8 +88,8 @@ def test_get_plan(plan, create_plan):
     m.id = 10
 
     plan.list.return_value = {'data': [m]}
-    plan_id = stripe_utils.get_plan(amt, ccy, interval)
-    assert plan_id == 10
+    plan = stripe_utils.get_plan(amt, ccy, interval)
+    assert plan['plan_id'] == 10
 
 @patch('donate.vendor.stripe.stripe.Plan')
 def test_create_plan(plan):
@@ -115,7 +115,7 @@ def test_charge_monthly(sub, customer, plan):
     email = "someone@somewhere.net"
     desc = "A plan"
 
-    plan.return_value = 10
+    plan.return_value = {'plan_id': 10}
     customer.create().id = 100
 
     stripe_utils.charge_monthly(cc_token=tok,
@@ -129,10 +129,12 @@ def test_charge_monthly(sub, customer, plan):
     sub.create.assert_called_with(customer=100, items=[{'plan': 10}])
 
 
+@patch('donate.vendor.stripe.stripe.Customer')
 @patch('donate.vendor.stripe.charge_monthly')
 @patch('donate.vendor.stripe.charge_once')
-def test_create_charge(once, monthly):
+def test_create_charge(once, monthly, customer):
 
+    customer.create().id = 10
     recurring = True
     cc_token = 'tok'
     amt = 10000

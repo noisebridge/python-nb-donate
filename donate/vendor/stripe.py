@@ -50,7 +50,8 @@ def create_charge(recurring, cc_token, amount_in_cents,
             amount_in_cents,
             description)
 
-    return charge
+    customer = get_customer(cc_token, email)
+    return {**charge, **customer}
 
 
 def get_plan(amount, currency='USD', interval='month'):
@@ -69,10 +70,10 @@ def get_plan(amount, currency='USD', interval='month'):
 
     if len(plans) == 0:
         plan = create_plan(amount, currency, interval)
-        return plan.id
+        return {'plan_id': plan.id}
 
     if len(plans) == 1:
-        return plans['data'][0].id
+        return {'plan_id': plans['data'][0].id}
 
     if len(plans) > 1:
         raise ValueError("Noisebridge should only have 1 plan for amt: {},"
@@ -89,26 +90,22 @@ def create_plan(amount, currency, interval):
             currency=currency,
             interval=interval)
 
-    return plan
+    return {'plan_id': plan}
 
 
 def charge_monthly(cc_token, amount_in_cents, email, description):
     """creates a recurring charge, in this case hard coded to the defaults
     in 'get_plan' which is USD and monthly.
     """
-    with stripe_api() as api:
-        customer = api.Customer.create(
-            source=cc_token,
-            email=email)
-
+    customer = get_customer(cc_token=cc_token, email=email)
     plan = get_plan(amount_in_cents)
 
     with stripe_api() as api:
         subscription = stripe.Subscription.create(
-            customer=customer.id,
-            items=[{'plan': plan}])
+            customer=customer['customer_id'],
+            items=[{'plan': plan['plan_id']}])
 
-    return subscription.id
+    return {**customer, **plan, 'subscription_id': subscription.id}
 
 
 def charge_once(cc_token, amount_in_cents, description):
@@ -120,4 +117,13 @@ def charge_once(cc_token, amount_in_cents, description):
             description=description,
             source=cc_token)
 
-    return charge.id
+    return {'charge_id': charge.id}
+
+
+def get_customer(cc_token, email):
+    with stripe_api() as api:
+        customer = api.Customer.create(
+            source=cc_token,
+            email=email)
+
+    return {'customer_id': customer.id}
