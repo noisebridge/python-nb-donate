@@ -1,35 +1,19 @@
 Donate
 ======
-.. image:: https://travis-ci.org/marcidy/nb_donate.svg?branch=master
-   :target: https://travis-ci.org/marcidy/nb_donate
-
+.. image:: https://travis-ci.org/noisebridge/python-nb-donate.svg?branch=master
+   :target: https://travis-ci.com/noisebridge/python-nb-donate.svg?branch=master
 A rewrite of Noisebridge's donation site in python using Flask.
 
-Quick Start
------------
 
-Reference: http://flask.pocoo.org/
+Noisebridge Donate
+__________________
 
-optional: do it in a virtualenv
+The donation server handles donations from people to noisebridge as well as to accounts and projects.  All donations flow to Noisebridge accounts, but they can be credited in this system to accounts, including projects.
 
-``pip install virtualenv; virtualenv venv; source venv/bin/activate``
-
-install requirements
-
-``pip install -r requirements.txt``
-
-run the app
-
-``FLASK_APP=autoapp.py flask run``
-
-Requirements
+Installation
 ____________
 
-| Flask
-| Flask-Migrate
-| Flask-SQLAlchemy
-| Flask-Validator
-| dot-env
+See INSTALL.md for instructions on getting the application up and running.
 
 Model Specification
 ___________________
@@ -47,16 +31,3 @@ Projects have a stated goal.  A project will have at least one account to track 
 
 .. image:: pics/schema.png
    :width: 60pt
-
-Database Creation / Migration
-_____________________________
-
-We use Flask-Migrate to create and run the database.  The workflow is
-
-1. [Once] flask db init to create the migrations folder
-2. [Once] edit migrations/env.py to add the model data
-3. flask db migrate - creates a migration in the migrations/versions folder which represents the commands to go from teh existing DB state to the new state.  These migration scripts may need to be edited.
-4. flask db upgrade - run the migration script.
-5. run `$ FLASK_ENV=<env> python scripts/initialize_database.py` to populate database with initial data.
-
-If having an a issue with a migration, it's important to remove __pycache__ from the migration folder tree to make sure cached versions which may be repeating the same issues.
