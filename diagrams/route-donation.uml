@@ -2,16 +2,20 @@
 
 request -> donate: POST request to /donation route
 donate -> route: route request to donation_page blueprint
-route -> route: parse request form data with get_donation_params()
-route -> route: check required parameters
-route -> route: check donation amount validity
-route -> create_charge: Create stripe charge
+route -> route: parse request form data with get_donation_params() to get params
+route <-X route: if missing or bad params, flash message to user 
+route -> create_charge: Create stripe charge objects (customers, charges, plans, subscriptions)
 activate create_charge
-route <-- create_charge: redirect back to form on error
+request <--X create_charge: redirect back to form on error
+route <- create_charge: return stripe object ids
 deactivate create_charge
-request <-- route: User retry on error
-route -> model_stripe_data: pass donation data to create models for this donation
+route --> route: Create stripe Subscription for user if recurring
+route -> database: retrieve Plan object from database
+route <-X database: create Plan object if not found
+route <- route: add subscription to plan
+route --> database: add Plan and Subscription
 activate model_stripe_data
+route -> model_stripe_data: if one time donation, create the transaction
 route <- model_stripe_data: Transaction with all required models attached
 deactivate model_stripe_data
 route -> route: Create StripeDonation object

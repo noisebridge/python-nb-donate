@@ -2,9 +2,11 @@
 (*) -down-> "create_charge"
 if "recurring" then
     -right->[true] "charge_monthly"
-    -right-> "stripe api: Customer.create"
+        "charge_monthly" -down-> "stripe api: Customer.create"
+        "stripe api: Customer.create" -down-> "return customer.id"
+        "charge_monthly" -down-> "stripe api: Subscription.create"
+        "charge_monthly" -right-> "get_plan"
     partition StripePlan {
-        -down-> "get_plan"
         -down-> "stripe api: Plan.list"
         if "plan exists" then
             -right->[false] "create_plan"
@@ -14,12 +16,13 @@ if "recurring" then
             -down->[true] "return plan.id"
         endif
     }
-    -down-> "stripe api: Subscription.create"
-    -left-> "return subscription.id"
+    "return customer.id" -right-> "stripe api: Subscription.create"
+    "return plan.id" -right-> "stripe api: Subscription.create"
+    "stripe api: Subscription.create" -down-> "return subscription.id, plan.id, customer.id"
 else
     -left->[false] "charge_once"
     --> "stripe api: Charge.create"
-    --> "return charge.id"
+    --> "return charge.id, charge.customer"
 endif
 
 @enduml
