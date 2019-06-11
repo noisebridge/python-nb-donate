@@ -22,9 +22,15 @@ from donate.models import (
     Project,
     Currency,
     Transaction,
-    StripeDonation
+    StripeDonation,
+    StripePlan,
+    StripeSubscription,
 )
-from donate.vendor.stripe import create_charge
+from donate.vendor.stripe import (
+    create_charge,
+    get_customer
+)
+
 import stripe
 from stripe.error import StripeError
 
@@ -127,41 +133,80 @@ def donation():
 
     app.logger.debug("Params: {}".format(params))
     amt = int(round(float(params['charge']), 2) * 100)
-    app.logger.debug("Amout: {}".format(amt))
+    app.logger.debug("Amount: {}".format(amt))
 
     try:
-        charge = create_charge(
+        charge_data = create_charge(
             params['recurring'],
             params['stripe_token'],  # appended by donate.js
             amt,
             params['email'])
-        app.logger.debug("Charge created: {}".format(charge))
+        app.logger.debug("Charge created: {}".format(charge_data))
     except StripeError as error:
         app.logger.error("StripeError: ")
         flash(error)
         return redirect('/index#form')
         # TODO log request data, make sure charge failed
 
-    app.logger.debug("Creating Transaction")
-    tx = model_stripe_data(req_data=params)
+    if params['recurring']:
+        app.logger.debug("Creating Subscription")
 
-    app.logger.debug("Creating StripeDonation -  anon: {}, card_id: {}, "
-                     "charge_id: {}".format(False,
-                                            params['stripe_token'],
-                                            charge.balance_transaction))
-    sd = StripeDonation(
-        anonymous=False,
-        card_id=params['stripe_token'],
-        charge_id=charge.balance_transaction)
-    sd.txs = tx
+        stripe_sub = StripeSubscription(
+            email=params['email'],
+            customer_id=charge_data['customer_id'])
 
-    try:
-        db.session.add(tx)
-        db.session.add(sd)
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        raise e
+        plan_name = "{} / Month".format(amt)
+
+        app.logger.debug("Checking for Stripe Plan {}".format(plan_name))
+        try:
+            stripe_plan = get_one(StripePlan, {'name': plan_name})
+        except NoResultFound:
+            app.logger.debug("Creating plan {}".format(plan_name))
+            stripe_plan = StripePlan(name=plan_name,
+                               amount=amt,
+                               interval="M",
+                               desc="{}/{}".format(amt, "M"))
+            stripe_plan.subscriptions=[stripe_sub]
+        try:
+            stripe_plan
+        except NameError:
+            app.logging.error("Something went horribly wrong with StripePlan")
+
+        app.logger.debug("Adding Subscription to "
+                         "plan {} for user {}"
+                         .format(plan_name, params['email']))
+        stripe_plan.subscriptions.append(stripe_sub)
+
+        try:
+            db.session.add(stripe_plan)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    else:
+        app.logger.debug("Creating Transaction")
+        tx = model_stripe_data(req_data=params)
+
+        app.logger.debug("Creating StripeDonation -  anon: {}, card_id: {}, "
+                         "charge_id: {}, email: {}".format(params['anonymous'],
+                                                params['stripe_token'],
+                                                charge_data['charge_id'],
+                                                charge_data['customer_id']))
+        sd = StripeDonation(
+            anonymous=params['anonymous'],
+            card_id=params['stripe_token'],
+            charge_id=charge_data['charge_id'],
+            customer_id=charge_data['customer_id'])
+        sd.txs = tx
+
+        try:
+            db.session.add(tx)
+            db.session.add(sd)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
     return redirect('/thanks')
 
@@ -173,11 +218,12 @@ def index():
     other summary data
     """
 
-    sorted_projects = sorted(db.session.query(Project).all(),
+    sorted_projects = sorted(db.session.query(Project)
+                             .filter(Project.name != "General Fund").all(),
                              key=lambda proj: proj.name)
 
-    donations = db.session.query(Donation).limit(10)
-
+    # donations = db.session.query(Donation).limit(10)
+    donations = []
     STRIPE_KEY = app.get_stripe_key('PUBLIC')
 
     return render_template('main.html',

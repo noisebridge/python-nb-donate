@@ -194,20 +194,47 @@ def test_model_stripe_data(testapp, test_form, db):
     assert tx.payer.ccy_id == tx.recvr.ccy_id
 
 
+@patch('donate.routes.get_donation_params')
 @patch('donate.routes.create_charge')
-def test_donation_post(create_charge, testapp, test_form, test_db_project, db):
+@patch('donate.routes.flash')
+def test_donation_post(flash, create_charge, get_params, testapp,
+                       test_form, test_db_project, db):
     app = testapp
-
     proj = db.session.query(Project).one()
+
+    donation_params = {
+        'charge': 100,
+        'email': 'bobloblaw@lawblog.com',
+        'name': 'Bob Loblaw',
+        'stripe_token': 'abs123',
+        'recurring': True,
+        'anonymous': False,
+        'project_select': proj.name}
+
     test_form.vals['charge[amount]'] = [" ", str(test_form.amt), ""]
     test_form.vals['project_select'] = proj.name
+    create_charge.return_value = {'charge_id': 1, 'plan_id': 2, 'customer_id': 3}
 
     vals = {}
-    with pytest.raises(IndexError):
-        response = app.post("/donation", data=vals)
+    get_params.side_effect = KeyError(['test'])
+    response = app.post("/donation", data=vals)
+    assert response.status_code == 302
+
+    get_params.side_effect = ValueError(['test'])
+    response = app.post("/donation", data=vals)
+    assert response.status_code == 302
+
+    get_params.side_effect = None
+    get_params.return_value = donation_params
 
     create_charge.return_value = {'charge_id': 1, 'plan_id': 2, 'customer_id': 3}
     response = app.post("/donation", data=test_form, follow_redirects=True)
 
     assert create_charge.called
     assert response.status_code == 200
+
+    donation_params['recurring'] = False
+    get_params.return_value = donation_params
+
+    create_charge.return_value = {'charge_id': 0, 'customer_id': 1}
+    response = app.post("/donation", data=test_form, follow_redirects=True)
