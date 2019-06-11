@@ -19,3 +19,5 @@ build/
 
 instance/
 logs/
+
+migrations/versions/*
