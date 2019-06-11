@@ -18,7 +18,7 @@
 ```
 FLASK_APP=./autoapp.py
 FLASK_ENV=DEVELOPMENT
-FLASK_DEBUG=1
+FLASK_DEBUG=1  # do not use this in production.  security vulnerability.
 FLASK_RUN_PORT=5005
 
 STRIPE_KEY="<get from stripe admin>"
@@ -26,3 +26,8 @@ STRIPE_SECRET="<get from stripe admin>"
 
 DONATE_SECRET="<random bits of entropy, available in the woodshop>"
 ```
+
+# Database installation
+`$ flask db init` will complain if the migrations directory exists.  It's fine.  If it does complain, make sure migrations/versions exists.  If not, just create it.
+
+Note that migrations/env.py contains the configuration for the models used by alembic for migrations.  lines 18-27 are critical for the automigrations to be generated.  Update these with any new models.
