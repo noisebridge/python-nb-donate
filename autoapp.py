@@ -3,13 +3,20 @@ from donate.app import create_app
 from donate.database import db
 from donate.log_utils import start_timer, log_request
 from donate.models import DonateConfiguration
-from donate.settings import DevConfig, ProdConfig
+from donate.settings import DevConfig, ProdConfig, TestConfig
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
 from sqlalchemy.orm.exc import NoResultFound
 
-CONFIG = DevConfig if get_debug_flag() else ProdConfig
+if os.environ['FLASK_APP']='DEVELOPMENT':
+    CONFIG = DevConfig
+
+if os.environ['FLASK_APP']='PRODUCTION':
+    CONFIG = ProdConfig
+
+if os.environ['FLASK_APP']='TESTING':
+    CONFIG = TestConfig
 
 handler = TimedRotatingFileHandler(filename=CONFIG.LOG_FILE,
                                    when="W6", interval=1,
