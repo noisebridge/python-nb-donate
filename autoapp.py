@@ -9,13 +9,13 @@ from logging.handlers import TimedRotatingFileHandler
 import os
 from sqlalchemy.orm.exc import NoResultFound
 
-if os.environ['FLASK_APP']='DEVELOPMENT':
+if os.environ['FLASK_APP'] == 'DEVELOPMENT':
     CONFIG = DevConfig
 
-if os.environ['FLASK_APP']='PRODUCTION':
+if os.environ['FLASK_APP'] == 'PRODUCTION':
     CONFIG = ProdConfig
 
-if os.environ['FLASK_APP']='TESTING':
+if os.environ['FLASK_APP'] == 'TESTING':
     CONFIG = TestConfig
 
 handler = TimedRotatingFileHandler(filename=CONFIG.LOG_FILE,
