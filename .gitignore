@@ -20,5 +20,4 @@ build/
 instance/
 logs/
 
-migrations/versions/*
 diagrams/*.png
