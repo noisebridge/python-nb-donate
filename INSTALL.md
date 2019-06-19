@@ -4,14 +4,13 @@
 2. install python3-virtualenv
 3. pip3 install virtualenvwrapper
 4. create a virtualenv for donate with python3
-5. pip install -r requirements.txt -e . <-- development install
-6. run $ pytest
-7. retrieve .env file
-8. make donate/logs directory (or change log location, this should/can be automated?)
-9. flask db init
-10. flask db migrate
-11. flask db upgrade
-12. $ FLASK_ENV=DEVELOPMENT python scripts/initialize_database.py
+5. pip install -r requirements.txt -e . (need to check if this is OK for production install)
+6. run `$ pytest`
+7. retrieve or create .env file (or set environment variables as documented below)
+8. flask db init
+9. flask db migrate
+10. flask db upgrade
+11. $ FLASK_ENV=DEVELOPMENT python scripts/initialize_database.py
 
 # .env example
 
@@ -28,7 +27,7 @@ DONATE_SECRET="<random bits of entropy, available in the woodshop>"
 ```
 
 # Database installation
-`$ flask db init` will complain if the migrations directory exists, which it will since it's included in the package.  It's fine.  When it does complain, make sure the directory migrations/versions exists.  If not, just create the directory.
+`$ flask db init` will complain if the migrations directory exists, which it will since it's included in the package.  It's fine.  When it does complain, make sure the directory migrations/versions exists.  If not, just create the directory, but migrations/verions is shipped as well.
 
 Note that migrations/env.py contains the configuration for the models used by alembic for migrations.  lines 18-27 are critical for the automigrations to be generated.  Update these imports if any new model is created.
 
