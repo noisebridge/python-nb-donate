@@ -35,7 +35,7 @@ import stripe
 from stripe.error import StripeError
 
 git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
-repo_path = "FIXME" #  FIXME or don't.  Why is this even here.
+repo_path = "https://github.com/noisebridge/python-nb-donate/tree/"
 
 donation_page = Blueprint('donation', __name__, template_folder="templates")
 home_page = Blueprint('home', __name__, template_folder="templates")
