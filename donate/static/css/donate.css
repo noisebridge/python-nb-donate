@@ -77,6 +77,10 @@ img {
   flex-grow: 1;
 }
 
+div.alerts {
+    background-color: #FF9933;
+}
+
 .donation-form #donation-form-custom-amount {
   display: none;
 }
