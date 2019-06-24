@@ -42,7 +42,7 @@ class DevConfig(Config):
     CACHE_TYPE = 'simple'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(10**6)
     LOG_LEVEL = logging.DEBUG
-    LOG_FILE = os.path.join(Config.PROJECT_ROOT, "logs/donate.log")
+    LOG_FILE = os.path.join(Config.PROJECT_ROOT, "logs/donate-dev.log")
 
 
 class TestConfig(Config):
