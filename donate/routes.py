@@ -32,7 +32,7 @@ from donate.vendor.stripe import (
 )
 
 import stripe
-from stripe.error import StripeError
+from stripe import error as se
 
 git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
 repo_path = "https://github.com/noisebridge/python-nb-donate/tree/"
@@ -142,11 +142,20 @@ def donation():
             amt,
             params['email'])
         app.logger.debug("Charge created: {}".format(charge_data))
-    except StripeError as error:
+
+    except se.CardError as error:
         err = error.json_body.get('error', {})
-        msg = err.get('message', {})
-        app.logger.error("StripeError: {}".format(err))
+        msg = err.get('message', "")
+        app.logger.error("CardError: {}".format(err))
         flash(msg)
+        return redirect('/index#form')
+    except se.RateLimitError as error:
+        flash("Rate limit hit, please try again in a few seconds")
+        return redirect('/index#form')
+    except se.StripeError as error:
+        app.logger.error("StripeError: {}".format(error))
+        flash("Unexpected error, please check data and try again."
+              "If the error persists, please contact Noisebridge support")
         return redirect('/index#form')
         # TODO log request data, make sure charge failed
 
