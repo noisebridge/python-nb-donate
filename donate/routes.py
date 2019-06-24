@@ -144,9 +144,13 @@ def donation():
         app.logger.debug("Charge created: {}".format(charge_data))
 
     except se.CardError as error:
-        err = error.json_body.get('error', {})
-        msg = err.get('message', "")
-        app.logger.error("CardError: {}".format(err))
+        if error.json_body is not None:
+            err = error.json_body.get('error', {})
+            msg = err.get('message', "Unknown Card Error")
+            app.logger.error("CardError: {}".format(err))
+        else:
+            msg = "Unknown Card Error"
+            app.logger.error("CardError: {}".format(error))
         flash(msg)
         return redirect('/index#form')
     except se.RateLimitError as error:
