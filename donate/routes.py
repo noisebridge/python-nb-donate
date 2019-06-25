@@ -159,7 +159,7 @@ def donation():
     except se.StripeError as error:
         app.logger.error("StripeError: {}".format(error))
         flash("Unexpected error, please check data and try again."
-              "If the error persists, please contact Noisebridge support")
+              "  If the error persists, please contact Noisebridge support")
         return redirect('/index#form')
         # TODO log request data, make sure charge failed
 
