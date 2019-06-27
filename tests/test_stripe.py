@@ -145,3 +145,57 @@ def test_create_charge(once, monthly, customer):
 
     stripe_utils.create_charge(not recurring, cc_token, amt, email)
     assert once.called
+
+
+# @patch('donate.routes.redirect')
+@patch('donate.routes.flash')
+@patch('donate.routes.get_donation_params')
+@patch('donate.routes.create_charge')
+def test_donate_stripe_error(create_charge, get_donation_params,
+                             flash,  testapp):
+    CardError = stripe.error.CardError
+    StripeError = stripe.error.StripeError
+    RateLimitError = stripe.error.RateLimitError
+
+    params = {
+        'charge': 100.00,
+        'recurring': False,
+        'stripe_token': "1234",
+        'email': "test@test.com"}
+
+    # get_donation_params.return_value = {}
+    # get_donation_params.side_effect = None
+    # redirect.return_value =
+
+    msg = "test message"
+    ce = CardError(code='404', param={}, message=msg)
+
+    create_charge.side_effect = ce
+
+    response = testapp.post("/donation", data={})
+    assert flash.called
+    flash.assert_called_with("Unknown Card Error")
+
+    json_body = {'error': {'message': msg}}
+    create_charge.side_effect = CardError(code='404', param={},
+                                          message=msg, json_body=json_body)
+
+    response = testapp.post("/donation", data={})
+
+    assert flash.called
+    flash.assert_called_with(msg)
+
+    create_charge.side_effect = RateLimitError()
+
+    response = testapp.post("/donation", data={})
+    assert flash.called
+    flash.assert_called_with("Rate limit hit, "
+                             "please try again in a few seconds")
+
+    create_charge.side_effect = StripeError()
+
+    response = testapp.post("/donation", data={})
+    assert flash.called
+    flash.assert_called_with(
+        "Unexpected error, please check data and try again."
+        "  If the error persists, please contact Noisebridge support")

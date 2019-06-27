@@ -154,12 +154,13 @@ def donation():
         flash(msg)
         return redirect('/index#form')
     except se.RateLimitError as error:
+        app.logger.warn("RateLimitError hit!")
         flash("Rate limit hit, please try again in a few seconds")
         return redirect('/index#form')
     except se.StripeError as error:
         app.logger.error("StripeError: {}".format(error))
         flash("Unexpected error, please check data and try again."
-              "If the error persists, please contact Noisebridge support")
+              "  If the error persists, please contact Noisebridge support")
         return redirect('/index#form')
         # TODO log request data, make sure charge failed
 
