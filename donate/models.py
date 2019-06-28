@@ -162,12 +162,12 @@ class StripeDonation(Donation, TimestampMixin):
     id = db.Column(db.Integer,
                    db.ForeignKey('donation.id'),
                    primary_key=True)
-    card_id = db.Column(db.String,
+    card_id = db.Column(db.String(64),
                         nullable=False)
-    charge_id = db.Column(db.String,
+    charge_id = db.Column(db.String(64),
                           nullable=False,
                           default=False)
-    customer_id = db.Column(db.String,
+    customer_id = db.Column(db.String(64),
                             nullable=False,
                             default=False)
     __mapper_args__ = {
@@ -253,8 +253,8 @@ class StripeSubscription(db.Model, TimestampMixin):
     # user = db.Column(db.Integer,
     #                  db.ForeignKey('user.id'),
     #                  nullable=False)
-    email = db.Column(db.String)
-    customer_id = db.Column(db.String)
+    email = db.Column(db.String(128))
+    customer_id = db.Column(db.String(64))
     txs = db.Column(db.Integer,
                     db.ForeignKey('transaction.id'))
 
@@ -268,13 +268,13 @@ class StripePlan(db.Model):
                    primary_key=True)
     ccy_id = db.Column(db.Integer,
                        db.ForeignKey('currency.id'))
-    name = db.Column(db.String)
+    name = db.Column(db.String(64))
     amount = db.Column(db.Float,
                        nullable=False,
                        default=1)
-    interval = db.Column(db.String,
+    interval = db.Column(db.String(64),
                          nullable=False)
-    desc = db.Column(db.String,
+    desc = db.Column(db.String(64),
                      nullable=False)
     subscriptions = db.relationship('StripeSubscription')
 

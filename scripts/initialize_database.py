@@ -1,4 +1,6 @@
 # from donate.database import db
+from dotenv import load_dotenv
+load_dotenv()
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
@@ -10,12 +12,11 @@ from donate.models import (
 )
 import donate.settings as configs
 
-
 def create_session():
     flask_env = os.environ['FLASK_ENV']
     if flask_env == "PRODUCTION":
         config = configs.ProdConfig
-    else:
+    if flask_env == "DEVELOPMENT":
         config = configs.DevConfig
 
     engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
