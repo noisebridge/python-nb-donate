@@ -1,6 +1,3 @@
-# from donate.database import db
-from dotenv import load_dotenv
-load_dotenv()
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
@@ -16,8 +13,12 @@ def create_session():
     flask_env = os.environ['FLASK_ENV']
     if flask_env == "PRODUCTION":
         config = configs.ProdConfig
-    if flask_env == "DEVELOPMENT":
+    elif flask_env == "DEVELOPMENT":
         config = configs.DevConfig
+    elif flask_env == "TESTING":
+        config = confifs.TestConfig
+    else:
+        raise Exception("FLASK_ENV not recognized")
 
     engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
     Session = sessionmaker(bind=engine)

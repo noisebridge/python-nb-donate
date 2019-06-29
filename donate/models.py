@@ -34,7 +34,7 @@ class User(db.Model):
     username = db.Column(db.String(80),
                          unique=True,
                          nullable=False)
-    email = db.Column(db.String(80),
+    email = db.Column(db.String(255),
                       unique=True,
                       nullable=False)
     name_first = db.Column(db.String(80))
@@ -162,12 +162,12 @@ class StripeDonation(Donation, TimestampMixin):
     id = db.Column(db.Integer,
                    db.ForeignKey('donation.id'),
                    primary_key=True)
-    card_id = db.Column(db.String(64),
+    card_id = db.Column(db.String(255),
                         nullable=False)
-    charge_id = db.Column(db.String(64),
+    charge_id = db.Column(db.String(255),
                           nullable=False,
                           default=False)
-    customer_id = db.Column(db.String(64),
+    customer_id = db.Column(db.String(255),
                             nullable=False,
                             default=False)
     __mapper_args__ = {
@@ -253,8 +253,8 @@ class StripeSubscription(db.Model, TimestampMixin):
     # user = db.Column(db.Integer,
     #                  db.ForeignKey('user.id'),
     #                  nullable=False)
-    email = db.Column(db.String(128))
-    customer_id = db.Column(db.String(64))
+    email = db.Column(db.String(255))
+    customer_id = db.Column(db.String(255))
     txs = db.Column(db.Integer,
                     db.ForeignKey('transaction.id'))
 
