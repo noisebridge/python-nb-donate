@@ -19,6 +19,7 @@ class Config:
     LOG_FORMAT = "%(asctime)s | %(pathname)s:%(lineno)d |" \
         "%(funcName)s | %(levelname)s | %(message)s "
     SINGLE_CCY = True
+    CSRF_ENABLED = True
 
 
 class ProdConfig(Config):
@@ -26,8 +27,7 @@ class ProdConfig(Config):
 
     ENV = 'prod'
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL',
-                                             'postresql://localhost/example')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('PROD_DATABASE_URI', None)
     LOG_LEVEL = logging.WARN
 
 
@@ -36,9 +36,10 @@ class DevConfig(Config):
 
     ENV = 'dev'
     DEBUG = True
-    DB_NAME = 'dev.db'
-    DB_PATH = os.path.join(Config.PROJECT_ROOT, DB_NAME)
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////{0}'.format(DB_PATH)
+    # DB_NAME = 'dev.db'
+    # DB_PATH = os.path.join(Config.PROJECT_ROOT, DB_NAME)
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URI', None)
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:////{0}'.format(DB_PATH)
     CACHE_TYPE = 'simple'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(10**6)
     LOG_LEVEL = logging.DEBUG

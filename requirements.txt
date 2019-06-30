@@ -6,9 +6,11 @@ GitPython==2.1.11
 git+git://github.com/xeBuz/Flask-Validator.git@v1.4#egg=Flask-Validator
 pdoc==0.3.2
 pytest==4.1.0
+pytest-cov==2.7.1
 python-dotenv==0.10.1
 sadisplay==0.4.9
 Werkzeug==0.14.1
 stripe==2.17.0
 rfc3339==6.0
 ansicolors==1.1.8
+mysqlclient==1.4.2
