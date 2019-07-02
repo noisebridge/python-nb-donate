@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+import prometheus_client
 from donate.extensions import db, migrate
 from donate.settings import ProdConfig
 from donate.models import (
@@ -29,6 +30,11 @@ def create_app(config_object=ProdConfig):
 
     app.get_stripe_key = get_stripe_key
 
+    # Handle metrics requests.
+    @app.route("/metrics")
+    def metrics():  
+        return Response(prometheus_client.generate_latest(), mimetype=prometheus_client.CONTENT_TYPE_LATEST)
+    
     return(app)
 
 
