@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, Response
 import prometheus_client
 from donate.extensions import db, migrate
 from donate.settings import ProdConfig
@@ -32,9 +32,9 @@ def create_app(config_object=ProdConfig):
 
     # Handle metrics requests.
     @app.route("/metrics")
-    def metrics():  
+    def metrics():
         return Response(prometheus_client.generate_latest(), mimetype=prometheus_client.CONTENT_TYPE_LATEST)
-    
+
     return(app)
 
 
