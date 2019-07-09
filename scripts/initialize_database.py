@@ -16,7 +16,7 @@ def create_session():
     elif flask_env == "DEVELOPMENT":
         config = configs.DevConfig
     elif flask_env == "TESTING":
-        config = confifs.TestConfig
+        config = configs.TestConfig
     else:
         raise Exception("FLASK_ENV not recognized")
 
