@@ -11,7 +11,7 @@ import donate.settings as configs
 from dotenv import load_dotev
 
 
-load_dotenv(os.path.abspath('../.env')
+load_dotenv(os.path.abspath('../.env'))
 
 
 def create_session():
