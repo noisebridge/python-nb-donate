@@ -8,7 +8,7 @@ from donate.models import (
     Project,
 )
 import donate.settings as configs
-from dotenv import load_dotev
+from dotenv import load_dotenv
 
 
 load_dotenv(os.path.abspath('../.env'))
