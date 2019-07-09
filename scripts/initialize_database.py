@@ -8,6 +8,10 @@ from donate.models import (
     Project,
 )
 import donate.settings as configs
+from dotenv import load_dotenv
+
+
+load_dotenv('/srv/pydonate/code/.env')
 
 def create_session():
     flask_env = os.environ['FLASK_ENV']
