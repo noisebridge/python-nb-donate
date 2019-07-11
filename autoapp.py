@@ -1,4 +1,4 @@
-from dotend import load_dotenv
+from dotenv import load_dotenv
 from donate.app import create_app
 from donate.database import db
 from donate.log_utils import start_timer, log_request
