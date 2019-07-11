@@ -34,7 +34,8 @@ from donate.vendor.stripe import (
 import stripe
 from stripe import error as se
 
-git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
+#FIXME: git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
+git_sha="whatever"
 repo_path = "https://github.com/noisebridge/python-nb-donate/tree/"
 
 donation_page = Blueprint('donation', __name__, template_folder="templates")
