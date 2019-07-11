@@ -1,13 +1,16 @@
-from flask.helpers import get_debug_flag
+from dotend import load_dotenv
 from donate.app import create_app
 from donate.database import db
 from donate.log_utils import start_timer, log_request
 from donate.models import DonateConfiguration
 from donate.settings import DevConfig, ProdConfig, TestConfig
+from flask.helpers import get_debug_flag
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
 from sqlalchemy.orm.exc import NoResultFound
+
+load_dotenv(os.environ['DONATE_DOTENV'])
 
 if os.environ['FLASK_ENV']=='DEVELOPMENT':
     CONFIG = DevConfig
