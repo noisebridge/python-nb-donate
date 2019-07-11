@@ -1,7 +1,11 @@
+<<<<<<< HEAD
 from dotenv import load_dotenv
 import os
 load_dotenv(os.environ['DONATE_DOTENV'])
 
+=======
+from dotend import load_dotenv
+>>>>>>> parent of 600fa0c... fixint slepping
 from donate.app import create_app
 from donate.database import db
 from donate.log_utils import start_timer, log_request
