@@ -1,4 +1,7 @@
 from dotenv import load_dotenv
+import os
+load_dotenv(os.environ['DONATE_DOTENV'])
+
 from donate.app import create_app
 from donate.database import db
 from donate.log_utils import start_timer, log_request
@@ -7,10 +10,8 @@ from donate.settings import DevConfig, ProdConfig, TestConfig
 from flask.helpers import get_debug_flag
 import logging
 from logging.handlers import TimedRotatingFileHandler
-import os
 from sqlalchemy.orm.exc import NoResultFound
 
-load_dotenv(os.environ['DONATE_DOTENV'])
 
 if os.environ['FLASK_ENV']=='DEVELOPMENT':
     CONFIG = DevConfig
