@@ -1,0 +1,34 @@
+# App launcher name
+FLASK_APP=./autoapp.py
+
+# Environment
+FLASK_ENV=DEVELOPMENT
+
+#Debug flag, set to 1 to see helpful tracebacks in browser
+FLASK_DEBUG=1
+
+# App port
+FLASK_RUN_PORT=5000
+
+# Stripe keys
+STRIPE_KEY=""
+STRIPE_SECRET=""
+
+# Donate secret, used for session signing
+DONATE_SECRET=""
+
+# Presently unused
+DONATE_PRODUCT="prod_F4cX7XZmDtbOx"
+
+# Database Credentials
+# DB_USER="dbuser"
+# DB_PASS="dbpass"
+# DB_HOST="localhost"
+# DB_SOCK="/var/run/mysqld/mysqld.sock"
+
+# Example databases
+# DB_PROD_NAME="noisebridge_donate"
+# PROD_DATABASE_URI="mysql+mysqldb://${DB_USER}:${DB_PASS}@${DB_HOST}/${DB_PROD_NAME}?unix_socket=${DB_SOCK}"
+
+DB_TEST_NAME="test_donate"
+TEST_DATABASE_URI="sqlite:///${DB_TEST_NAME}"

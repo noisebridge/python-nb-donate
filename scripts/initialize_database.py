@@ -1,6 +1,9 @@
+import os
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import os
 from donate.models import (
     DonateConfiguration,
     Currency,
@@ -8,10 +11,6 @@ from donate.models import (
     Project,
 )
 import donate.settings as configs
-from dotenv import load_dotenv
-
-
-load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 
 
 def create_session():

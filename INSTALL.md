@@ -4,13 +4,13 @@
 2. install python3-virtualenv
 3. pip3 install virtualenvwrapper
 4. create a virtualenv for donate with python3
-5. pip install -r requirements.txt -e . (need to check if this is OK for production install)
-6. run `$ pytest`
+5. Install donate in development mode: `$ pip install -r requirements.txt -e .`
+6. run tests `$ pytest`
 7. retrieve or create .env file (or set environment variables as documented below)
-8. flask db init
+8. flask db init 
 9. flask db migrate
 10. flask db upgrade
-11. $ FLASK_ENV=DEVELOPMENT python scripts/initialize_database.py
+11. $ FLASK\_DOTENV=path\_to_.env python scripts/initialize_database.py
 
 # .env example
 
@@ -18,13 +18,15 @@
 FLASK_APP=./autoapp.py
 FLASK_ENV=DEVELOPMENT
 FLASK_DEBUG=1  # do not use this in production.  security vulnerability.
-FLASK_RUN_PORT=5005
+FLASK_RUN_PORT=5000
 
 STRIPE_KEY="<get from stripe admin>"
 STRIPE_SECRET="<get from stripe admin>"
 
 DONATE_SECRET="<random bits of entropy, available in the woodshop>"
 ```
+
+see `dotenv-example` for a working example that uses a sqlite database for development, requiring no extra database config.  Keys need to be generated or aquired from Stripe.
 
 # Database installation
 `$ flask db init` will complain if the migrations directory exists, which it will since it's included in the package.  It's fine.  When it does complain, make sure the directory migrations/versions exists.  If not, just create the directory, but migrations/verions is shipped as well.
