@@ -28,7 +28,7 @@ class ProdConfig(Config):
     ENV = 'prod'
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('PROD_DATABASE_URI', None)
-    LOG_LEVEL = logging.WARN
+    LOG_LEVEL = logging.INFO
 
 
 class DevConfig(Config):
