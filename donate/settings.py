@@ -15,7 +15,7 @@ class Config:
     JWT_AUTH_HEADERS_PREFIX = 'Token'
     CORS_ORIGIN_WHITELIST = []
     JWT_HEADER_TYPE = 'Token'
-    LOG_FILE = "logs/donate/donate.log"
+    LOG_FILE = "logs/donate.log"
     LOG_FORMAT = "%(asctime)s | %(pathname)s:%(lineno)d |" \
         "%(funcName)s | %(levelname)s | %(message)s "
     SINGLE_CCY = True
