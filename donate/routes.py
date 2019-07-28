@@ -160,9 +160,6 @@ def model_stripe_data(stripe_data, params):
 def donation():
     """ Processes a stripe donation. """
 
-    import pudb
-    pudb.set_trace()
-
     app.logger.debug("Entering route /donation")
     request_data = request.get_data()
     app.logger.debug("Request Data: {}".format(request_data))
