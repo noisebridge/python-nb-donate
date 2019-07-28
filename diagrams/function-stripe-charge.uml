@@ -1,28 +1,48 @@
 @startuml
-(*) -down-> "create_charge"
-if "recurring" then
-    -right->[true] "charge_monthly"
-        "charge_monthly" -down-> "stripe api: Customer.create"
-        "stripe api: Customer.create" -down-> "return customer.id"
-        "charge_monthly" -down-> "stripe api: Subscription.create"
-        "charge_monthly" -right-> "get_plan"
-    partition StripePlan {
-        -down-> "stripe api: Plan.list"
-        if "plan exists" then
-            -right->[false] "create_plan"
-            -down->"stripe api: Plan.create"
-            -down->"return plan.id"
-        else
-            -down->[true] "return plan.id"
-        endif
-    }
-    "return customer.id" -right-> "stripe api: Subscription.create"
-    "return plan.id" -right-> "stripe api: Subscription.create"
-    "stripe api: Subscription.create" -down-> "return subscription.id, plan.id, customer.id"
+(*)
+:stripe.key = "private key";
+
+if (stripe_customer_id?) then (False)
+    :stripe.Customer.create;
+endif
+:customer_id;
+
+if (recurring charge?) then (True)
+    if(plan_exists?) then (False)
+        :stripe.Plan.create;
+    endif
+    :stripe.Subscription.create;
 else
-    -left->[false] "charge_once"
-    --> "stripe api: Charge.create"
-    --> "return charge.id, charge.customer"
+    :stripe.Charge.create;
 endif
 
 @enduml
+
+' @startuml
+' (*) -down-> "create_charge"
+' if "recurring" then
+'     -right->[true] "charge_monthly"
+'         "charge_monthly" -down-> "stripe api: Customer.create"
+'         "stripe api: Customer.create" -down-> "return customer.id"
+'         "charge_monthly" -down-> "stripe api: Subscription.create"
+'         "charge_monthly" -right-> "get_plan"
+'     partition StripePlan {
+'         -down-> "stripe api: Plan.list"
+'         if "plan exists" then
+'             -right->[false] "create_plan"
+'             -down->"stripe api: Plan.create"
+'             -down->"return plan.id"
+'         else
+'             -down->[true] "return plan.id"
+'         endif
+'     }
+'     "return customer.id" -right-> "stripe api: Subscription.create"
+'     "return plan.id" -right-> "stripe api: Subscription.create"
+'     "stripe api: Subscription.create" -down-> "return subscription.id, plan.id, customer.id"
+' else
+'     -left->[false] "charge_once"
+'     --> "stripe api: Charge.create"
+'     --> "return charge.id, charge.customer"
+' endif
+' 
+' @enduml

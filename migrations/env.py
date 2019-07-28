@@ -25,7 +25,7 @@ from donate.models import (
     StripePlan,
     StripeSubscription,
 )
-from donate.database import db
+from donate.extensions import db
 
 target_metadata = db.Model.metadata
 

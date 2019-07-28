@@ -1,24 +1,21 @@
-import os
-import git
-import json
 from flask import (
     current_app as app,
     flash,
     redirect,
     render_template,
     request,
-    url_for,
     Blueprint,
 )
 from sqlalchemy.orm.exc import (
     NoResultFound,
-    MultipleResultsFound,
 )
-from donate.util import get_one
-from donate.database import db
+from donate.util import (
+    get_one,
+    obtain_model,
+)
+from donate.extensions import db
 from donate.models import (
     Account,
-    Donation,
     Project,
     Currency,
     Transaction,
@@ -27,15 +24,13 @@ from donate.models import (
     StripeSubscription,
 )
 from donate.vendor.stripe import (
-    create_charge,
-    get_customer
+    PaymentFlowError,
+    StripeAPICallError,
+    flow_stripe_payment
 )
 
-import stripe
-from stripe import error as se
-
-#FIXME: git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
-git_sha="whatever"
+# FIXME: git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
+git_sha = "whatever"
 repo_path = "https://github.com/noisebridge/python-nb-donate/tree/"
 
 donation_page = Blueprint('donation', __name__, template_folder="templates")
@@ -51,71 +46,122 @@ donation_charges = Blueprint('new_charge',
                              __name__, template_folder="templates")
 
 
+class DonationFormError(Exception):
+    pass
+
+
 def get_donation_params(form):
-    charges = [charge for charge
-               in form.getlist('charge[amount]')
-               if charge not in ["", "other", ' ']]
-    ret = {
-        'charge': charges[0],
-        'email': form['donor[email]'],
-        'name': form.get('donor[name]', "Anonymous"),
-        'stripe_token': form['donor[stripe_token]'],
-        'recurring': 'charge[recurring]' in form,
-        'anonymous': 'donor[anonymous]' in form,
-        'project_select': form['project_select']}
+    try:
+        charges = [charge for charge
+                   in form.getlist('charge[amount]')
+                   if charge not in ["", "other", ' ']]
+        if form['donor[email]'] == '':
+            raise KeyError('email')
+        ret = {
+            'charge': charges[0],
+            'email': form['donor[email]'],
+            'name': form.get('donor[name]', "Anonymous"),
+            'stripe_token': form['donor[stripe_token]'],
+            'recurring': 'charge[recurring]' in form,
+            'anonymous': 'donor[anonymous]' in form,
+            'project_select': form['project_select']}
+
+    except KeyError as e:
+        err_msg = e.args[0]
+        app.logger.debug("Params not set: {}".format(err_msg))
+        raised_msg = "Error: required form value {} not set.".format(err_msg)
+        raise DonationFormError(raised_msg)
+    except IndexError as e:
+        err_msg = e.args[0]
+        app.logger.debug("Params bad Value: {}".format(err_msg))
+        raised_msg = "Error: please enter a valid amount for your donation"
+        raise DonationFormError(raised_msg)
     return ret
 
 
-def model_stripe_data(req_data):
+def model_stripe_data(stripe_data, params):
     app.logger.info("Modelling stripe data")
 
-    if app.config['SINGLE_CCY']:
-        ccy_name = "USD"  # FIXME more generic...i mean..maybe
+    customer = stripe_data['customer']
+    email = customer.email
+    from_acc_name = email
 
-    to_proj = req_data['project_select']
-    from_acc_name = req_data['email']
-    amount = int(round(float(req_data['charge']), 2) * 100)
+    if 'charge' in stripe_data:
+        charge = stripe_data['charge']
+        amount = charge.amount
+        ccy = charge.currency.upper()
+
+    if 'subscription' in stripe_data:
+        subscription = stripe_data['subscription']
+        plan = subscription.plan
+        amount = plan.amount
+        ccy = plan.currency.upper()
+
+    if (app.config['SINGLE_CCY'] and ccy != "USD"):
+        raise ValueError("Attempt to create non-USD donation!")
 
     # These will raise errors if not found or more than one found.  They
     # should bubble up to the route.
-    project = get_one(Project, {'name': to_proj})
-    ccy = get_one(Currency, {'code': ccy_name})
+    ccy = get_one(Currency, {'code': ccy})
 
-    # Check for user account (e.g. the account from which the spice will flow)
-    app.logger.info("Finding account {}.".format(from_acc_name))
-    try:
-        from_acct = get_one(Account,
-                            {'name': from_acc_name,
-                             'ccy': ccy})
-    # if it doesn't exist, make it.
-    except NoResultFound:
-        app.logger.info("Customer Account not found, creating account"
-                        " for new customer {}".format(from_acc_name))
-        from_acct = Account(name=from_acc_name,
-                            ccy=ccy)
+    from_acct = obtain_model(Account, {'name': from_acc_name, 'ccy': ccy},
+                             {'name': from_acc_name, 'ccy': ccy})
+
+    # find the project receiving the donation and get it's account
+    project = get_one(Project, {'name': stripe_data['project']})
 
     for project_account in project.accounts:
-        if project_account.ccy.code == ccy_name:
+        if project_account.ccy.code == ccy.code:
             to_acct = project_account
+        else:
+            app.logger.error("No account with ccy {} "
+                             "on project {}".format(ccy.code, project.name))
+            raise NoResultFound
 
-    try:
-        to_acct
-    except NameError:
-        app.logger.error("No account with ccy {} "
-                         "on project {}".format(ccy_name, to_proj))
-        raise NoResultFound
+    if 'subscription' in stripe_data:
+        app.logger.debug("Creating Subscription")
+        stripe_sub = StripeSubscription(email=email, customer_id=customer.id)
+        stripe_plan = obtain_model(StripePlan,
+                                   gets={'name': plan.name},
+                                   sets={'name': plan.name,
+                                         'amount': amount,
+                                         'interval': 'M',
+                                         'desc': "{}/{}".format(amount, "M")})
+        stripe_plan.subscriptions.append(stripe_sub)
 
-    tx = Transaction(amount=amount,
-                     ccy=ccy,
-                     payer=from_acct,
-                     recvr=to_acct)
+        app.logger.debug("Adding Subscription to "
+                         "plan {} for user {}"
+                         .format(plan.name, email))
+        from_acct.subscriptions.append(stripe_sub)
+        return [stripe_plan, from_acct]
 
-    return tx
+    else:
+        app.logger.debug("Creating Transaction")
+        # create transaction between the accounts
+        tx = Transaction(amount=amount,
+                         ccy=ccy,
+                         payer=from_acct,
+                         recvr=to_acct)
+
+        dbg_msg = "Creating StripeDonation - "
+        dbg_msg += "anon: {}, charge_id: {}, customer: {}"
+        dbg_msg = dbg_msg.format(params['anonymous'], charge.id, customer.id)
+        app.logger.debug(dbg_msg)
+
+        sd = StripeDonation(
+            anonymous=params['anonymous'],
+            charge_id=charge.id,
+            customer_id=customer.id)
+        sd.txs = tx
+    return [sd]
 
 
 @donation_page.route('/donation', methods=['POST'])
 def donation():
     """ Processes a stripe donation. """
+
+    import pudb
+    pudb.set_trace()
 
     app.logger.debug("Entering route /donation")
     request_data = request.get_data()
@@ -123,107 +169,46 @@ def donation():
 
     try:
         params = get_donation_params(request.form)
-    except KeyError as e:
-        app.logger.debug("Params not set: {}".format(e.args[0]))
-        flash("Error: required form value %s not set." % e.args[0])
-        return redirect('/index#form')
-    except ValueError as e:
-        app.logger.debug("Params bad Value: {}".format(e.args[0]))
-        flash("Error: please enter a valid amount for your donation")
+    except DonationFormError as e:
+        flash(e.args[0])
         return redirect('/index#form')
 
     app.logger.debug("Params: {}".format(params))
-    amt = int(round(float(params['charge']), 2) * 100)
-    app.logger.debug("Amount: {}".format(amt))
+    amount_in_cents = int(round(float(params['charge']), 2) * 100)
+    app.logger.debug("Amount: {}".format(amount_in_cents))
 
     try:
-        charge_data = create_charge(
-            params['recurring'],
-            params['stripe_token'],  # appended by donate.js
-            amt,
-            params['email'])
-        app.logger.debug("Charge created: {}".format(charge_data))
+        app.logger.debug("Flowing Stripe Payment -- email: {}, source: {}"
+                         " amount_in_cents: {}, recurring: {}".format(
+                             params['email'], params['stripe_token'],
+                             amount_in_cents, params['recurring']))
+        stripe_data = flow_stripe_payment(
+            email=params['email'],
+            source=params['stripe_token'],  # appended by donate.js
+            amount_in_cents=amount_in_cents,
+            recurring=params['recurring'])
 
-    except se.CardError as error:
-        if error.json_body is not None:
-            err = error.json_body.get('error', {})
-            msg = err.get('message', "Unknown Card Error")
-            app.logger.error("CardError: {}".format(err))
-        else:
-            msg = "Unknown Card Error"
-            app.logger.error("CardError: {}".format(error))
-        flash(msg)
-        return redirect('/index#form')
-    except se.RateLimitError as error:
-        app.logger.warn("RateLimitError hit!")
-        flash("Rate limit hit, please try again in a few seconds")
-        return redirect('/index#form')
-    except se.StripeError as error:
-        app.logger.error("StripeError: {}".format(error))
+    except PaymentFlowError as error:
+        app.logger.error(error.args[0])
         flash("Unexpected error, please check data and try again."
               "  If the error persists, please contact Noisebridge support")
         return redirect('/index#form')
+    except StripeAPICallError as error:
+        app.logger.warning(error.log_msg)
+        flash(error.user_msg)
+        return redirect('/index#form')
         # TODO log request data, make sure charge failed
 
-    if params['recurring']:
-        app.logger.debug("Creating Subscription")
-
-        stripe_sub = StripeSubscription(
-            email=params['email'],
-            customer_id=charge_data['customer_id'])
-
-        plan_name = "{} / Month".format(amt)
-
-        app.logger.debug("Checking for Stripe Plan {}".format(plan_name))
-        try:
-            stripe_plan = get_one(StripePlan, {'name': plan_name})
-        except NoResultFound:
-            app.logger.debug("Creating plan {}".format(plan_name))
-            stripe_plan = StripePlan(name=plan_name,
-                               amount=amt,
-                               interval="M",
-                               desc="{}/{}".format(amt, "M"))
-            stripe_plan.subscriptions=[stripe_sub]
-        try:
-            stripe_plan
-        except NameError:
-            app.logging.error("Something went horribly wrong with StripePlan")
-
-        app.logger.debug("Adding Subscription to "
-                         "plan {} for user {}"
-                         .format(plan_name, params['email']))
-        stripe_plan.subscriptions.append(stripe_sub)
-
-        try:
-            db.session.add(stripe_plan)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            raise e
-
-    else:
-        app.logger.debug("Creating Transaction")
-        tx = model_stripe_data(req_data=params)
-
-        app.logger.debug("Creating StripeDonation -  anon: {}, card_id: {}, "
-                         "charge_id: {}, email: {}".format(params['anonymous'],
-                                                params['stripe_token'],
-                                                charge_data['charge_id'],
-                                                charge_data['customer_id']))
-        sd = StripeDonation(
-            anonymous=params['anonymous'],
-            card_id=params['stripe_token'],
-            charge_id=charge_data['charge_id'],
-            customer_id=charge_data['customer_id'])
-        sd.txs = tx
-
-        try:
-            db.session.add(tx)
-            db.session.add(sd)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            raise e
+    # Add models to the DB
+    stripe_data['project'] = params['project_select']
+    models = model_stripe_data(stripe_data, params)
+    try:
+        for model in models:
+            db.session.add(model)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise e
 
     return redirect('/thanks')
 
@@ -278,7 +263,7 @@ def get_project(project_name):
     """
     project = db.session.query(Project).filter_by(name=project_name).all()
     if len(project) == 0:
-        return new_project(project_name)
+        return new_project()
     if len(project) == 1:
         return (render_template('project.html',
                                 title=project_name,

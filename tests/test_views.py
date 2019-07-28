@@ -1,19 +1,22 @@
-import donate
 import pytest
-from flask_validator import ValidateError
-import git
-import json
+from unittest.mock import Mock
 from donate.models import (
     Account,
     Currency,
     Project,
+    Transaction,
+    StripePlan,
+    StripeSubscription,
+    StripeDonation
 )
 from donate.routes import (
     get_donation_params,
     model_stripe_data,
+    DonationFormError
 )
+from donate.vendor.stripe import PaymentFlowError, StripeAPICallError
 from sqlalchemy.orm.exc import NoResultFound
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 
 def validate_main_page_data(data):
@@ -145,8 +148,7 @@ def test_one_project_page(testapp, db):
     assert str(proj.goal) in data
 
 
-def test_get_donation_params(testapp, test_form):
-    app = testapp
+def test_get_donation_params(test_form):
     form = test_form
 
     result = get_donation_params(form)
@@ -160,81 +162,202 @@ def test_get_donation_params(testapp, test_form):
     assert result['project_select'] == form.vals['project_select']
 
 
-@pytest.mark.usefixtures('test_db_project')
-def test_model_stripe_data(testapp, test_form, db):
+def test_get_donation_params_errors(testapp, test_form):
     app = testapp
 
-    req_data = {
-        'charge': "100",
-        'email': "rando@thewhatever.org",
-        'name': "Jeru the Damaga",
-        'stripe_token': "abcd1234",
-        'recurring': False,
-        'anonymous': False,
-        'project_select': "Throws Error"
-    }
+    form_vals = test_form.vals.copy()
 
-    with pytest.raises(NoResultFound):
-        tx = model_stripe_data(req_data)
+    for k in ['donor[email]', 'donor[stripe_token]', 'project_select']:
+        test_form.vals = form_vals.copy()
+        del test_form.vals[k]
+        with pytest.raises(DonationFormError):
+            get_donation_params(test_form)
+
+    test_form.vals = form_vals.copy()
+    test_form.getlist = lambda x: []
+    with pytest.raises(DonationFormError):
+        get_donation_params(test_form)
+
+
+@pytest.mark.usefixtures('test_db_project')
+def test_model_stripe_data_error(testapp, test_stripe_data, db):
 
     proj = db.session.query(Project).one()
-    acct = proj.accounts[0]
-    ccy = acct.ccy
+    ccy = Currency(code="BTC", name="Douchebro Dinero")
+    acct = Account(name="test_proj", ccy=ccy)
+    proj.accounts = [acct]
+    db.session.add(proj)
 
-    req_data['project_select'] = proj.name
+    del test_stripe_data['plan']
+    del test_stripe_data['subscription']
+    test_stripe_data['project'] = proj.name
+    test_stripe_data['charge'].currency = "BTC"
 
-    tx = model_stripe_data(req_data)
-    db.session.add(tx)
+    params = {'anonymous': False}
+    with pytest.raises(ValueError):
+        model_stripe_data(test_stripe_data, params)
 
-    payer = db.session.query(Account).filter_by(name=req_data['email']).one()
+    test_stripe_data['charge'].currency = "USD"
+    with pytest.raises(NoResultFound):
+        model_stripe_data(test_stripe_data, params)
 
-    assert tx.amount == int(req_data['charge'])*100
+
+@pytest.mark.usefixtures('test_db_project')
+def test_model_stripe_data_charge(testapp, test_stripe_data, db):
+
+    params = {'anonymous': False}
+
+    customer = test_stripe_data['customer']
+    charge = test_stripe_data['charge']
+
+    # Trigger charge
+    del test_stripe_data['plan']
+    del test_stripe_data['subscription']
+
+    test_stripe_data['project'] = "not_found"
+    with pytest.raises(NoResultFound):
+        model_stripe_data(test_stripe_data, params)
+
+    proj = db.session.query(Project).one()
+    test_stripe_data['project'] = proj.name
+
+    models = model_stripe_data(test_stripe_data, params)
+    for model in models:
+        db.session.add(model)
+
+    payer = db.session.query(Account).filter_by(name=customer.email).one()
+    assert payer
+    assert payer.name == customer.email
+    assert payer.ccy.code == charge.currency.upper()
+
+    query = db.session.query(Project)
+    query = query.join(Account, Project.accounts)
+    query = query.join(Currency, Account.ccy)
+    query = query.filter(Project.name == proj.name)
+    query = query.filter(Currency.code == charge.currency.upper())
+    proj = query.one()
+    assert proj
+    recvr = proj.accounts[0]
+    assert recvr.ccy.code == charge.currency.upper()
+
+    tx = db.session.query(Transaction).filter_by(recvr=recvr).one()
+    assert tx.amount == charge.amount
     assert tx.payer == payer
-    assert tx.recvr == acct
-    assert tx.payer.ccy_id == tx.recvr.ccy_id
+
+    sd = db.session.query(StripeDonation).one()
+    assert sd.charge_id == charge.id
+    assert sd.customer_id == customer.id
+
+
+@pytest.mark.usefixtures('test_db_project')
+def test_model_stripe_data_subscription(testapp, test_stripe_data, db):
+
+    params = {
+        'anonymous': False,
+    }
+
+    customer = test_stripe_data['customer']
+    stripe_plan = test_stripe_data['plan']
+
+    # Target subscription
+    del test_stripe_data['charge']
+    proj = db.session.query(Project).one()
+    test_stripe_data['project'] = proj.name
+
+    models = model_stripe_data(test_stripe_data, params)
+    for model in models:
+        db.session.add(model)
+
+    payer = db.session.query(Account).filter_by(name=customer.email).one()
+    assert payer
+    assert payer.ccy.code == stripe_plan.currency.upper()
+
+    donate_plan = db.session.query(StripePlan).one()
+    assert donate_plan.amount == stripe_plan.amount
+    assert donate_plan.interval == "M"
+    assert donate_plan.name == stripe_plan.name
+
+    assert len(donate_plan.subscriptions) == 1
+    donate_sub = donate_plan.subscriptions[0]
+
+    assert donate_sub.stripe_plan_id == donate_plan.id
+    assert donate_sub.email == customer.email
+    assert donate_sub.acct == payer.id
 
 
 @patch('donate.routes.get_donation_params')
-@patch('donate.routes.create_charge')
+@patch('donate.routes.flow_stripe_payment')
+@patch('donate.routes.model_stripe_data')
 @patch('donate.routes.flash')
-def test_donation_post(flash, create_charge, get_params, testapp,
-                       test_form, test_db_project, db):
+def test_donation_post(flash, model_stripe_data, flow_stripe_payment,
+                       get_params, testapp, test_stripe_data, test_form,
+                       test_db_project, db):
     app = testapp
     proj = db.session.query(Project).one()
 
+    customer = test_stripe_data['customer']
+    customer_name = "Bob Loblaw"
+    source = "test_source"
+    plan = test_stripe_data['plan']
+
+    mock_stripe_data = test_stripe_data
+    del mock_stripe_data['charge']
+
     donation_params = {
-        'charge': 100,
-        'email': 'bobloblaw@lawblog.com',
-        'name': 'Bob Loblaw',
-        'stripe_token': 'abs123',
+        'charge': plan.amount/100,
+        'email': customer.email,
+        'name': customer_name,
+        'stripe_token': source,
         'recurring': True,
         'anonymous': False,
         'project_select': proj.name}
 
-    test_form.vals['charge[amount]'] = [" ", str(test_form.amt), ""]
-    test_form.vals['project_select'] = proj.name
-    create_charge.return_value = {'charge_id': 1, 'plan_id': 2, 'customer_id': 3}
+    flow_stripe_payment.return_value = test_stripe_data
+    model_stripe_data.return_value = []
 
     vals = {}
-    get_params.side_effect = KeyError(['test'])
-    response = app.post("/donation", data=vals)
-    assert response.status_code == 302
-
-    get_params.side_effect = ValueError(['test'])
+    get_params.side_effect = DonationFormError("test")
     response = app.post("/donation", data=vals)
     assert response.status_code == 302
 
     get_params.side_effect = None
     get_params.return_value = donation_params
-
-    create_charge.return_value = {'charge_id': 1, 'plan_id': 2, 'customer_id': 3}
     response = app.post("/donation", data=test_form, follow_redirects=True)
 
-    assert create_charge.called
+    assert flow_stripe_payment.called
     assert response.status_code == 200
+    assert model_stripe_data.called_with(stripe_data=test_stripe_data,
+                                         params=donation_params)
 
-    donation_params['recurring'] = False
-    get_params.return_value = donation_params
 
-    create_charge.return_value = {'charge_id': 0, 'customer_id': 1}
-    response = app.post("/donation", data=test_form, follow_redirects=True)
+@patch('donate.routes.get_donation_params')
+@patch('donate.routes.flow_stripe_payment')
+@patch('donate.routes.model_stripe_data')
+@patch('donate.routes.flash')
+def test_donation_post_errors(flash, model_stripe_data, flow_stripe_payment,
+                              get_donation_params, testapp, test_form):
+
+    app = testapp
+    msg = "Ohn nos!"
+    error = DonationFormError(msg)
+    get_donation_params.side_effect = error
+
+    response = app.post("/donation", data=test_form)
+    assert response.status_code == 302
+
+    get_donation_params.side_effect = None
+
+    flow_stripe_payment.side_effect = PaymentFlowError("Whoops!")
+    response = app.post("/donation", data=test_form)
+    assert response.status_code == 302
+
+    flow_stripe_payment.side_effect = StripeAPICallError(user_msg="user",
+                                                         log_msg="Log")
+    response = app.post("/donation", data=test_form)
+    assert response.status_code == 302
+
+
+def test_get_project(testapp, db):
+    app = testapp
+    response = app.get('/projects/not_a_project')
+    assert response.status_code == 200

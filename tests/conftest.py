@@ -1,24 +1,17 @@
 import pytest
-import os
 import uuid
-from random import randint
 from donate.app import create_app
-from donate.database import (
+from donate.extensions import (
     db as _db,
-    make_dependencies,
-    count_dependencies,
 )
 from donate.settings import TestConfig
 from donate.models import (
     User,
     Account,
     Project,
-    Transaction,
     Currency,
-    StripeDonation,
-    StripeSubscription,
-    StripePlan,
 )
+from unittest.mock import Mock
 
 
 @pytest.yield_fixture(scope='function')
@@ -197,12 +190,12 @@ def stripe_subscription_data():
 def stripe_donation_data():
 
     label = "stripe_donation"
-    keys = ['anonymous', 'type', 'card_id', 'charge_id', 'customer_id']
+    keys = ['anonymous', 'type', 'charge_id', 'customer_id']
 
     obj_data = [
-        (True, 'stripe_donation', "1234-5678-9101", uuid.uuid1().hex, '10'),
-        (False, 'stripe_donation', "0987-6543-2112", uuid.uuid1().hex, '11'),
-        (False, 'stripe_donation', "8888-9999-1111-2222", uuid.uuid1().hex, '12')]
+        (True, 'stripe_donation', uuid.uuid1().hex, '10'),
+        (False, 'stripe_donation', uuid.uuid1().hex, '11'),
+        (False, 'stripe_donation', uuid.uuid1().hex, '12')]  # NOQA
 
     return data_dict_builder({"label": label,
                               "keys": keys,
@@ -225,6 +218,27 @@ def test_db_project(db):
 
     db.session.add(proj)
     db.session.commit()
+
+
+@pytest.fixture(scope='function')
+def test_stripe_data():
+    customer = Mock()
+    customer.id = "mock_customer_id"
+    customer.email = "mock@email.net"
+    charge = Mock()
+    charge.id = "mock_charge_id"
+    charge.amount = 10000
+    charge.currency = "usd"
+    plan = Mock()
+    plan.id = "mock_plan_id"
+    plan.amount = 10000
+    plan.currency = "usd"
+    plan.name = "100 / month"
+    subscription = Mock()
+    subscription.plan = plan
+
+    return {'customer': customer, 'plan': plan, 'charge': charge,
+            'subscription': subscription}
 
 
 @pytest.fixture(scope='function')
@@ -253,6 +267,7 @@ def test_form():
                 return self.vals[x]
             else:
                 return y
+
         def items(self):
             return self.vals.items()
 

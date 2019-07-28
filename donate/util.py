@@ -4,7 +4,7 @@ from sqlalchemy.orm.exc import (
 )
 
 from flask import current_app as app
-from donate.database import db
+from donate.extensions import db
 
 
 def get_one(cls, criteria):
@@ -20,3 +20,17 @@ def get_one(cls, criteria):
         app.logger.error("Multiple {} found wiht criteria {}"
                          .format(cls.__name__, criteria))
         raise e
+
+
+def obtain_model(cls, gets, sets=None):
+    app.logger.info("Finding {} by {}".format(cls, gets))
+    try:
+        obj = get_one(cls, gets)
+    except NoResultFound:
+        if sets is not None:
+            app.logger.info("creating {} with {}".format(cls, sets))
+            obj = cls(**sets)
+        else:
+            app.logger.info("No creation criteria passed for {}".format(cls))
+            obj = None
+    return obj

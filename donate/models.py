@@ -89,6 +89,9 @@ class Account(db.Model, TimestampMixin):
     ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
     ccy = db.relationship('Currency')
 
+    # stripe_source = db.Column(db.String(255))
+    subscriptions = db.relationship('StripeSubscription')
+
     @classmethod
     def __declare_last__(cls):
         ValidateString(Account.name, False, True)
@@ -162,8 +165,8 @@ class StripeDonation(Donation, TimestampMixin):
     id = db.Column(db.Integer,
                    db.ForeignKey('donation.id'),
                    primary_key=True)
-    card_id = db.Column(db.String(255),
-                        nullable=False)
+    # card_id = db.Column(db.String(255),
+    #                     nullable=False)
     charge_id = db.Column(db.String(255),
                           nullable=False,
                           default=False)
@@ -242,7 +245,8 @@ class StripeSubscription(db.Model, TimestampMixin):
     # Note: Subscriptions will literally subscribe to updates via API request
     #       to generate appropriate transactions.'''
 
-    # Really should be subscribe from an account to an account through a Project
+    # Really should be subscribe from an account to an account through a
+    # Project
 
     __tablename__ = "stripe_subscription"
     id = db.Column(db.Integer,
@@ -254,6 +258,7 @@ class StripeSubscription(db.Model, TimestampMixin):
     #                  db.ForeignKey('user.id'),
     #                  nullable=False)
     email = db.Column(db.String(255))
+    acct = db.Column(db.Integer, db.ForeignKey('account.id'))
     customer_id = db.Column(db.String(255))
     txs = db.Column(db.Integer,
                     db.ForeignKey('transaction.id'))

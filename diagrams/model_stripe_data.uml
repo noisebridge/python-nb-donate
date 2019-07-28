@@ -1,0 +1,20 @@
+@startuml
+:model_stripe_data
+    requires:
+        stripe_data - output fromm flow_stripe_payment
+        params - parsed request parameters
+    returns: list
+        Account
+        StripeDonation
+        StripePlan
+;
+:get_customer_account
+    requires:
+        customer.email
+        charge.ccy || plan.ccy
+    retrives:
+        Account(email, ccy)
+    creates:
+        Account(email, ccy)
+;
+@enduml

@@ -1,5 +1,5 @@
 import stripe
-import donate.vendor.stripe as stripe_utils
+import donate.vendor.stripe as stripe_mod
 import pytest
 import os
 from unittest.mock import Mock, patch
@@ -11,7 +11,7 @@ def test_api_context_manager():
     old_val = os.environ['STRIPE_SECRET']
     os.environ['STRIPE_SECRET'] = fake_key
 
-    with stripe_utils.stripe_api() as api:
+    with stripe_mod.stripe_api() as api:
         assert api.api_key == fake_key
 
     os.environ['STRIPE_SECRET'] = old_val
@@ -19,183 +19,223 @@ def test_api_context_manager():
     old_val = os.environ['STRIPE_KEY']
     os.environ['STRIPE_KEY'] = fake_key
 
-    assert stripe_utils._get_stripe_key('PUBLIC') == fake_key
+    assert stripe_mod._get_stripe_key('PUBLIC') == fake_key
 
     os.environ['STRIPE_KEY'] = old_val
 
 
-def test_stringify_stripe_error():
-    error_json_body = {}
-    error = stripe.error.CardError(code='1',
-                                   param='params',
-                                   message='No',
-                                   json_body=error_json_body)
+def test_api_context_errors():
+    error_msg = "Error"
+    json_body = {'error': {'message': error_msg}}
 
-    msg = stripe_utils.stringify_stripe_error(error)
-    assert msg == "Your card was not accepted"
+    CardError = stripe.error.CardError
 
-    msg = stripe_utils.stringify_stripe_error('wrong')
-    assert msg == "An unexpected error occured processing your payment request"
+    ce = CardError(code=200, message="Error", json_body=json_body, param={})
+    with pytest.raises(stripe_mod.StripeAPICallError):
+        with stripe_mod.stripe_api() as api:
+            raise ce
+
+    ce = CardError(code=200, message="Error", json_body={}, param={})
+    with pytest.raises(stripe_mod.StripeAPICallError):
+        with stripe_mod.stripe_api() as api:
+            raise ce
+
+    ce = CardError(code=200, message="Error", json_body=None, param={})
+    with pytest.raises(stripe_mod.StripeAPICallError):
+        with stripe_mod.stripe_api() as api:
+            raise ce
+
+    with pytest.raises(stripe_mod.StripeAPICallError):
+        with stripe_mod.stripe_api() as api:
+            raise stripe.error.RateLimitError("Whoops!")
+
+    with pytest.raises(stripe_mod.StripeAPICallError):
+        with stripe_mod.stripe_api() as api:
+            raise stripe.error.StripeError("test")
 
 
-@patch('donate.vendor.stripe.stripe.Charge')
-def test_create_onetime_charge(charge):
+@patch('donate.vendor.stripe.stripe.Customer.list')
+def test_get_customer(customer_list):
+    email = "test@domain.net"
 
-    tok = "token"
-    amt = 10000
-    desc = "lasers"
-    charge_id = stripe_utils.charge_once(tok, amt, desc)
-
-    assert charge.create.called
-    charge.create.assert_called_with(amount=amt,
-                                     currency="usd",
-                                     description=desc,
-                                     source=tok)
-
-
-@patch('donate.vendor.stripe.create_plan')
-@patch('donate.vendor.stripe.stripe.Plan')
-def test_get_plan(plan, create_plan):
-    amt = 20000
-    ccy = "USD"
-    interval = "month"
-
-    plan_id = stripe_utils.get_plan(amt, ccy, interval)
-    assert plan.list.called
-
-    plan.list.assert_called_with(amount=amt,
-                                 limit=1,
-                                 active=True,
-                                 currency=ccy,
-                                 interval=interval)
-
-    plan.list.return_value = []
-    plan_id = stripe_utils.get_plan(amt, ccy, interval)
-
-    plan.list.assert_called_with(amount=amt,
-                                 limit=1,
-                                 active=True,
-                                 currency=ccy,
-                                 interval=interval)
-    assert create_plan.called
-    create_plan.assert_called_with(amt, ccy, interval)
-
-    plan.list.return_value = [1, 2]
     with pytest.raises(ValueError):
-        plan_id = stripe_utils.get_plan(amt, ccy, interval)
+        stripe_mod.get_customer()
 
-    m = Mock
-    m.id = 10
+    customer_list.return_value.data = []
+    customer = stripe_mod.get_customer(email)
+    assert customer is None
 
-    plan.list.return_value = {'data': [m]}
-    plan = stripe_utils.get_plan(amt, ccy, interval)
-    assert plan['plan_id'] == 10
+    customer_list.return_value.data = ["test"]
+    customer = stripe_mod.get_customer(email)
+    assert customer == "test"
 
-@patch('donate.vendor.stripe.stripe.Plan')
-def test_create_plan(plan):
+    customer_list.return_value.data = ["test1", "test2"]
+    with pytest.raises(stripe_mod.StripeDataIntegrity):
+        customer = stripe_mod.get_customer(email)
 
-    amt = 10000
-    ccy = "USD",
-    interval = "monthly"
 
-    stripe_utils.create_plan(amt, ccy, interval)
+@patch('donate.vendor.stripe.stripe.Plan.list')
+@patch('donate.vendor.stripe.stripe.Plan.create')
+def test_get_plan(plan_create, plan_list):
 
-    plan.create.assert_called_with(name="${} / {}".format(amt/100, interval),
-                                   amount=amt,
-                                   currency=ccy,
+    amount = 10000
+    currency = "usd"
+    interval = "month"
+    plan_name = "${} / {}".format(amount/100, interval)
+
+    ret_val = {'data': ["retrieved_plan"]}
+    plan_list.return_value = ret_val
+    plan = stripe_mod.get_plan(amount=amount,
+                               currency=currency,
+                               interval=interval)
+    plan_list.assert_called_with(amount=amount, currency=currency,
+                                 interval=interval, active=True,
+                                 limit=1)
+    assert plan == "retrieved_plan"
+
+    plan_list.return_value = []
+    plan_create.return_value = "created_plan"
+    plan = stripe_mod.get_plan(amount=amount,
+                               currency=currency,
+                               interval=interval)
+    plan_create.assert_called_with(name=plan_name,
+                                   amount=amount,
+                                   currency=currency,
+                                   interval=interval)
+    assert plan == "created_plan"
+
+    plan_list.return_value = ['test1', 'teset1']
+    with pytest.raises(stripe_mod.StripeDataIntegrity):
+        plan = stripe_mod.get_plan(amount=amount,
+                                   currency=currency,
                                    interval=interval)
 
 
+def test_stripe_erors():
+    err = stripe_mod.StripeAPICallError(user_msg="test1", log_msg="test2")
+
+    assert err.user_msg == "test1"
+    assert err.log_msg == "test2"
+
+
+@patch('donate.vendor.stripe.stripe.Customer.list')
+@patch('donate.vendor.stripe.stripe.Customer.create')
+@patch('donate.vendor.stripe.stripe.Plan.list')
+@patch('donate.vendor.stripe.stripe.Plan.create')
+@patch('donate.vendor.stripe.stripe.Subscription.create')
+def test_flow_stripe_payment_errors(sub_create, plan_create,
+                                    plan_list, cust_create, cust_list):
+    email = "test@network.org"
+    source = "not_a_real_token"
+
+    mock_customer = Mock(sources=Mock(data=[]))
+    cust_create.return_value = mock_customer
+
+    with pytest.raises(stripe_mod.PaymentFlowError):
+        stripe_mod.flow_stripe_payment()
+
+    with pytest.raises(stripe_mod.PaymentFlowError):
+        stripe_mod.flow_stripe_payment(email=None)
+
+    with pytest.raises(stripe_mod.PaymentFlowError):
+        stripe_mod.flow_stripe_payment(email=None, source=None)
+
+    cust_list.return_value = Mock(data=[])
+    with pytest.raises(stripe_mod.PaymentFlowError):
+        stripe_mod.flow_stripe_payment(email=email, source=source)
+
+    with pytest.raises(stripe_mod.PaymentFlowError):
+        stripe_mod.flow_stripe_payment(email=email, source=source,
+                                       amount_in_cents=0)
+
+    with pytest.raises(stripe_mod.PaymentFlowError):
+        stripe_mod.flow_stripe_payment(email=email, source=source,
+                                       amount_in_cents=-1)
+
+    with pytest.raises(stripe_mod.PaymentFlowError):
+        stripe_mod.flow_stripe_payment(email=email, source=source,
+                                       amount_in_cents=1, currency="btc")
+
+    with pytest.raises(stripe_mod.PaymentFlowError):
+        stripe_mod.flow_stripe_payment(email=email, source=None,
+                                       amount_in_cents=1, currency="usd",
+                                       interval="month")
+
+    with pytest.raises(stripe_mod.StripeDataIntegrity):
+        stripe_mod.flow_stripe_payment(email=email, source=source,
+                                       amount_in_cents=1, currency="usd",
+                                       interval="week")
+
+    with pytest.raises(stripe_mod.StripeDataIntegrity):
+        stripe_mod.flow_stripe_payment(email=email, source=source,
+                                       amount_in_cents=1)
+
+    cust_create.return_value = Mock(sources=Mock(data=[source]))
+    with pytest.raises(stripe_mod.PaymentFlowError):
+        stripe_mod.flow_stripe_payment(email=email, source=source,
+                                       recurring=True, amount_in_cents=1,
+                                       currency="usd", interval="week")
+
+
+@patch('donate.vendor.stripe.get_customer')
+@patch('donate.vendor.stripe.stripe.Customer.create')
 @patch('donate.vendor.stripe.get_plan')
-@patch('donate.vendor.stripe.stripe.Customer')
-@patch('donate.vendor.stripe.stripe.Subscription')
-def test_charge_monthly(sub, customer, plan):
-    tok = "abc123"
-    amt = 1000
-    email = "someone@somewhere.net"
-    desc = "A plan"
+@patch('donate.vendor.stripe.stripe.Subscription.create')
+def test_flow_stripe_payment_subscription(sub_create, get_plan,
+                                          cust_create, get_customer):
+    email = "test@network.org"
+    source = "not_a_real_token"
+    amount = 10000
+    currency = "usd"
+    interval = "month"
 
-    plan.return_value = {'plan_id': 10}
-    customer.create().id = 100
+    cust_create.return_value = Mock(sources=Mock(data=[source]), id='cust_id')
+    get_customer.return_value = Mock(sources=Mock(data=[source]), id='cust_id')
+    get_plan.return_value = Mock(id='plan_id')
+    mock_subscription = "test_subscription"
+    sub_create.return_value = mock_subscription
 
-    stripe_utils.charge_monthly(cc_token=tok,
-                                amount_in_cents=amt,
-                                email=email,
-                                description=desc)
+    out = stripe_mod.flow_stripe_payment(email=email, source=source,
+                                         amount_in_cents=amount,
+                                         currency=currency, recurring=True,
+                                         interval=interval)
 
-    customer.create.assert_called_with(source=tok,
-                                       email=email)
+    get_plan.assert_called_with(amount=amount,
+                                currency=currency,
+                                interval=interval)
 
-    sub.create.assert_called_with(customer=100, items=[{'plan': 10}])
+    sub_create.assert_called_with(customer="cust_id",
+                                  items=[{'plan': "plan_id"}])
 
-
-@patch('donate.vendor.stripe.stripe.Customer')
-@patch('donate.vendor.stripe.charge_monthly')
-@patch('donate.vendor.stripe.charge_once')
-def test_create_charge(once, monthly, customer):
-
-    customer.create().id = 10
-    recurring = True
-    cc_token = 'tok'
-    amt = 10000
-    email = "someone@womewhere.net"
-
-    stripe_utils.create_charge(recurring, cc_token, amt, email)
-    assert monthly.called
-
-    stripe_utils.create_charge(not recurring, cc_token, amt, email)
-    assert once.called
+    assert out['customer'].sources.data[0] == source
+    assert out['plan'].id == "plan_id"
+    assert out['subscription'] == "test_subscription"
 
 
-# @patch('donate.routes.redirect')
-@patch('donate.routes.flash')
-@patch('donate.routes.get_donation_params')
-@patch('donate.routes.create_charge')
-def test_donate_stripe_error(create_charge, get_donation_params,
-                             flash,  testapp):
-    CardError = stripe.error.CardError
-    StripeError = stripe.error.StripeError
-    RateLimitError = stripe.error.RateLimitError
+@patch('donate.vendor.stripe.get_customer')
+@patch('donate.vendor.stripe.stripe.Customer.create')
+@patch('donate.vendor.stripe.stripe.Charge.create')
+def test_flow_stripe_payment_charge(charge_create, cust_create, get_customer):
+    email = "test@network.org"
+    source = "not_a_real_token"
+    amount = 10000
+    currency = "usd"
 
-    params = {
-        'charge': 100.00,
-        'recurring': False,
-        'stripe_token': "1234",
-        'email': "test@test.com"}
+    mock_customer = Mock(sources=Mock(data=[source]), id='cust_id')
+    get_customer.return_value = Mock(sources=Mock(data=[source]), id='cust_id')
+    mock_charge = "mock_charge"
+    charge_create.return_value = mock_charge
 
-    # get_donation_params.return_value = {}
-    # get_donation_params.side_effect = None
-    # redirect.return_value =
+    out = stripe_mod.flow_stripe_payment(email=email, source=source,
+                                         amount_in_cents=amount,
+                                         currency=currency)
 
-    msg = "test message"
-    ce = CardError(code='404', param={}, message=msg)
+    assert charge_create.called_with(amount=amount,
+                                     currency=currency,
+                                     customer=mock_customer.id)
 
-    create_charge.side_effect = ce
-
-    response = testapp.post("/donation", data={})
-    assert flash.called
-    flash.assert_called_with("Unknown Card Error")
-
-    json_body = {'error': {'message': msg}}
-    create_charge.side_effect = CardError(code='404', param={},
-                                          message=msg, json_body=json_body)
-
-    response = testapp.post("/donation", data={})
-
-    assert flash.called
-    flash.assert_called_with(msg)
-
-    create_charge.side_effect = RateLimitError()
-
-    response = testapp.post("/donation", data={})
-    assert flash.called
-    flash.assert_called_with("Rate limit hit, "
-                             "please try again in a few seconds")
-
-    create_charge.side_effect = StripeError()
-
-    response = testapp.post("/donation", data={})
-    assert flash.called
-    flash.assert_called_with(
-        "Unexpected error, please check data and try again."
-        "  If the error persists, please contact Noisebridge support")
+    customer = out['customer']
+    charge = out['charge']
+    assert customer.id == 'cust_id'
+    assert customer.sources.data[0] == source
+    assert charge == "mock_charge"

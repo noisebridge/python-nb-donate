@@ -1,5 +1,5 @@
 from datetime import datetime
-from donate.database import db
+from donate.extensions import db
 from donate.models import (
     Currency,
     Account,
@@ -35,16 +35,16 @@ def test_insert_ccy():
 def test_bad_formed_ccy():
 
     with pytest.raises(ValidateError):
-        ccy = Currency(code=12345, name="US Dollar")
+        Currency(code=12345, name="US Dollar")
 
     with pytest.raises(ValidateError):
-        ccy = Currency(code="USD", name=12345)
+        Currency(code="USD", name=12345)
 
     with pytest.raises(ValidateError):
-        ccy = Currency(code=None, name=12345)
+        Currency(code=None, name=12345)
 
     with pytest.raises(ValidateError):
-        ccy = Currency(code="USD", name=None)
+        Currency(code="USD", name=None)
 
 
 def test_new_user():
@@ -78,13 +78,13 @@ def test_insert_user():
 def test_bad_formed_user():
 
     with pytest.raises(ValidateError):
-        u = User(username=123, email="test@test.com")
+        User(username=123, email="test@test.com")
 
     with pytest.raises(ValidateError):
-        u = User(username=None, email="test@test.com")
+        User(username=None, email="test@test.com")
 
     with pytest.raises(ValidateError):
-        u = User(username="testname", email=None)
+        User(username="testname", email=None)
 
 
 @pytest.mark.usefixtures('db')
@@ -120,21 +120,21 @@ def test_insert_account(model_objects):
 def test_bad_formed_account():
 
     with pytest.raises(ValidateError):
-        acct = Account(name="test", ccy_id="test")
+        Account(name="test", ccy_id="test")
 
     with pytest.raises(ValidateError):
-        acct = Account(name=124, ccy_id=1234)
+        Account(name=124, ccy_id=1234)
 
     with pytest.raises(ValidateError):
-        acct = Account(name=None, ccy_id=1234)
+        Account(name=None, ccy_id=1234)
 
     with pytest.raises(ValidateError):
-        acct = Account(name="test", ccy_id=None)
+        Account(name="test", ccy_id=None)
 
 
 def test_new_project():
 
-    acc_id = 1
+    # acc_id = 1
     goal = 4000000
     name = "Forever Home"
 
@@ -163,26 +163,25 @@ def test_bad_formed_project():
     name = "Forever Home"
 
     with pytest.raises(ValidateError):
-        proj = Project(goal="test", name=name)
+        Project(goal="test", name=name)
 
     with pytest.raises(ValidateError):
-        proj = Project(goal=goal, name=1234)
+        Project(goal=goal, name=1234)
 
 
 def test_new_transaction():
 
-    approver_id = 20
+    # approver_id = 20
     ccy = 4
     payer_id = 30
     recvr_id = 40
-    requestor_id = 50
+    # requestor_id = 50
     amount = 9000
     now = datetime.now()
     pay_acct = 60
     rec_acct = 70
 
-    tx = Transaction(
-        # approver_id=approver_id,
+    tx = Transaction(  # approver_id=approver_id,
                      ccy_id=ccy,
                      payer_id=payer_id,
                      recvr_id=recvr_id,
@@ -206,10 +205,10 @@ def test_new_transaction():
 @pytest.mark.usefixtures('db')
 def test_insert_transaction(model_objects):
 
-    approver = 100
-    payer = 201
-    receiver = 400
-    requestor = 693
+    # approver = 100
+    # payer = 201
+    # receiver = 400
+    # requestor = 693
     ccy_id = 1
     rec_acct = 7
     pay_acct = 9
@@ -268,8 +267,8 @@ def test_new_stripe_plan():
     amount = 8000
     interval = "month"
     desc = "a subscription for 8000 / month!"
-    acct_id = 4
-    acct = 10
+    # acct_id = 4
+    # acct = 10
 
     plan = StripePlan(id=id,
                       ccy_id=ccy_id,

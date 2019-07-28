@@ -1,0 +1,37 @@
+@startuml
+:check
+    require email
+    condidtional token;
+:get customer id
+    using email;
+partition Customer {
+    if(customer?)
+        -> no;
+        :create customer
+                using source
+                using email;
+    endif
+}
+:create payment
+    require customer
+    customer has source;
+partition payment {
+if (recurring payment?) then (subscription)
+    if (if plan doesn't exist) then (then)
+        :create plan
+                using amount
+                using frequency;
+    endif
+    :create subscription
+            using plan
+            using customer
+            implied source;
+else (single charge)
+    :create charge 
+            using amount
+            using customer
+            implied source;
+endif
+}
+@enduml
+

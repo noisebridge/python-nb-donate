@@ -1,0 +1,64 @@
+@startuml
+:donation request;
+:flow stripe payment
+    requires:
+        email
+        recurring
+        amount_in_cents
+        currency
+        source
+    uses:
+        interval
+    returns: dict
+        customer: stripe.Customer
+        charge: stripe.charge
+        subscription: stripe.Subscription
+        plan: stripe.Plan];
+:check data
+    checks:
+        email is None
+        amount_in_cents <=0
+        currency != usd
+    raises:
+        PaymentFlowError;
+:get customer
+    have:
+        email
+    retrieves:
+        stripe.Customer
+    raises:
+        StripeDataIntegrity;
+:check customer
+    requires:
+        source;
+if (no source and no customer) then
+    :raise PaymentFlowError;
+    stop;
+endif
+:add stripe.Customer to returns;
+if (recurring) then
+    :flow_subscription
+        requires:
+            customer
+            amount_in_cents
+            currency
+            interval
+        creates:
+            stripe.Subscription
+            stripe.Plan
+    add stripe.Subscription to returns
+    add stripe.Plan to returns;
+else
+    :flow charge
+        requires:
+            amount_in_cents
+            currency
+            customer
+            description
+        creates:
+            stripe.Charge
+    add stripe.Charge to returns;
+endif
+:returns
+    stripe data promised to database;
+@enduml
