@@ -126,7 +126,8 @@ def model_stripe_data(stripe_data, params):
                                    sets={'name': plan.name,
                                          'amount': amount,
                                          'interval': 'M',
-                                         'desc': "{}/{}".format(amount, "M")})
+                                         'desc': "${}/{}".format(amount/100,
+                                                                 "M")})
         stripe_plan.subscriptions.append(stripe_sub)
 
         app.logger.debug("Adding Subscription to "
