@@ -160,6 +160,14 @@ def test_get_donation_params(testapp, test_form):
     assert result['project_select'] == form.vals['project_select']
 
 
+def test_get_donation_params_error(testapp, test_form):
+    app = testapp
+    form = test_form
+    form.vals["donor[email]"] = ''
+    with pytest.raises(KeyError):
+        get_donation_params(form)
+
+
 @pytest.mark.usefixtures('test_db_project')
 def test_model_stripe_data(testapp, test_form, db):
     app = testapp
@@ -238,3 +246,8 @@ def test_donation_post(flash, create_charge, get_params, testapp,
 
     create_charge.return_value = {'charge_id': 0, 'customer_id': 1}
     response = app.post("/donation", data=test_form, follow_redirects=True)
+
+    create_charge.side_effect = ValueError("bob@email.tld")
+    response = app.post("/donation", data=test_form)
+    assert response.status_code == 302
+

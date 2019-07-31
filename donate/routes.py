@@ -55,6 +55,10 @@ def get_donation_params(form):
     charges = [charge for charge
                in form.getlist('charge[amount]')
                if charge not in ["", "other", ' ']]
+
+    if form['donor[email]'] == '':
+        raise KeyError('email')
+
     ret = {
         'charge': charges[0],
         'email': form['donor[email]'],
@@ -155,11 +159,16 @@ def donation():
         flash(msg)
         return redirect('/index#form')
     except se.RateLimitError as error:
-        app.logger.warn("RateLimitError hit!")
+        app.logger.warning("RateLimitError hit!")
         flash("Rate limit hit, please try again in a few seconds")
         return redirect('/index#form')
     except se.StripeError as error:
         app.logger.error("StripeError: {}".format(error))
+        flash("Unexpected error, please check data and try again."
+              "  If the error persists, please contact Noisebridge support")
+        return redirect('/index#form')
+    except ValueError as error:
+        app.logger.error("ValueError: {}".format(error))
         flash("Unexpected error, please check data and try again."
               "  If the error persists, please contact Noisebridge support")
         return redirect('/index#form')

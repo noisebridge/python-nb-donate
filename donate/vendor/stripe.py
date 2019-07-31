@@ -40,13 +40,14 @@ def create_charge(recurring, cc_token, amount_in_cents,
     if recurring:
         charge = charge_monthly(
             cc_token,
-            amount_in_cents,
             email,
+            amount_in_cents,
             description)
 
     else:
         charge = charge_once(
             cc_token,
+            email,
             amount_in_cents,
             description)
 
@@ -92,7 +93,7 @@ def create_plan(amount, currency, interval):
     return {'plan_id': plan}
 
 
-def charge_monthly(cc_token, amount_in_cents, email, description):
+def charge_monthly(cc_token, email, amount_in_cents, description):
     """creates a recurring charge, in this case hard coded to the defaults
     in 'get_plan' which is USD and monthly.
     """
@@ -100,29 +101,38 @@ def charge_monthly(cc_token, amount_in_cents, email, description):
     plan = get_plan(amount_in_cents)
 
     with stripe_api() as api:
-        subscription = stripe.Subscription.create(
+        subscription = api.Subscription.create(
             customer=customer['customer_id'],
             items=[{'plan': plan['plan_id']}])
 
     return {**customer, **plan, 'subscription_id': subscription.id}
 
 
-def charge_once(cc_token, amount_in_cents, description):
+def charge_once(cc_token, email, amount_in_cents, description):
     """ Returns the id of a one-off charge"""
+    customer = get_customer(cc_token=cc_token, email=email)
     with stripe_api() as api:
         charge = api.Charge.create(
             amount=amount_in_cents,
             currency='usd',
             description=description,
-            source=cc_token)
+            customer=customer['customer_id'])
 
     return {'charge_id': charge.id, 'customer_id': charge.customer}
 
 
 def get_customer(cc_token, email):
     with stripe_api() as api:
-        customer = api.Customer.create(
-            source=cc_token,
-            email=email)
+        customer_list = api.Customer.list(email=email)
+
+    if len(customer_list) == 0:
+        with stripe_api() as api:
+            customer = api.Customer.create(
+                source=cc_token,
+                email=email)
+    elif len(customer_list) == 1:
+        customer = customer_list.data[0]
+    elif len(customer_list) > 1:
+        raise ValueError("More than one customer for: {}".format(email))
 
     return {'customer_id': customer.id}
