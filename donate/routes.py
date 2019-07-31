@@ -155,7 +155,7 @@ def donation():
         flash(msg)
         return redirect('/index#form')
     except se.RateLimitError as error:
-        app.logger.warn("RateLimitError hit!")
+        app.logger.warning("RateLimitError hit!")
         flash("Rate limit hit, please try again in a few seconds")
         return redirect('/index#form')
     except se.StripeError as error:
