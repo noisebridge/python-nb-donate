@@ -160,6 +160,14 @@ def test_get_donation_params(testapp, test_form):
     assert result['project_select'] == form.vals['project_select']
 
 
+def test_get_donation_params_error(testapp, test_form):
+    app = testapp
+    form = test_form
+    form.vals["donor[email]"] = ''
+    with pytest.raises(KeyError):
+        get_donation_params(form)
+
+
 @pytest.mark.usefixtures('test_db_project')
 def test_model_stripe_data(testapp, test_form, db):
     app = testapp

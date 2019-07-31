@@ -55,6 +55,10 @@ def get_donation_params(form):
     charges = [charge for charge
                in form.getlist('charge[amount]')
                if charge not in ["", "other", ' ']]
+
+    if form['donor[email]'] == '':
+        raise KeyError('email')
+
     ret = {
         'charge': charges[0],
         'email': form['donor[email]'],
