@@ -38,19 +38,34 @@ def test_stringify_stripe_error():
     assert msg == "An unexpected error occured processing your payment request"
 
 
-@patch('donate.vendor.stripe.stripe.Charge')
-def test_create_onetime_charge(charge):
+@patch('donate.vendor.stripe.stripe.Charge.create')
+@patch('donate.vendor.stripe.stripe.Customer.list')
+@patch('donate.vendor.stripe.stripe.Customer.create')
+def test_create_onetime_charge(customer_create, customer_list, charge):
 
     tok = "token"
+    email = "rando@noisebridge.net"
     amt = 10000
     desc = "lasers"
-    charge_id = stripe_utils.charge_once(tok, amt, desc)
+    customer_list.return_value = []
+    m = Mock
+    m.id = "test_customer"
+    customer_create.return_value = m
 
-    assert charge.create.called
-    charge.create.assert_called_with(amount=amt,
-                                     currency="usd",
-                                     description=desc,
-                                     source=tok)
+    charge_id = stripe_utils.charge_once(tok, email, amt, desc)
+
+    assert charge.called
+    assert customer_create.called
+    customer_create.called_with(source=tok, email=email)
+    charge.assert_called_with(amount=amt, currency='usd',
+                              description=desc,
+                              customer="test_customer")
+
+    customer_list.return_value = [Mock(data=m)]
+    assert charge.called
+    charge.assert_called_with(amount=amt, currency='usd',
+                              description=desc,
+                              customer="test_customer")
 
 
 @patch('donate.vendor.stripe.create_plan')
@@ -90,6 +105,7 @@ def test_get_plan(plan, create_plan):
     plan.list.return_value = {'data': [m]}
     plan = stripe_utils.get_plan(amt, ccy, interval)
     assert plan['plan_id'] == 10
+
 
 @patch('donate.vendor.stripe.stripe.Plan')
 def test_create_plan(plan):
