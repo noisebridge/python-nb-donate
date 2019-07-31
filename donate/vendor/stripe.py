@@ -110,13 +110,13 @@ def charge_monthly(cc_token, email, amount_in_cents, description):
 
 def charge_once(cc_token, email, amount_in_cents, description):
     """ Returns the id of a one-off charge"""
-    customer_id = get_customer(email, cc_token)['customer_id']
+    customer = get_customer(cc_token=cc_token, email=email)
     with stripe_api() as api:
         charge = api.Charge.create(
             amount=amount_in_cents,
             currency='usd',
             description=description,
-            customer=customer_id)
+            customer=customer['customer_id'])
 
     return {'charge_id': charge.id, 'customer_id': charge.customer}
 
