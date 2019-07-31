@@ -163,6 +163,11 @@ def donation():
         flash("Unexpected error, please check data and try again."
               "  If the error persists, please contact Noisebridge support")
         return redirect('/index#form')
+    except ValueError as error:
+        app.logger.error("ValueError: {}".format(error))
+        flash("Unexpected error, please check data and try again."
+              "  If the error persists, please contact Noisebridge support")
+        return redirect('/index#form')
         # TODO log request data, make sure charge failed
 
     if params['recurring']:

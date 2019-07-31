@@ -238,3 +238,8 @@ def test_donation_post(flash, create_charge, get_params, testapp,
 
     create_charge.return_value = {'charge_id': 0, 'customer_id': 1}
     response = app.post("/donation", data=test_form, follow_redirects=True)
+
+    create_charge.side_effect = ValueError("bob@email.tld")
+    response = app.post("/donation", data=test_form)
+    assert response.status_code == 302
+
