@@ -1,24 +1,23 @@
-import os
-import git
-import json
+import random
+import string
+from datetime import datetime
 from flask import (
     current_app as app,
     flash,
+    make_response,
     redirect,
     render_template,
     request,
-    url_for,
     Blueprint,
 )
 from sqlalchemy.orm.exc import (
     NoResultFound,
-    MultipleResultsFound,
 )
 from donate.util import get_one
 from donate.database import db
 from donate.models import (
     Account,
-    Donation,
+    DonateConfiguration,
     Project,
     Currency,
     Transaction,
@@ -28,14 +27,11 @@ from donate.models import (
 )
 from donate.vendor.stripe import (
     create_charge,
-    get_customer
 )
-
-import stripe
 from stripe import error as se
 
-#FIXME: git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
-git_sha="whatever"
+# FIXME: git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
+git_sha = "whatever"
 repo_path = "https://github.com/noisebridge/python-nb-donate/tree/"
 
 donation_page = Blueprint('donation', __name__, template_folder="templates")
@@ -49,6 +45,49 @@ new_account_page = Blueprint('new_account',
                              __name__, template_folder="templates")
 donation_charges = Blueprint('new_charge',
                              __name__, template_folder="templates")
+nonce_page = Blueprint('denonce', __name__, template_folder="templates")
+
+
+def create_nonce():
+    nonce = ''.join(random.choice(string.ascii_letters + string.digits)
+                    for n in range(256))
+    db.session.add(DonateConfiguration(key=nonce, type="nonce", value="true"))
+    db.session.commit()
+    return nonce
+
+
+def consume_nonce(nonce):
+
+    nonces = db.session.query(DonateConfiguration).filter_by(
+        key=nonce,
+        type="nonce",
+        value="true").all()
+
+    if len(nonces) == 0:
+        return None
+
+    if len(nonces) == 1:
+        nonce = nonces[0]
+        if (datetime.now() - nonce.created_at).total_seconds() <= 60:
+            key = app.get_stripe_key('PUBLIC')
+        for nonce in nonces:
+            db.session.delete(nonce)
+        db.session.commit()
+        return key
+
+    if len(nonces) > 1:
+        for nonce in nonces:
+            db.session.delete(nonce)
+        db.session.commit()
+        return None
+
+
+@nonce_page.route('/nonce/<nonce>', methods=['GET'])
+def denonce(nonce):
+    data = {'value': consume_nonce(nonce)}
+    resp = make_response(render_template('nonce.html', data=data))
+    resp.headers['Content-type'] = 'application/json'
+    return resp
 
 
 def get_donation_params(form):
@@ -158,7 +197,7 @@ def donation():
             app.logger.error("CardError: {}".format(error))
         flash(msg)
         return redirect('/index#form')
-    except se.RateLimitError as error:
+    except se.RateLimitError:
         app.logger.warning("RateLimitError hit!")
         flash("Rate limit hit, please try again in a few seconds")
         return redirect('/index#form')
@@ -189,14 +228,14 @@ def donation():
         except NoResultFound:
             app.logger.debug("Creating plan {}".format(plan_name))
             stripe_plan = StripePlan(name=plan_name,
-                               amount=amt,
-                               interval="M",
-                               desc="{}/{}".format(amt, "M"))
-            stripe_plan.subscriptions=[stripe_sub]
+                                     amount=amt,
+                                     interval="M",
+                                     desc="{}/{}".format(amt, "M"))
+            stripe_plan.subscriptions = [stripe_sub]
         try:
             stripe_plan
         except NameError:
-            app.logging.error("Something went horribly wrong with StripePlan")
+            app.logger.error("Something went horribly wrong with StripePlan")
 
         app.logger.debug("Adding Subscription to "
                          "plan {} for user {}"
@@ -214,11 +253,13 @@ def donation():
         app.logger.debug("Creating Transaction")
         tx = model_stripe_data(req_data=params)
 
-        app.logger.debug("Creating StripeDonation -  anon: {}, card_id: {}, "
-                         "charge_id: {}, email: {}".format(params['anonymous'],
-                                                params['stripe_token'],
-                                                charge_data['charge_id'],
-                                                charge_data['customer_id']))
+        app.logger.debug(
+            "Creating StripeDonation -  anon: {}, card_id: {}, "
+            "charge_id: {}, email: {}".format(
+                params['anonymous'],
+                params['stripe_token'],
+                charge_data['charge_id'],
+                charge_data['customer_id']))
         sd = StripeDonation(
             anonymous=params['anonymous'],
             card_id=params['stripe_token'],
@@ -250,7 +291,8 @@ def index():
 
     # donations = db.session.query(Donation).limit(10)
     donations = []
-    STRIPE_KEY = app.get_stripe_key('PUBLIC')
+
+    nonce = create_nonce()
 
     return render_template('main.html',
                            data={
@@ -258,7 +300,7 @@ def index():
                                'repo_path': repo_path,
                                'recent_donations': donations,
                                'projects': sorted_projects,
-                               'stripe_pk': STRIPE_KEY
+                               'nonce': nonce
                            })
 
 

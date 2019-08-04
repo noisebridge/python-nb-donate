@@ -1,4 +1,3 @@
-import os
 from flask import Flask, Response
 import prometheus_client
 from donate.extensions import db, migrate
@@ -7,8 +6,6 @@ from donate.models import (
     Account,
     Currency,
     Project,
-    StripeDonation,
-    StripePlan,
     Transaction,
     User,
 )
@@ -33,7 +30,8 @@ def create_app(config_object=ProdConfig):
     # Handle metrics requests.
     @app.route("/metrics")
     def metrics():
-        return Response(prometheus_client.generate_latest(), mimetype=prometheus_client.CONTENT_TYPE_LATEST)
+        return Response(prometheus_client.generate_latest(),
+                        mimetype=prometheus_client.CONTENT_TYPE_LATEST)
 
     return(app)
 
@@ -51,6 +49,7 @@ def register_blueprints(app):
     app.register_blueprint(routes.new_project_page)
     app.register_blueprint(routes.thanks_page)
     app.register_blueprint(routes.donation_charges)
+    app.register_blueprint(routes.nonce_page)
 
 
 def register_shellcontext(app):
