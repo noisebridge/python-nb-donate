@@ -13,7 +13,10 @@ from donate.models import (
     User,
 )
 from donate.vendor.stripe import _get_stripe_key as get_stripe_key
-from donate import routes
+from donate import (
+    routes,
+    nonce
+)
 
 
 def create_app(config_object=ProdConfig):
@@ -51,6 +54,7 @@ def register_blueprints(app):
     app.register_blueprint(routes.new_project_page)
     app.register_blueprint(routes.thanks_page)
     app.register_blueprint(routes.donation_charges)
+    app.register_blueprint(nonce.nonce_page)
 
 
 def register_shellcontext(app):
