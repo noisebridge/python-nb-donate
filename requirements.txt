@@ -2,10 +2,10 @@ Babel==2.6.0
 Flask==1.0.2
 Flask-Migrate==2.3.1
 Flask-SQLAlchemy==2.3.2
-GitPython==2.1.11
+GitPython==3.0.9
 git+git://github.com/xeBuz/Flask-Validator.git@v1.4#egg=Flask-Validator
 pdoc==0.3.2
-pytest==4.1.0
+pytest==5.3.5
 pytest-cov==2.7.1
 python-dotenv==0.10.1
 sadisplay==0.4.9
