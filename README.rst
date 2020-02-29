@@ -1,7 +1,8 @@
 Donate
 ======
-.. image:: https://travis-ci.org/noisebridge/python-nb-donate.svg?branch=master
-   :target: https://travis-ci.com/noisebridge/python-nb-donate.svg?branch=master
+.. image:: https://travis-ci.com/noisebridge/python-nb-donate.svg?branch=master
+   :target: https://travis-ci.com/noisebridge/python-nb-donate
+
 A rewrite of Noisebridge's donation site in python using Flask.
 
 
