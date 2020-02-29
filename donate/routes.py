@@ -248,8 +248,7 @@ def index():
                              .filter(Project.name != "General Fund").all(),
                              key=lambda proj: proj.name)
 
-    # donations = db.session.query(Donation).limit(10)
-    donations = []
+    donations = db.session.query(Donation).limit(10)
     STRIPE_KEY = app.get_stripe_key('PUBLIC')
 
     return render_template('main.html',
