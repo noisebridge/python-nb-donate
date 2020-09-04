@@ -205,7 +205,8 @@ def test_model_stripe_data(testapp, test_form, db):
 @patch('donate.routes.get_donation_params')
 @patch('donate.routes.create_charge')
 @patch('donate.routes.flash')
-def test_donation_post(flash, create_charge, get_params, testapp,
+@patch('donate.routes.get_recaptcha_resp')
+def test_donation_post(get_recaptcha_resp, flash, create_charge, get_params, testapp,
                        test_form, test_db_project, db):
     app = testapp
     proj = db.session.query(Project).one()
@@ -222,10 +223,12 @@ def test_donation_post(flash, create_charge, get_params, testapp,
     test_form.vals['charge[amount]'] = [" ", str(test_form.amt), ""]
     test_form.vals['project_select'] = proj.name
     create_charge.return_value = {'charge_id': 1, 'plan_id': 2, 'customer_id': 3}
+    get_recaptcha_resp.return_value = {"score": 1.0}
 
     vals = {}
     get_params.side_effect = KeyError(['test'])
     response = app.post("/donation", data=vals)
+    assert get_recaptcha_resp.called
     assert response.status_code == 302
 
     get_params.side_effect = ValueError(['test'])
