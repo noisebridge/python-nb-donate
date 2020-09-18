@@ -1,7 +1,7 @@
 jQuery(function ($) {
-  function displayError(form, error) {
-    $(".alerts").prepend('<div class="alert alert-danger" role="alert">' + error.message + "</div>");
-    form.find("[data-stripe=" + error.param + "]").closest(".form-group").addClass("has-error");
+  function displayError(form) {
+    genericerrmsg = 'Something went wrong. Please try a different <a href="https://www.noisebridge.net/wiki/Donate_or_Pay_Dues">payment method</a>.'
+    $(".alerts").prepend('<div class="alert alert-danger" role="alert">' + genericerrmsg + "</div>");
   };
 
   function resetErrors(form) {
@@ -27,6 +27,8 @@ jQuery(function ($) {
     var $form = $(this);
     resetErrors($form);
     $form.find("button").prop("disabled", true);
+
+
     var fields = {
       number: $form.find(".cc-number").val(),
       cvc: $form.find(".cc-cvc").val(),
@@ -42,12 +44,17 @@ jQuery(function ($) {
 
     Stripe.card.createToken(fields, function (status, response) {
       if (response.error) {
-        displayError($form, response.error);
+        displayError($form);
         $form.find("button").prop("disabled", false);
       }
       else {
-        $form.append($('<input type="hidden" name="donor[stripe_token]" />').val(response.id));
-        $form.get(0).submit();
+        grecaptcha.ready(function() {
+          grecaptcha.execute('6LeP9cYZAAAAAOZ0ltHOuM_h7N2DzOpRg6FLqSJ6', {action: 'submit'}).then(function(token) {
+            $form.append($('<input type="hidden" name="donor[stripe_token]" />').val(response.id));
+            $form.append($('<input type="hidden" name="g-recaptcha-response" />').val(token));
+            $form.get(0).submit();
+          });
+        });
       }
     });
 

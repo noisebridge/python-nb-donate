@@ -169,6 +169,7 @@ def test_create_charge(once, monthly, customer):
 @patch('donate.routes.create_charge')
 def test_donate_stripe_error(create_charge, get_donation_params,
                              flash,  testapp):
+    genericerrmsg = '<div class="alert alert-danger" role="alert">Something went wrong. Please try a different <a href="https://www.noisebridge.net/wiki/Donate_or_Pay_Dues">payment method</a>.</div>'
     CardError = stripe.error.CardError
     StripeError = stripe.error.StripeError
     RateLimitError = stripe.error.RateLimitError
@@ -190,7 +191,7 @@ def test_donate_stripe_error(create_charge, get_donation_params,
 
     response = testapp.post("/donation", data={})
     assert flash.called
-    flash.assert_called_with("Unknown Card Error")
+    flash.assert_called_with(genericerrmsg)
 
     json_body = {'error': {'message': msg}}
     create_charge.side_effect = CardError(code='404', param={},
@@ -199,19 +200,16 @@ def test_donate_stripe_error(create_charge, get_donation_params,
     response = testapp.post("/donation", data={})
 
     assert flash.called
-    flash.assert_called_with(msg)
+    flash.assert_called_with(genericerrmsg)
 
     create_charge.side_effect = RateLimitError()
 
     response = testapp.post("/donation", data={})
     assert flash.called
-    flash.assert_called_with("Rate limit hit, "
-                             "please try again in a few seconds")
+    flash.assert_called_with(genericerrmsg)
 
     create_charge.side_effect = StripeError()
 
     response = testapp.post("/donation", data={})
     assert flash.called
-    flash.assert_called_with(
-        "Unexpected error, please check data and try again."
-        "  If the error persists, please contact Noisebridge support")
+    flash.assert_called_with(genericerrmsg)

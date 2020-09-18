@@ -1,9 +1,11 @@
 import os
 import git
 import json
+import requests
 from flask import (
     current_app as app,
     flash,
+    Markup,
     redirect,
     render_template,
     request,
@@ -34,8 +36,8 @@ from donate.vendor.stripe import (
 import stripe
 from stripe import error as se
 
-#FIXME: git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
-git_sha="whatever"
+# FIXME: git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
+git_sha = "whatever"
 repo_path = "https://github.com/noisebridge/python-nb-donate/tree/"
 
 donation_page = Blueprint('donation', __name__, template_folder="templates")
@@ -117,23 +119,51 @@ def model_stripe_data(req_data):
     return tx
 
 
+def get_recaptcha_resp(request):
+    token = request.form.get("g-recaptcha-response")
+    secret = os.environ["RECAPTCHA_SECRET_KEY"]
+    recaptcha_request_data = {"secret": secret, "response": token, "remoteip": request.remote_addr}
+    recaptcha_resp = requests.post("https://www.google.com/recaptcha/api/siteverify", data=recaptcha_request_data)
+    if not recaptcha_resp.ok:
+        app.logger.debug("recaptcha request failed with status_code={}".format(recaptcha_resp.status_code))
+    return recaptcha_resp.json()
+
+
+def wrap_err_msg(msg):
+    return Markup('<div class="alert alert-danger" role="alert">' + msg + '</div>')
+
+
 @donation_page.route('/donation', methods=['POST'])
 def donation():
-    """ Processes a stripe donation. """
-
+    genericerrmsg = 'Something went wrong. Please try a different <a href="https://www.noisebridge.net/wiki/Donate_or_Pay_Dues">payment method</a>.'
     app.logger.debug("Entering route /donation")
     request_data = request.get_data()
     app.logger.debug("Request Data: {}".format(request_data))
 
+    """ Verify recaptcha """
+    recaptcha_resp_json = None
+    try:
+        recaptcha_resp_json = get_recaptcha_resp(request)
+        app.logger.debug("recaptcha response data: {}".format(recaptcha_resp_json))
+    except json.decoder.JSONDecodeError:
+        app.logger.debug("failed to json decode request body")
+    except Exception as e:
+        app.logger.exception("Exception during recaptha")
+    if recaptcha_resp_json is None or "score" not in recaptcha_resp_json.keys() or recaptcha_resp_json["score"] < 0.5:
+        app.logger.info("recaptcha score below threshold, stopping payment attempt")
+        flash(wrap_err_msg(genericerrmsg))
+        return redirect('/index#form')
+
+    """ Processes a stripe donation. """
     try:
         params = get_donation_params(request.form)
     except KeyError as e:
         app.logger.debug("Params not set: {}".format(e.args[0]))
-        flash("Error: required form value %s not set." % e.args[0])
+        flash(wrap_err_msg("Error: required form value %s not set." % e.args[0]))
         return redirect('/index#form')
     except ValueError as e:
         app.logger.debug("Params bad Value: {}".format(e.args[0]))
-        flash("Error: please enter a valid amount for your donation")
+        flash(wrap_err_msg("Error: please enter a valid amount for your donation"))
         return redirect('/index#form')
 
     app.logger.debug("Params: {}".format(params))
@@ -151,26 +181,22 @@ def donation():
     except se.CardError as error:
         if error.json_body is not None:
             err = error.json_body.get('error', {})
-            msg = err.get('message', "Unknown Card Error")
             app.logger.error("CardError: {}".format(err))
         else:
-            msg = "Unknown Card Error"
             app.logger.error("CardError: {}".format(error))
-        flash(msg)
+        flash(wrap_err_msg(genericerrmsg))
         return redirect('/index#form')
     except se.RateLimitError as error:
         app.logger.warning("RateLimitError hit!")
-        flash("Rate limit hit, please try again in a few seconds")
+        flash(wrap_err_msg(genericerrmsg))
         return redirect('/index#form')
     except se.StripeError as error:
         app.logger.error("StripeError: {}".format(error))
-        flash("Unexpected error, please check data and try again."
-              "  If the error persists, please contact Noisebridge support")
+        flash(wrap_err_msg(genericerrmsg))
         return redirect('/index#form')
     except ValueError as error:
         app.logger.error("ValueError: {}".format(error))
-        flash("Unexpected error, please check data and try again."
-              "  If the error persists, please contact Noisebridge support")
+        flash(wrap_err_msg(genericerrmsg))
         return redirect('/index#form')
         # TODO log request data, make sure charge failed
 
@@ -189,10 +215,10 @@ def donation():
         except NoResultFound:
             app.logger.debug("Creating plan {}".format(plan_name))
             stripe_plan = StripePlan(name=plan_name,
-                               amount=amt,
-                               interval="M",
-                               desc="{}/{}".format(amt, "M"))
-            stripe_plan.subscriptions=[stripe_sub]
+                                     amount=amt,
+                                     interval="M",
+                                     desc="{}/{}".format(amt, "M"))
+            stripe_plan.subscriptions = [stripe_sub]
         try:
             stripe_plan
         except NameError:
@@ -216,9 +242,9 @@ def donation():
 
         app.logger.debug("Creating StripeDonation -  anon: {}, card_id: {}, "
                          "charge_id: {}, email: {}".format(params['anonymous'],
-                                                params['stripe_token'],
-                                                charge_data['charge_id'],
-                                                charge_data['customer_id']))
+                                                           params['stripe_token'],
+                                                           charge_data['charge_id'],
+                                                           charge_data['customer_id']))
         sd = StripeDonation(
             anonymous=params['anonymous'],
             card_id=params['stripe_token'],
@@ -243,7 +269,6 @@ def index():
     """ setup main page with overview of projects, recent donations, and
     other summary data
     """
-
     sorted_projects = sorted(db.session.query(Project)
                              .filter(Project.name != "General Fund").all(),
                              key=lambda proj: proj.name)
