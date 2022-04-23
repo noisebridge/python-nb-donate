@@ -20,8 +20,8 @@ class TimestampMixin():
 
 
 class User(db.Model):
-    '''A user is someonme internal to Noisebridge who uses the system for
-    reportinng purposes.  This should include treasurers and priviledged
+    '''A user is someone internal to Noisebridge who uses the system for
+    reporting purposes.  This should include treasurers and privileged
     users who may access sensitive user data for donations
 
     id:         unique ID of the user, e.g. primary key
@@ -71,7 +71,7 @@ class Currency(db.Model, TimestampMixin):
 
 class Account(db.Model, TimestampMixin):
     ''' Accounts aggregate transactions.  They are associated with one and
-    only one currenct.  An account can increase or decrease based on the
+    only one currency.  An account can increase or decrease based on the
     sum of the transactions.
 
     id:         unique Id
@@ -103,9 +103,8 @@ class Project(db.Model, TimestampMixin):
     id:         Unique ID
     name:       Project name
     desc:       Project description
-    account_id: Accunt linked to project (might need multiple for multiple ccys
-    goal:       Amount required to read the goal of the project.
-    (prob need ccy)
+    account_id: Account linked to project (might need multiple for multiple ccys)
+    goal:       Amount required to read the goal of the project. (prob need ccy)
     '''
 
     id = db.Column(db.Integer,
@@ -154,7 +153,6 @@ class StripeDonation(Donation, TimestampMixin):
     the outside world and Noisebridge.  there is no direct account linked to a
     donation, it encapsulates the payment method and person. All financial data
     is handled via created transactions or the associated user data.
-
     '''
 
     __tablename__ = 'stripe_donation'
