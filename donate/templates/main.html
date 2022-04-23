@@ -98,8 +98,8 @@
                     <div id="project-selection">
                       <select name="project_select" id="donation-for-project" class="form-control">
                           <option selected="selected" value="General Fund">General Fund</option>
-                          {% if projects %}
-                            {% for project in projects %}
+                          {% if data.projects %}
+                            {% for project in data.projects %}
                               <option value="{{ project.name }}">{{ project.name }}</option>
                             {% endfor %}
                           {% endif %}
