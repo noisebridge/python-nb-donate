@@ -1,18 +1,20 @@
 Babel==2.9.1
-Flask==1.0.2
-Flask-Migrate==2.3.1
-Flask-SQLAlchemy==2.3.2
+Flask==2.3.3
+Flask-Migrate==3.1.0
+Flask-SQLAlchemy==3.1.1
+>>>>>>> b4b1660 (Fix git requirements)
 GitPython==3.0.9
-git+git://github.com/xeBuz/Flask-Validator.git@v1.4#egg=Flask-Validator
-pdoc==0.3.2
+git+https://github.com/xeBuz/Flask-Validator.git@v1.4#egg=Flask-Validator
+pdoc==14.1.0
 pytest==5.3.5
 pytest-cov==2.7.1
 python-dotenv==0.10.1
 sadisplay==0.4.9
-Werkzeug==0.15.3
+Werkzeug==2.3.8
 stripe==2.17.0
 rfc3339==6.0
 ansicolors==1.1.8
 mysqlclient==1.4.2
+markdown==3.4.4
 prometheus_client==0.7.1
 requests==2.24.0
