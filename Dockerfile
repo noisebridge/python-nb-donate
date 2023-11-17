@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.11
 COPY . /app
 WORKDIR /app
 RUN mkdir /var/log/donate && \
