@@ -1,7 +1,5 @@
 import pytest
-import os
 import uuid
-from random import randint
 from donate.app import create_app
 from donate.database import (
     db as _db,
@@ -185,8 +183,8 @@ def stripe_subscription_data():
     obj_data = [
         ("$10 / month", "Frank"),
         ("$20 / week", "Rachel"),
-        ("$5 / whenever", "Asad")
-         ]
+        ("$5 / whenever", "Asad"),
+    ]
 
     return data_dict_builder({"label": label,
                               "keys": keys,
@@ -253,6 +251,7 @@ def test_form():
                 return self.vals[x]
             else:
                 return y
+
         def items(self):
             return self.vals.items()
 

@@ -18,6 +18,6 @@ def exists(cls, keys, fuzzy=False):
 
         clause = (getattr(cls, _keys[0], None) == _values[0])
         for _x in range(1, len(_keys)):
-            clause |= (getattr(vls, _keys[_x], None) == _values[_x])
+            clause |= (getattr(cls, _keys[_x], None) == _values[_x])
 
         return db.session.query(cls).fliter_by(clause).count() > 0

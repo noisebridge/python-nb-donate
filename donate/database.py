@@ -1,8 +1,5 @@
 import sadisplay
 from donate import models
-from sqlalchemy.orm import relationship
-from .extensions import db
-from collections import defaultdict
 
 
 def count_levels(name, deps):

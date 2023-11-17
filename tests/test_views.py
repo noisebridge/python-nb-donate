@@ -1,8 +1,4 @@
-import donate
 import pytest
-from flask_validator import ValidateError
-import git
-import json
 from donate.models import (
     Account,
     Currency,
@@ -13,7 +9,7 @@ from donate.routes import (
     model_stripe_data,
 )
 from sqlalchemy.orm.exc import NoResultFound
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 
 def validate_main_page_data(data):
@@ -146,7 +142,6 @@ def test_one_project_page(testapp, db):
 
 
 def test_get_donation_params(testapp, test_form):
-    app = testapp
     form = test_form
 
     result = get_donation_params(form)
@@ -161,7 +156,6 @@ def test_get_donation_params(testapp, test_form):
 
 
 def test_get_donation_params_error(testapp, test_form):
-    app = testapp
     form = test_form
     form.vals["donor[email]"] = ''
     with pytest.raises(KeyError):
@@ -170,8 +164,6 @@ def test_get_donation_params_error(testapp, test_form):
 
 @pytest.mark.usefixtures('test_db_project')
 def test_model_stripe_data(testapp, test_form, db):
-    app = testapp
-
     req_data = {
         'charge': "100",
         'email': "rando@thewhatever.org",
@@ -187,7 +179,6 @@ def test_model_stripe_data(testapp, test_form, db):
 
     proj = db.session.query(Project).one()
     acct = proj.accounts[0]
-    ccy = acct.ccy
 
     req_data['project_select'] = proj.name
 
@@ -196,7 +187,7 @@ def test_model_stripe_data(testapp, test_form, db):
 
     payer = db.session.query(Account).filter_by(name=req_data['email']).one()
 
-    assert tx.amount == int(req_data['charge'])*100
+    assert tx.amount == int(req_data['charge']) * 100
     assert tx.payer == payer
     assert tx.recvr == acct
     assert tx.payer.ccy_id == tx.recvr.ccy_id
@@ -253,4 +244,3 @@ def test_donation_post(get_recaptcha_resp, flash, create_charge, get_params, tes
     create_charge.side_effect = ValueError("bob@email.tld")
     response = app.post("/donation", data=test_form)
     assert response.status_code == 302
-

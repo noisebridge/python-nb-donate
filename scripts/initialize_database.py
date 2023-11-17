@@ -34,7 +34,6 @@ def create_session():
 def init():
     '''Adds the initial currency, account, and project for the General Fund.'''
 
-
     ccy = Currency(code="USD", name="US Dollar")
     acct = Account(name="General Fund Account", ccy=ccy)
     project = Project(name="General Fund",
@@ -45,8 +44,8 @@ def init():
     session = create_session()
 
     donate_config = DonateConfiguration(key="INIT",
-                                          type="string",
-                                          value="true")
+                                        type="string",
+                                        value="true")
     try:
         session.add(project)  # Includes the ccy and acct of the project
         session.add(donate_config)
