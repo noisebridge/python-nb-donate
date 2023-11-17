@@ -1,5 +1,5 @@
 Babel==2.9.1
-Flask==1.0.2
+Flask==2.2.5
 Flask-Migrate==2.3.1
 Flask-SQLAlchemy==2.3.2
 GitPython==3.0.9
