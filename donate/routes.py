@@ -32,7 +32,7 @@ from donate.vendor.stripe import (
     create_charge,
     get_customer
 )
-
+from donate.nonce import create_nonce
 import stripe
 from stripe import error as se
 
@@ -275,7 +275,7 @@ def index():
 
     # donations = db.session.query(Donation).limit(10)
     donations = []
-    STRIPE_KEY = app.get_stripe_key('PUBLIC')
+    nonce = create_nonce()
 
     return render_template('main.html',
                            data={
@@ -283,7 +283,7 @@ def index():
                                'repo_path': repo_path,
                                'recent_donations': donations,
                                'projects': sorted_projects,
-                               'stripe_pk': STRIPE_KEY
+                               'nonce': nonce
                            })
 
 

@@ -288,6 +288,6 @@ class DonateConfiguration(db.Model, TimestampMixin):
     __tablename__ = 'donate_configuration'
 
     id = db.Column(db.Integer, primary_key=True)
-    key = db.Column(db.String(32), nullable=False, unique=True)
+    key = db.Column(db.String(64), nullable=False, unique=True)
     type = db.Column(db.String(10), nullable=False)
     value = db.Column(db.String(32), nullable=False)
