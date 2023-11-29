@@ -13,11 +13,11 @@ from logging.handlers import TimedRotatingFileHandler
 from sqlalchemy.orm.exc import NoResultFound
 
 
-if os.environ['FLASK_ENV']=='DEVELOPMENT':
+if os.environ['FLASK_ENV'] == 'DEVELOPMENT':
     CONFIG = DevConfig
-elif os.environ['FLASK_ENV']=='PRODUCTION':
+elif os.environ['FLASK_ENV'] == 'PRODUCTION':
     CONFIG = ProdConfig
-elif os.environ['FLASK_ENV']=='TESTING':
+elif os.environ['FLASK_ENV'] == 'TESTING':
     CONFIG = TestConfig
 else:
     raise Exception("FLASK_ENV not recognized")

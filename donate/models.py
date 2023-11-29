@@ -1,10 +1,8 @@
 from donate.extensions import db
 from datetime import datetime
-from babel import numbers
 from flask_validator import (
     ValidateInteger,
     ValidateString,
-    ValidateEmail,
     ValidateNumeric,
 )
 

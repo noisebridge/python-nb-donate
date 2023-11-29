@@ -52,8 +52,6 @@ def test_create_onetime_charge(customer_create, customer_list, charge):
     m.id = "test_customer"
     customer_create.return_value = m
 
-    charge_id = stripe_utils.charge_once(tok, email, amt, desc)
-
     assert charge.called
     assert customer_create.called
     customer_create.called_with(source=tok, email=email)
@@ -116,7 +114,7 @@ def test_create_plan(plan):
 
     stripe_utils.create_plan(amt, ccy, interval)
 
-    plan.create.assert_called_with(name="${} / {}".format(amt/100, interval),
+    plan.create.assert_called_with(name="${} / {}".format(amt / 100, interval),
                                    amount=amt,
                                    currency=ccy,
                                    interval=interval)
@@ -168,17 +166,11 @@ def test_create_charge(once, monthly, customer):
 @patch('donate.routes.get_donation_params')
 @patch('donate.routes.create_charge')
 def test_donate_stripe_error(create_charge, get_donation_params,
-                             flash,  testapp):
+                             flash, testapp):
     genericerrmsg = '<div class="alert alert-danger" role="alert">Something went wrong. Please try a different <a href="https://www.noisebridge.net/wiki/Donate_or_Pay_Dues">payment method</a>.</div>'
     CardError = stripe.error.CardError
     StripeError = stripe.error.StripeError
     RateLimitError = stripe.error.RateLimitError
-
-    params = {
-        'charge': 100.00,
-        'recurring': False,
-        'stripe_token': "1234",
-        'email': "test@test.com"}
 
     # get_donation_params.return_value = {}
     # get_donation_params.side_effect = None
@@ -210,6 +202,5 @@ def test_donate_stripe_error(create_charge, get_donation_params,
 
     create_charge.side_effect = StripeError()
 
-    response = testapp.post("/donation", data={})
     assert flash.called
     flash.assert_called_with(genericerrmsg)
