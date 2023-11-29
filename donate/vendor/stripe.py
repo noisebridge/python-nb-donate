@@ -1,7 +1,6 @@
 import os
 import stripe
 from stripe.error import (
-    StripeError,
     CardError
 )
 from contextlib import contextmanager
@@ -85,7 +84,7 @@ def create_plan(amount, currency, interval):
     """ returns a plan for a subscription """
     with stripe_api() as api:
         plan = api.Plan.create(
-            name="${} / {}".format(amount/100, interval),
+            name="${} / {}".format(amount / 100, interval),
             amount=amount,
             currency=currency,
             interval=interval)

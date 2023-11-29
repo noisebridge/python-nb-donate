@@ -183,14 +183,14 @@ def test_new_transaction():
 
     tx = Transaction(
         # approver_id=approver_id,
-                     ccy_id=ccy,
-                     payer_id=payer_id,
-                     recvr_id=recvr_id,
-                     # requestor_id=requestor_id,
-                     amount=amount,
-                     datetime=now,
-                     payer=pay_acct,
-                     recvr=rec_acct)
+        ccy_id=ccy,
+        payer_id=payer_id,
+        recvr_id=recvr_id,
+        # requestor_id=requestor_id,
+        amount=amount,
+        datetime=now,
+        payer=pay_acct,
+        recvr=rec_acct)
 
     # assert tx.approver_id == approver_id
     assert tx.ccy_id == ccy

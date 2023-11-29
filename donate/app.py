@@ -1,4 +1,3 @@
-import os
 from flask import Flask, Response
 import prometheus_client
 from donate.extensions import db, migrate
@@ -7,8 +6,6 @@ from donate.models import (
     Account,
     Currency,
     Project,
-    StripeDonation,
-    StripePlan,
     Transaction,
     User,
 )

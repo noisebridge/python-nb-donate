@@ -1,5 +1,4 @@
 import os
-import git
 import json
 import requests
 from flask import (
@@ -9,18 +8,15 @@ from flask import (
     redirect,
     render_template,
     request,
-    url_for,
     Blueprint,
 )
 from sqlalchemy.orm.exc import (
     NoResultFound,
-    MultipleResultsFound,
 )
 from donate.util import get_one
 from donate.database import db
 from donate.models import (
     Account,
-    Donation,
     Project,
     Currency,
     Transaction,
@@ -30,10 +26,8 @@ from donate.models import (
 )
 from donate.vendor.stripe import (
     create_charge,
-    get_customer
 )
 
-import stripe
 from stripe import error as se
 
 # FIXME: git_sha = git.Repo(search_parent_directories=True).head.object.hexsha
@@ -147,7 +141,7 @@ def donation():
         app.logger.debug("recaptcha response data: {}".format(recaptcha_resp_json))
     except json.decoder.JSONDecodeError:
         app.logger.debug("failed to json decode request body")
-    except Exception as e:
+    except Exception:
         app.logger.exception("Exception during recaptha")
     if recaptcha_resp_json is None or "score" not in recaptcha_resp_json.keys() or recaptcha_resp_json["score"] < 0.5:
         app.logger.info("recaptcha score below threshold, stopping payment attempt")
@@ -186,7 +180,7 @@ def donation():
             app.logger.error("CardError: {}".format(error))
         flash(wrap_err_msg(genericerrmsg))
         return redirect('/index#form')
-    except se.RateLimitError as error:
+    except se.RateLimitError:
         app.logger.warning("RateLimitError hit!")
         flash(wrap_err_msg(genericerrmsg))
         return redirect('/index#form')
