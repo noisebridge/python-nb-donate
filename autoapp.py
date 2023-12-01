@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os
-load_dotenv(os.environ['DONATE_DOTENV'])
+#load_dotenv(os.environ['DONATE_DOTENV'])
 
 from donate.app import create_app
 from donate.database import db
