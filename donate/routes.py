@@ -14,7 +14,7 @@ from sqlalchemy.orm.exc import (
     NoResultFound,
 )
 from donate.util import get_one
-from donate.database import db
+from donate.extensions import db
 from donate.models import (
     Account,
     Project,

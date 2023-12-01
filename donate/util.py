@@ -4,7 +4,8 @@ from sqlalchemy.orm.exc import (
 )
 
 from flask import current_app as app
-from donate.database import db
+from donate.extensions import db
+
 
 
 def get_one(cls, criteria):
