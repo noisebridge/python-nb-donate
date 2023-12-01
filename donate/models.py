@@ -1,11 +1,14 @@
 from donate.extensions import db
 from datetime import datetime
-from flask_validator import (
-    ValidateInteger,
-    ValidateString,
-    ValidateNumeric,
-)
-
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import validates
+## replaced by ripping off 
+# https://github.com/learn-co-curriculum/python-p4-validation-flask-sqlalchemy-validations
+#from flask_validator import (
+#    ValidateInteger,
+#    ValidateString,
+#    ValidateNumeric,
+#)
 
 class TimestampMixin():
     ''' Most objects (but not all) need a creation and updated timestamp '''
@@ -41,13 +44,28 @@ class User(db.Model):
     # donations = db.relationship('Donation')
     # subscriptions = db.relationship('StripeSubscription')
 
+## replaced by ripping off
+# https://github.com/learn-co-curriculum/python-p4-validation-flask-sqlalchemy-validations
+    """
     @classmethod
     def __declare_last__(cls):
         ValidateString(User.username, False, True)
         ValidateString(User.email,
                        False,
-                       True,
+                       True,sqlalchemy.orm
                        "not a valid email address")
+    """
+    @validates('username', 'name_first', 'name_last')
+    def validate_string(self, key, s):
+        if not isinstance(s, str):
+            raise ValueError("Failed string test")
+        return s
+
+    @validates('email')
+    def validate_email(self, key, address):
+        if '@' not in address:
+            raise ValueError("Failed simple email test")
+        return address
 
 
 class Currency(db.Model, TimestampMixin):
@@ -61,10 +79,17 @@ class Currency(db.Model, TimestampMixin):
                      unique=True,
                      nullable=False)
 
+    """
     @classmethod
     def __declare_last__(cls):
         ValidateString(Currency.name, False, True)
         ValidateString(Currency.code, False, True)
+    """
+    @validates('name', 'code')
+    def validate_string(self, key, s):
+        if not isinstance(s, str):
+            raise ValueError("Failed string test")
+        return s
 
 
 class Account(db.Model, TimestampMixin):
@@ -87,10 +112,24 @@ class Account(db.Model, TimestampMixin):
     ccy_id = db.Column(db.Integer, db.ForeignKey('currency.id'))
     ccy = db.relationship('Currency')
 
+    """
     @classmethod
     def __declare_last__(cls):
         ValidateString(Account.name, False, True)
         ValidateInteger(Account.ccy_id, False, True)
+    """
+    @validates('name')
+    def validate_string(self, key, s):
+        if not isinstance(s, str):
+            raise ValueError("Failed string test")
+        return s
+
+    @validates('ccy_id')
+    def validate_integer(self, key, i):
+        if not isinstance(i, int):
+            raise ValueError("Failed integer test")
+        return i
+
 
 
 class Project(db.Model, TimestampMixin):
@@ -117,10 +156,23 @@ class Project(db.Model, TimestampMixin):
 
     accounts = db.relationship('Account')
 
+    """
     @classmethod
     def __declare_last__(cls):
         ValidateString(Project.name, False, True)
         ValidateNumeric(Project.goal, False, True)
+    """
+    @validates('name')
+    def validate_string(self, key, s):
+        if not isinstance(s, str):
+            raise ValueError("Failed string test")
+        return s    
+
+    @validates('goal')
+    def validate_number(self, key, g):
+        if not g.isnumeric():
+            raise ValueError("Failed numeric test")
+        return g
 
 
 class Donation(db.Model, TimestampMixin):
@@ -219,6 +271,7 @@ class Transaction(db.Model, TimestampMixin):
     # approver = db.relationship("User",
     #                            foreign_keys=[approver_id])
 
+    """
     @classmethod
     def __declare_last__(cls):
         ValidateInteger(Transaction.ccy_id, False, True)
@@ -229,6 +282,18 @@ class Transaction(db.Model, TimestampMixin):
         # ValidateInteger(Transaction.approver_id, False, True)
         # validate that the transaction is between two accounts with the
         # same ccy
+    """
+    @validates('ccy_id','payer_id','recvr_id')
+    def validate_integer(self, key, i):
+        if not isinstance(i, int):
+            raise ValueError("Failed integer test")
+        return i
+
+    @validates('amount')
+    def validate_number(self, key, g):
+        if not g.isnumeric():
+            raise ValueError("Failed numeric test")
+        return g
 
 
 class StripeSubscription(db.Model, TimestampMixin):
@@ -273,14 +338,31 @@ class StripePlan(db.Model):
     desc = db.Column(db.String(64),
                      nullable=False)
     subscriptions = db.relationship('StripeSubscription')
-
+    """
     @classmethod
     def __declare_last__(cls):
         ValidateNumeric(StripePlan.amount, False, True)
         ValidateString(StripePlan.name, False, True)
         ValidateInteger(StripePlan.ccy_id, False, True)
         ValidateString(StripePlan.interval, False, True)
+    """
+    @validates('name','interval')
+    def validate_string(self, key, s):
+        if not isinstance(s, str):
+            raise ValueError("Failed string test")
+        return s    
+    
+    @validates('ccy_id')
+    def validate_integer(self, key, i):
+        if not isinstance(i, int):
+            raise ValueError("Failed integer test")
+        return i
 
+    @validates('amount')
+    def validate_number(self, key, g):
+        if not g.isnumeric():
+            raise ValueError("Failed numeric test")
+        return g
 
 class DonateConfiguration(db.Model, TimestampMixin):
     __tablename__ = 'donate_configuration'
