@@ -4,12 +4,12 @@ import requests
 from flask import (
     current_app as app,
     flash,
-    Markup,
     redirect,
     render_template,
     request,
     Blueprint,
 )
+from markupsafe import Markup
 from sqlalchemy.orm.exc import (
     NoResultFound,
 )
