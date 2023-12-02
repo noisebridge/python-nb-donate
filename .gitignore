@@ -22,3 +22,5 @@ logs/
 migrations/versions/*
 
 diagrams/*.png
+
+test_donate
