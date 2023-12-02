@@ -170,10 +170,9 @@ class Project(db.Model, TimestampMixin):
 
     @validates('goal')
     def validate_number(self, key, g):
-        if not g.isnumeric():
+        if (type(g) != int) and (type(g) != long) and (type(g) != float) and (type(g) != complex):
             raise ValueError("Failed numeric test")
         return g
-
 
 class Donation(db.Model, TimestampMixin):
     ''' An amount of currency donated by a user, possibly anonymous.
@@ -291,7 +290,7 @@ class Transaction(db.Model, TimestampMixin):
 
     @validates('amount')
     def validate_number(self, key, g):
-        if not g.isnumeric():
+        if (type(g) != int) and (type(g) != long) and (type(g) != float) and (type(g) != complex):
             raise ValueError("Failed numeric test")
         return g
 
@@ -360,7 +359,7 @@ class StripePlan(db.Model):
 
     @validates('amount')
     def validate_number(self, key, g):
-        if not g.isnumeric():
+        if (type(g) != int) and (type(g) != long) and (type(g) != float) and (type(g) != complex):
             raise ValueError("Failed numeric test")
         return g
 
