@@ -1,9 +1,9 @@
 from dotenv import load_dotenv
 import os
-load_dotenv(os.environ['DONATE_DOTENV'])
+#load_dotenv(os.environ['DONATE_DOTENV'])
 
 from donate.app import create_app
-from donate.database import db
+from donate.extensions import db
 from donate.log_utils import start_timer, log_request
 from donate.models import DonateConfiguration
 from donate.settings import DevConfig, ProdConfig, TestConfig
