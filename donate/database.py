@@ -1,6 +1,9 @@
 import sadisplay
 from donate import models
 
+# Magic import
+from .extensions import db  # noqa: F401
+
 
 def count_levels(name, deps):
     if deps[name] == set():
