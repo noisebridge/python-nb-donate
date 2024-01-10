@@ -3,7 +3,7 @@ Flask==1.1.4
 Flask-Migrate==2.3.1
 Flask-SQLAlchemy==2.5.1
 SQLAlchemy==1.4.50
-GitPython==3.0.9
+GitPython==3.1.41
 git+https://github.com/xeBuz/Flask-Validator.git@v1.4#egg=Flask-Validator
 pdoc==0.3.2
 pytest==5.3.5
